@@ -1,0 +1,15 @@
+Package: MicSim
+Type: Package
+Title: Performing continuous-time microsimulation
+Version: 1.0
+Date: 2014-01-08
+Author: Sabine Zinn
+Maintainer: Sabine Zinn <sabine.zinn@uni-bamberg.de>
+Description: The package performs continuous-time microsimulations for population projections.
+LazyData: yes
+Depends: R (>= 3.0.1), chron, snowfall, rlecuyer
+License: GPL-2
+Packaged: 2014-01-08 12:50:49 UTC; Biene
+NeedsCompilation: no
+Repository: CRAN
+Date/Publication: 2014-01-08 14:00:15

@@ -1,0 +1,6 @@
+#functions
+export(setSimHorizon, buildTransitionMatrix, micSim, micSimParallel, convertToLongFormat)
+
+importFrom(chron)
+importFrom(snowfall)
+importFrom(rlecuyer)

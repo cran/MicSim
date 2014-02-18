@@ -16,7 +16,7 @@ buildTransitionMatrix(allTransitions, absTransitions, stateSpace)
     A matrix comprising all possible transitions between values of state variables in the first column and in the second column the names of the functions defining the corresponding transition rates.
 }
   \item{absTransitions}{
-  A matrix comprising the names of the absorbing states which individuals are always exposed to (such as `dead' and `emigrated') in the first column and in the second column the names of the functions defining the corresponding transition rates. 
+  A matrix comprising the names of the absorbing states which individuals are always exposed to (such as "dead"" and emigrated labeled as "rest") in the first column and in the second column the names of the functions defining the corresponding transition rates. 
 }
   \item{stateSpace}{
  A matrix comprising all nonabsorbing states considered during simulation. 
@@ -27,9 +27,12 @@ buildTransitionMatrix(allTransitions, absTransitions, stateSpace)
  
 In \code{stateSpace} all state variables considered during simulation including their values have to be defined. Values are always described using labels. For example, label "M" for being married. Each column of \code{stateSpace} refers to one state variable considered and each row refers to one state of the state space. Apart from "m" and "f" reserved for male and female (state variable: gender) and "no" and "low" reserved for no education and elementary school attended (state variable: educational attainment), labels can be set arbitrarily.
 
- Each element of the first column of \code{allTransitions} has to be of the form "A->B" with indicating "A" the starting value of a transition and "B" the arrival value. ("->" is the placeholder defined to mark a transition.) For example, "0" (childless) describes the starting value of the transition marking a first birth event and "1" (first child) its arrival value. All value labels used have to be identical to the value labels of the state variables specifying the simulation model. 
+ Each element of the first column of \code{allTransitions} has to be of the form "A->B" with indicating "A" the starting value of a transition and "B" the arrival value. ("->" is the placeholder defined to mark a transition.) For example, "0" (childless) describes the starting value of the transition marking a first birth event and "1" (first child) its arrival value. All value labels used have to be identical to the value labels of the state variables specifying the simulation model.
   
-All nonabsorbing states listed in the first column of \code{absTransitions} have to be given as strings such as "dead" for being dead or "rest" for emigrated.
+All absorbing states listed in the first column of \code{absTransitions} have to be given as strings such as "dead" for being dead or "rest" for emigrated. Since dying is a competing risk all individuals are always exposed to, "dead" is a mandatory part of \code{absTransitions}.
+
+All transitions can be defined to depend on several state variables. For example, a divorce rate depends on gender and on the fertility status. Therefore, the starting value and the arrival value of a transition have to be specified as a combination of the considered attributes, separated by a forward slash and in accordance with the ordering of the state variables in the state space. For example, "f/A->f/B" describes a female specific transition from "A" to "B" and "f/M/1 -> f/D/1" might describe a mother's (indicated by "1") transition from "M" (e.g., married) to "D" (e.g., divorced).
+For absorbing states, a prefix indicates the attributes on which a transition is assumed to depend (also separated by forward slashs), e.g., "f/dead" and "m/dead" describe gender specific mortality transitions and "f/M/dead" and "m/M/dead" indicate gender specific mortality rates for married persons. 
 }
 \value{
   The \code{transitionMatrix} that is mandatory to perform a microsimulation run by \link{micSim} (sequentially) or by \link{micSimParallel} (parallel computing) is returned. The matrix has as many rows as the simulation model comprises nonabsorbing states and as many columns as the simulation model comprises absorbing and nonabsorbing states. The rows indicate starting states of transitions and the columns signify arrival states. At positions indicating impossible transitions, the matrix contains zeros. Otherwise the name of the function defining the respective transition rates is given.  
@@ -39,6 +42,9 @@ All nonabsorbing states listed in the first column of \code{absTransitions} have
 }
 \examples{
 
+#########################################################################################
+# 1. Example: Transition rates are specified to depend on only one state variable
+#########################################################################################
 # Defintion of state space, i.e., nonabsorbing and absorbing states
 sex <- c("m","f")                     
 fert <- c("0","1","2","3+")           
@@ -93,6 +99,33 @@ absTransitions <- rbind(c("dead","mortRates"),c("rest","emigrRates"))
 
 # Construct `transition matrix'.
 transitionMatrix <- buildTransitionMatrix(allTransitions,absTransitions,stateSpace)
+
+#########################################################################################
+# 2. Example: Transition rates are gender specific
+#########################################################################################
+# Defintion of nonabsorbing and absorbing states
+sex <- c("m","f")                               
+stateX <- c("H","P")        
+stateSpace <- expand.grid(sex=sex,stateX=stateX)
+absStates <- c("dead")   
+
+# Transitions indicating changes in `stateX'. 
+# We assume distinct transition rates for females and males.
+# Note: The functions `ratesHP_f',`ratesHP_m', `ratesPH_f', and 
+# `ratesPH_m' are transition rate functions defined by the user. 
+trMatrix_f <- cbind(c("f/H->f/P","f/P->f/H"),c("ratesHP_f", "ratesPH_f"))
+trMatrix_m <- cbind(c("m/H->m/P","m/P->m/H"),c("ratesHP_m", "ratesPH_m"))
+allTransitions <- rbind(trMatrix_f,trMatrix_m)
+
+# We assume gender specific mortality rates.
+# Note: The naming and specification of the respective mortality rate functions 
+# `mortRates_f' and `mortRates_m' depend on the user.
+absTransitions <- rbind(c("f/dead","mortRates_f"), c("m/dead","mortRates_m"))
+
+transitionMatrix <- buildTransitionMatrix(allTransitions=allTransitions,
+                      absTransitions=absTransitions, stateSpace=stateSpace)
+
+
 
 }
 

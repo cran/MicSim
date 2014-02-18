@@ -88,9 +88,9 @@ micSim <- function(initPop, immigrPop=NULL, transitionMatrix, absStates=NULL, in
   # Function checks whether a transition causes a newborn. (Demands `fert': all values of fertility variable, and 
   # `fertTr': matrix indicating transitions between fertility attributes.)
   isBirthEvent <- function(currState, destState){
-   fert <- unique(unlist(strsplit(fertTr,split="->")))
    if(length(fertTr)==0)
-    return(FALSE)
+      return(FALSE)
+   fert <- unique(unlist(strsplit(fertTr,split="->")))
    cS <- unlist(strsplit(currState,"/"))
    dS <- unlist(strsplit(destState,"/"))
    if("m" %in% cS)

@@ -21,15 +21,15 @@ The transition rates (also denoted as hazard rates or intensities) of Markovian 
 \tabular{ll}{
 Package: \tab MicSim\cr
 Type: \tab Package\cr
-Version: \tab 1.0\cr
-Date: \tab 2013-11-29\cr
+Version: \tab 1.0.1\cr
+Date: \tab 2014-02-18\cr
 License: \tab GPL-2\cr
 }
 }
 \author{
 Sabine Zinn
 
-Maintainer: sabine.zinn@uni-bamberg.de
+Maintainer: sabine.zinn@lifbi.de
 }
 \references{
 Willekens, F. (2014) Multistate analysis of life histories with R. Springer, forthcoming. 

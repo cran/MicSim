@@ -146,7 +146,7 @@ pop <- micSim(initPop=initPop, transitionMatrix=transitionMatrix, absStates=absS
 rm(list=ls())
 
 # Defining simulation horizon
-simHorizon <- setSimHorizon(startDate="01/01/2000", endDate="31/12/2010")
+simHorizon <- setSimHorizon(startDate="01/01/2000", endDate="31/12/2050")
 
 # Seed for random number generator
 set.seed(234)

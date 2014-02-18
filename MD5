@@ -1,11 +1,11 @@
-5547d62fc2c3782d56d2d7d9abf26435 *DESCRIPTION
+527c455d0aa5e9fca3d028fb5e99d2e1 *DESCRIPTION
 e24e84c6372c926962e48f8d03b51a82 *NAMESPACE
-f1f923a1e9e60c463da3eed4bc2db827 *R/auxFctMicSim.r
+9d35dcf74a06277eadebe89521468ffa *R/auxFctMicSim.r
 8905163a79f6f8d376b2b7732f1fbbf3 *R/convertToLong.r
-a38d4b245a2423963a10c6f3c4e85ad4 *R/micSim.r
-f1eb14658640dc753dc55ab6b5f1ae74 *man/MicSim-package.Rd
-8a54cc8ab1df420608b536874a2d683b *man/buildTransitionMatrix.Rd
+fd08461c8ac92381160e9486f63c8337 *R/micSim.r
+7d11163e4cdfa677d51fa9e65e1d1307 *man/MicSim-package.Rd
+750d97d06ea25ff303a4bf0c7497d1ce *man/buildTransitionMatrix.Rd
 fca0ab3edbcbb9b760cee8a3f575e72d *man/convertToLongFormat.Rd
-83301c1859ea7a15cc7051a4f5260e76 *man/micSim.Rd
+5b28bb5ff5b3b19e8e760c3e21a85838 *man/micSim.Rd
 69bbf73642668cc2fb243aa307e3a6b6 *man/micSimParallel.Rd
 58bd52cfca1ce9e7753f4caa8c06e8c8 *man/setSimHorizon.Rd

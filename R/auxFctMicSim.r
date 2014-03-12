@@ -42,10 +42,10 @@ buildTransitionMatrix <- function(allTransitions,absTransitions,stateSpace){
     }
   }  
   isInThisState <- function(ss,state){
-    if(sum(ss %in% state)==length(ss))
+    if(sum(ss %in% as.character(unlist(state)))==length(ss))
       return(TRUE)
     return(FALSE)
-  }    
+  }        
   if(!is.null(allTransitions)){
     tr <- do.call(rbind,strsplit(allTransitions[,1],"->"))
     for(i in 1: dim(tr)[1]){

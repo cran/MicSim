@@ -91,6 +91,8 @@ micSim <- function(initPop, immigrPop=NULL, transitionMatrix, absStates=NULL, in
    if(length(fertTr)==0)
       return(FALSE)
    fert <- unique(unlist(strsplit(fertTr,split="->")))
+    
+  # cat("cS: ",cS, "-> dS: ",dS,"\n" )
    cS <- unlist(strsplit(currState,"/"))
    dS <- unlist(strsplit(destState,"/"))
    if("m" %in% cS)
@@ -147,10 +149,11 @@ micSim <- function(initPop, immigrPop=NULL, transitionMatrix, absStates=NULL, in
     calTime <- as.numeric(unlist(inp[4]))         # calendat time in days
      # first event of an immigrant: he/she enters the population later than sim. starting time
     lagToWaitingTime <- ifelse(isIMInitEvent, (as.numeric(calTime) - as.numeric(simHorizon[1]))/365.25,0) 
-      #cat("ID: ",id,"\n")
-      #print(inp)
+      # cat("\n-----\nID: ",id,"\n")
+      # print(inp)
+      
     ageInYears <- getAgeInYears(currAge)
-      #cat("Age: ",ageInYears," - CalTime: ",calTime,"\n")
+      # cat("Age: ",ageInYears," - CalTime: ",years(calTime),"-",months(calTime),"-",days(calTime),"\n")
     # Possible destination states
     possTr <- transitionMatrix[which(rownames(transitionMatrix) %in% currState),]  
     possTr <- possTr[which(possTr !=0)]
@@ -205,48 +208,63 @@ micSim <- function(initPop, immigrPop=NULL, transitionMatrix, absStates=NULL, in
             idd <- rev(y)[c(diff(rev(y)),1)==1]
           }
          }
-        durSinceLastCovCh <- sum(as.numeric(dur[idd,"durUntil"]))
+        durSinceLastCovCh <- sum(as.numeric(dur[idd,"durUntil"]))       # If I do not how long an individual already is in a state: This gives NA.
+        if(is.na(durSinceLastCovCh))
+          durSinceLastCovCh <- 0 # Then assume the individual just entered that state. --> This is not a very sophisticated solution.
       }  
       if(length(covToCh)>1 & (!destState %in% absStates)){
           cat("Recognized a possible transition implying a change of two or more covariates.",
           "Concerning the derivation of the time being elapsed since the last transition this feature is not yet implemented.", 
           "Current State: ",currState," -> Possible transition to ",destState,"\n") 
       }
-      u <- -log(1-runif(1)) 
-        #cat("It: ",i,"--u: ",u,"\n")
-      # Extract individual transition rate (depending on age, calendar time, and time elapsed)  
-      indRateFct <- function(x){
+      indRateFctDET <- function(x){
         res <- eval(do.call(tr, 
-                args=list(age=ageInYears+x,calTime=1970.001+calTime/365.25+x,duration=durSinceLastCovCh/365.25+x)))
-        res <- ifelse(res==Inf,100000,res)
-         #cat("x: ",x," -- res", res,"\n")
-         #cat("\n---\n")
+                args=list(age=trunc(ageInYears)+x,calTime=trunc(1970.001+calTime/365.25)+x,duration=trunc(durSinceLastCovCh/365.25)+x)))
         return(res)
-      }
-      # Integrated hazard at max. value
-      intHaz <- try(integrate(indRateFct, lower=0, upper=ran)$value, silent=TRUE)
-      if(inherits(intHaz, "try-error")){          
-       intHaz <- integrate(indRateFct, lower=0, upper=ran, stop.on.error = FALSE, rel.tol = 0.01)$value
-      } 
-      # If transformed random variate exceeds max. value of integr. hazard, we will not find a finite random waiting time.      
-      if(u<=intHaz){
-        invHazFct <- function(x){
-           #cat("x: ",x,"\n")
-          try.res <- try(integrate(indRateFct, lower=0, upper=x)$value-u, silent=TRUE)
-           #print(try.res)
-          if(inherits(try.res, "try-error")){  
-            #cat("Seemingly, divergent intergral for ID ",id,
-            #  " in state ",currState," at age ",currAge," at time ",calTime, " to state ",destState,
-            #  " for random number: ",u,"\n")          
-            try.res <- integrate(indRateFct, lower=0, upper=x, stop.on.error = FALSE, rel.tol = 0.01)$value-u
-          } 
-           #cat("res: ",try.res,"\n-----\n")
-          return(try.res)
-        }  
-        # Find random waiting time.    
-        timeToNext <- uniroot(invHazFct,interval=c(0,ran))$root      
+      }      
+      detE <- indRateFctDET(0:ran)
+      if((Inf %in% detE) & (trunc(ageInYears) + (which(detE == Inf)[1]-1)) - ageInYears>0){ # deterministic event, still upcoming
+        timeToNext <-  which(detE == Inf)[1]-1
+#         cat("ID: ",inp, "\n - currState: ", currState, "- currAge: ",ageInYears, "durSinceLastTr",durSinceLastCovCh, 
+#             " -pos: ",which(detE == Inf)[1]," - tr: ", 
+#             tr, " - timeToNext: ",timeToNext,"\n-----\n")
+
       } else {
-        timeToNext <- Inf
+        u <- -log(1-runif(1)) 
+          #cat("It: ",i,"--u: ",u,"\n")
+        # Extract individual transition rate (depending on age, calendar time, and time elapsed)  
+        indRateFct <- function(x){
+          res <- eval(do.call(tr, 
+                  args=list(age=ageInYears+x,calTime=1970.001+calTime/365.25+x,duration=durSinceLastCovCh/365.25+x)))
+           #cat("x: ",x," -- res", res,"\n")
+           #cat("\n---\n")
+          return(res)
+        }
+        # Integrated hazard at max. value
+        intHaz <- try(integrate(indRateFct, lower=0, upper=ran)$value, silent=TRUE)
+        if(inherits(intHaz, "try-error")){          
+         intHaz <- integrate(indRateFct, lower=0, upper=ran, stop.on.error = FALSE, rel.tol = 0.01)$value
+        } 
+        # If transformed random variate exceeds max. value of integr. hazard, we will not find a finite random waiting time.      
+        if(u<=intHaz){
+          invHazFct <- function(x){
+             #cat("x: ",x,"\n")
+            try.res <- try(integrate(indRateFct, lower=0, upper=x)$value-u, silent=TRUE)
+             #print(try.res)
+            if(inherits(try.res, "try-error")){  
+              #cat("Seemingly, divergent intergral for ID ",id,
+              #  " in state ",currState," at age ",currAge," at time ",calTime, " to state ",destState,
+              #  " for random number: ",u,"\n")          
+              try.res <- integrate(indRateFct, lower=0, upper=x, stop.on.error = FALSE, rel.tol = 0.01)$value-u
+            } 
+             #cat("res: ",try.res,"\n-----\n")
+            return(try.res)
+          }  
+          # Find random waiting time.    
+          timeToNext <- uniroot(invHazFct,interval=c(0,ran))$root      
+        } else {
+          timeToNext <- Inf
+        }
       }
       nextEventMatrix[i,1] <- destState    
       nextEventMatrix[i,2] <- (timeToNext+lagToWaitingTime)*365.25    # time to next event in days
@@ -267,7 +285,7 @@ micSim <- function(initPop, immigrPop=NULL, transitionMatrix, absStates=NULL, in
         if(as.numeric(months(tt)) <= 9) {
           enDate <- chron(paste(enYear,dateSchoolEnrol,sep="/"), format=c(dates="y/m/d"), out.format=c(dates="d/m/year"))
         } else {
-          enYear <- as.numeric(as.character(enYear))+1
+          enYear <- as.numeric(as.character(enYear))#+1
           enDate <- chron(paste(enYear,dateSchoolEnrol,sep="/"), format=c(dates="y/m/d"), out.format=c(dates="d/m/year"))
         }      
         diffToEn <- as.numeric(enDate-tt)

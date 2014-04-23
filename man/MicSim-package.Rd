@@ -21,8 +21,8 @@ The transition rates (also denoted as hazard rates or intensities) of Markovian 
 \tabular{ll}{
 Package: \tab MicSim\cr
 Type: \tab Package\cr
-Version: \tab 1.0.2\cr
-Date: \tab 2014-03-12\cr
+Version: \tab 1.0.3\cr
+Date: \tab 2014-04-23\cr
 License: \tab GPL-2\cr
 }
 }

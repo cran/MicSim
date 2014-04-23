@@ -56,7 +56,7 @@ Sabine Zinn
 \dontrun{
 pop <- micSim(initPop, immigrPop, transitionMatrix, absStates, initStates, initStatesProb, 
         maxAge, simHorizon, fertTr)
-convertToLongFormat(pop,migr=TRUE)
+popLong <- convertToLongFormat(pop,migr=TRUE)
 }
 
 }

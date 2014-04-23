@@ -160,6 +160,7 @@ convertToLongFormat <- function(pop, migr=FALSE) {
     imPopLongFE <- popLong[imPopLongFEID,]
     imPopLongFE <- merge(imPopLongFE,immigrPop[,-3], by="ID")
     imPopLongFE$Tstart <- imPopLongFE[,"immigrDate"]
+    imPopLongFE$statusEntry <- 1
     imId <- which(names(imPopLongFE) %in% c("immigrDate","immigrInitState"))
     imPopLongFE <- imPopLongFE[,-imId]
     popLong <- popLong[-imPopLongFEID,]

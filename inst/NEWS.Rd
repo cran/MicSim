@@ -1,5 +1,12 @@
 \name{NEWS}
 \title{NEWS file for the MicSim package}
+
+\section{Changes in version 1.0.3}{
+ \itemize{
+   \item Refine funtionality of `micSim' function to handle deterministc events (marked by Inf rates).
+   \item Fix bug in function `buildTransitionMatrix'.
+  }
+}
 \section{Changes in version 1.0.2}{
  \itemize{
    \item Add News file.

@@ -58,7 +58,7 @@ buildTransitionMatrix <- function(allTransitions,absTransitions,stateSpace){
       stateSpaceDS <- stateSpace[idDS,,drop=F]
       for(j in 1:dim(stateSpaceOS)[1]){
         oS <- as.character(unlist(stateSpaceOS[j,]))
-        for(k in 1:dim(stateSpaceDS)[2]){
+        for(k in 1:dim(stateSpaceDS)[1]){
           dS <- as.character(unlist(stateSpaceDS[k,]))
           c1 <- oS[!oS %in% oSPr] 
           c2 <- dS[!dS %in% dSPr] 

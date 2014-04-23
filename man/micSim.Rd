@@ -5,7 +5,7 @@
   Run microsimulation (sequentially)
 }
 \description{
- Performs a continuous-time microsimulation run (sequentially, i.e., using only one CPU).
+ Performs a continuous-time microsimulation run (sequentially, i.e., using only one CPU core).
 }
 \usage{
 micSim(initPop, immigrPop = NULL, transitionMatrix, absStates = NULL, 
@@ -52,8 +52,7 @@ Nonabsorbing states have to be given as strings such as "dead" for being dead or
 
 \code{micSim} is able to conduct enrollment events to elementary school such that they take place on \code{dateSchoolEnrol} of a particular year. For this purpose, a state variable defining educational attainment has to be created first. Then, labels of possible values have to be defined such that "no" describes no education and "low" describes elementary education. Finally, the transition function determining the transition rate for the respective enrollment event has to be defined to return "Inf" for the age x at which children should be enrolled (e.g., at age seven) and zero otherwise. That way, an event "school enrollment on \code{dateSchoolEnrol} of the year in which a child turns x years old" is enforced.
 
-If educational attainment is not considered, \code{dateSchoolEnrol} can let be unspecified:
-\code{dateSchoolEnrol=c()}. 
+If educational attainment is not considered, \code{dateSchoolEnrol} can let be unspecified: \code{dateSchoolEnrol=c()}. 
 
 The starting population \code{initPop} has to be given in the form of a data frame. Each row of the data frame corresponds to one individual. \code{initPop} has to comprise the following information: 
 unique numerical person identifier (ID), birth date, and initial state (i.e., the state occupied by the individual when entering the synthetic population). Birth dates have to be chron objects. 
@@ -61,7 +60,13 @@ unique numerical person identifier (ID), birth date, and initial state (i.e., th
 Information about immigrants has to be given in the form of a data frame (\code{immigrPop}). Each row of the data frame corresponds to one immigrant.
 \code{immigrPop} contains the following data: unique numerical person identifier (ID), immigration date, birth date, and initial state (i.e., the state occupied by the immigrant when entering the simulated population). Immigration dates and birth dates have to be chron objects. 
 
-For each transition that should be considered during simulation accordant transition rates have to be provided. \code{micSim} requires these rates in form of functions which are handed over via the transition matrix \code{transitionMatrix} (described in the subsequent paragraph). The \code{MicSim} package allows rates to depend on three time scales: age, calendar time, and the time that has elapsed since the last change of a particular state variable (e.g., the time elapsed since wedding). The only mandatory time scale is age. That is, for each transition, transition rates have to be given at least according to \code{age}, but potentially also according to calendar time and duration. Even if transition rates are assumed to vary only along age, the respective functions have to feature \code{calTime} and \code{duration} as input arguments--then simply set to arbitrary values, e.g., to zero. For illustration, see the examples in the example section. Note that allowing transition rates to vary along the time elapsed since a last transition facilitates modelling gestation gaps after a delivery: For a period of nine or ten months transition rates for higher order parities are simply set to zero (cp., the complex example in the example section).  
+For each transition that should be considered during simulation accordant transition rates have to be provided. \code{micSim} requires these rates in form of functions which are handed over via the transition matrix \code{transitionMatrix} (described in the subsequent paragraph). The \code{MicSim} package allows rates to depend on three time scales: age, calendar time, and the time that has elapsed since the last change of a particular state variable (e.g., the time elapsed since wedding). 
+In accordance therewith, \code{micSim} requires transition rates functions to feature three input parameters, namely \code{age}, \code{calTime}, and \code{duration}.
+Via \code{age} the age of an individual is handed over, via \code{caltime} the calendar time, and via \code{duration} the time that has elapsed since the last change of the affected state variable.
+All three input parameters might vary, or only one or two of them.
+Also none of the input parameters can be specified to vary, i.e., a transition rate can be defined to be constant. 
+If rates are assumed to be independent of a specific time scale, the corresponding input argument can simply be ignored within the body of the rates function (i.e., is not used to determine a specific rate value).
+For illustration, see the examples in the example section. Note that allowing transition rates to vary along the time elapsed since a last transition facilitates modelling gestation gaps after a delivery: For a period of nine or ten months transition rates for higher order parities are simply set to zero (cf., the complex example in the example section).  
 
 The transition matrix \code{transitionMatrix} has as many rows as the simulation model comprises nonabsorbing states and as many columns as the simulation model comprises absorbing and nonabsorbing states. The rows of \code{transitionMatrix} mark starting states of transitions and the columns mark arrival states. At positions of \code{transitionMatrix} indicating impossible transitions, the matrix contains zeros. Otherwise the name of the function determining the respective transition rates has to be given. The function \link{buildTransitionMatrix} supports the construction of \code{transitionMatrix}.
 
@@ -118,10 +123,7 @@ initStates <- c("f","m","f","m","m")
 initPop <- data.frame(ID=1:5,birthDate=birthDates,initState=initStates)
 
 # Definition of mortality rates (Gompertz model).
-# BEWARE: Each function that describes transition rates has to feature
-# at least `age' (in years) as input parameter. Additionally, `calTime' (in years)
-# and `duration' (in years) might enter the function.
-mortRates <- function(age, calTime=1990, duration=0){
+mortRates <- function(age, calTime, duration){
   a <- ifelse(calTime<=1950, 0.00003, 0.00003)
   b <- ifelse(calTime<=1950, 0.1, 0.097)
   rate <- a*exp(b*age)
@@ -146,7 +148,7 @@ pop <- micSim(initPop=initPop, transitionMatrix=transitionMatrix, absStates=absS
 rm(list=ls())
 
 # Defining simulation horizon
-simHorizon <- setSimHorizon(startDate="01/01/2000", endDate="31/12/2050")
+simHorizon <- setSimHorizon(startDate="01/01/2014", endDate="31/12/2024")
 
 # Seed for random number generator
 set.seed(234)
@@ -156,7 +158,7 @@ maxAge <- 100
 
 # Defintion of nonabsorbing and absorbing states
 sex <- c("m","f")                     
-fert <- c("0","1","2","3+")           
+fert <- c("0","1+")           
 marital <- c("NM","M","D","W")        
 edu <- c("no","low","med","high")   
 stateSpace <- expand.grid(sex=sex,fert=fert,marital=marital,edu=edu)
@@ -166,70 +168,68 @@ absStates <- c("dead","rest")
 dateSchoolEnrol <- "09/01"
 
 # Definition of an initial population (for illustration purposes, create a random population)
-N = 200                                                       
-initBirthDatesRange <- chron(dates=c("31/12/1930","01/01/2000"),format=c(dates="d/m/Y"),
-  out.format=c(dates="d/m/year"))
+N = 100                                                       
+initBirthDatesRange <- chron(dates=c("31/12/1950","01/01/2014"),format=c(dates="d/m/Y"),
+                             out.format=c(dates="d/m/year"))
 birthDates <- dates(initBirthDatesRange[1] + runif(N, min=0, max=diff(initBirthDatesRange)))
 getRandInitState <- function(birthDate){
   age <- trunc(as.numeric(simHorizon[1] - birthDate)/365.25)
   s1 <- sample(sex,1)
-  s2 <- ifelse(age<=18, fert[1], ifelse(age<=22, sample(fert[1:3],1),sample(fert,1)))
+  s2 <- ifelse(age<=18, fert[1], sample(fert,1))
   s3 <- ifelse(age<=18, marital[1], ifelse(age<=22, sample(marital[1:3],1), 
-    sample(marital,1)))
+          sample(marital,1)))
   s4 <- ifelse(age<=7, edu[1], ifelse(age<=18, edu[2], ifelse(age<=23, sample(edu[2:3],1), 
-    sample(edu[-1],1))))
+          sample(edu[-1],1))))
   initState <- paste(c(s1,s2,s3,s4),collapse="/")
   return(initState)
 }
 initPop <- data.frame(ID=1:N, birthDate=birthDates, 
-  initState=sapply(birthDates, getRandInitState))
-  
+                      initState=sapply(birthDates, getRandInitState))
+
 # Definition of immigrants entering the population (for illustration purposes, create immigrants 
 # randomly)
 M = 20                                                           
 immigrDatesRange <- as.numeric(simHorizon)
 immigrDates <- dates(chron(immigrDatesRange[1] + runif(M, min=0,max=diff(immigrDatesRange)), 
- format=c(dates="d/m/Y", times="h:m:s"), out.format=c(dates="d/m/year",times="h:m:s")))
+      format=c(dates="d/m/Y", times="h:m:s"), out.format=c(dates="d/m/year",times="h:m:s")))
 immigrAges <- runif(M, min=15*365.25, max=70*365.25)
 immigrBirthDates <- dates(chron(as.numeric(immigrDates) - immigrAges, 
-  format=c(dates="d/m/Y", times="h:m:s"), out.format=c(dates="d/m/year", times="h:m:s")))
+      format=c(dates="d/m/Y", times="h:m:s"), out.format=c(dates="d/m/year", times="h:m:s")))
 IDmig <- max(as.numeric(initPop[,"ID"]))+(1:M)
 immigrPop <- data.frame(ID = IDmig, immigrDate = immigrDates, birthDate=immigrBirthDates, 
-  immigrInitState=sapply(immigrBirthDates, getRandInitState))  
+                        immigrInitState=sapply(immigrBirthDates, getRandInitState))  
 
 # Definition of initial states for newborns 
 initStates <- rbind(c("m","0","NM","no"),c("f","0","NM","no")) 
 # Definition of related occurrence probabilities
 initStatesProb <- c(0.515,0.485)                              
 
-# Definition of (possible) transition rates (that vary along age, calendar time, 
-# and duration). BEWARE: Each function that describes transition rates has to feature 
-# at least `age' (in years) as input parameter. Additionally, `calTime' (in years) 
-# and `duration' (in years) might enter the function.
-fert1Rates <- function(age, calTime=1990, duration=0){  # parity 1
- b <- ifelse(calTime<=1950, 3.9, 3.3)
- c <- ifelse(calTime<=1950, 28, 29)
- rate <-  (b/c)*(c/age)^(3/2)*exp(-b^2*(c/age+age/c-2))
- rate[age<=15 | age>=45] <- 0
- return(rate)
+# Definition of (possible) transition rates  
+# (1) Fertility rates (Hadwiger mixture model)
+fert1Rates <- function(age, calTime, duration){  # parity 1
+  b <- ifelse(calTime<=1950, 3.9, 3.3)
+  c <- ifelse(calTime<=1950, 28, 29)
+  rate <-  (b/c)*(c/age)^(3/2)*exp(-b^2*(c/age+age/c-2))
+  rate[age<=15 | age>=45] <- 0
+  return(rate)
 }
-fert2Rates <- function(age, calTime=1990, duration=0){  # partiy 2+
- b <- ifelse(calTime<=1950, 3.2, 2.8)
- c <- ifelse(calTime<=1950, 32, 33)
- rate <-  (b/c)*(c/age)^(3/2)*exp(-b^2*(c/age+age/c-2))
- rate[age<=15 | age>=45 | duration<0.75] <- 0
- return(rate)
+fert2Rates <- function(age, calTime, duration){  # partiy 2+
+  b <- ifelse(calTime<=1950, 3.2, 2.8)
+  c <- ifelse(calTime<=1950, 32, 33)
+  rate <-  (b/c)*(c/age)^(3/2)*exp(-b^2*(c/age+age/c-2))
+  rate[age<=15 | age>=45 | duration<0.75] <- 0
+  return(rate)
 }
 # (2) Rates for first marriage (normal density)
-marriage1Rates <- function(age, calTime=1990, duration=0){  
- m <- ifelse(calTime<=1950, 25, 30)
- s <- ifelse(calTime<=1950, 3, 3)
- rate <- dnorm(age, mean=m, sd=s)
- rate[age<=16] <- 0
- return(rate)
+marriage1Rates <- function(age, calTime, duration){  
+  m <- ifelse(calTime<=1950, 25, 30)
+  s <- ifelse(calTime<=1950, 3, 3)
+  rate <- dnorm(age, mean=m, sd=s)
+  rate[age<=16] <- 0
+  return(rate)
 }
-# (3) Remariage rates (logistic model)
-marriage2Rates <- function(age, calTime=1990, duration=0){  
+# (3) Remariage rates (log-logistic model)
+marriage2Rates <- function(age, calTime, duration){  
   b <- ifelse(calTime<=1950, 0.07, 0.10)
   p <- ifelse(calTime<=1950, 2.7,2.7)
   lambda <- ifelse(calTime<=1950, 0.04, 0.03)
@@ -238,7 +238,7 @@ marriage2Rates <- function(age, calTime=1990, duration=0){
   return(rate)
 }
 # (4) Divorce rates (normal density)
-divorceRates <- function(age, calTime=1990, duration=0){
+divorceRates <- function(age, calTime, duration){
   m <- ifelse(calTime<=1950, 40, 40)
   s <- ifelse(calTime<=1950, 7, 6)
   rate <- dnorm(age,mean=m,sd=s)
@@ -246,57 +246,59 @@ divorceRates <- function(age, calTime=1990, duration=0){
   return(rate)
 }
 # (5) Widowhood rates (gamma cdf)
-widowhoodRates <- function(age, calTime=1990, duration=0){
- rate <- ifelse(age<=30, 0, pgamma(age-30, shape=6, rate=0.06))
- return(rate)
+widowhoodRates <- function(age, calTime, duration){
+  rate <- ifelse(age<=30, 0, pgamma(age-30, shape=6, rate=0.06))
+  return(rate)
 }
 # (6) Rates to change educational attainment
-# # Set rate to `Inf' to make transition for age 7 and greater deterministic.
-noToLowEduRates <- function(age, calTime=1990, duration=0){
- rate <- ifelse(age==7,Inf,0) 
- return(rate)
+# Set rate to `Inf' to make transition for age 7 deterministic.
+noToLowEduRates <- function(age, calTime, duration){
+  rate <- ifelse(age==7,Inf,0) 
+  return(rate)
 }
-lowToMedEduRates <- function(age, calTime=1990, duration=0){
- rate <- dnorm(age,mean=16,sd=1)
- rate[age<=15 | age>=25] <- 0
- return(rate)
+lowToMedEduRates <- function(age, calTime, duration){
+  rate <- dnorm(age,mean=16,sd=1)
+  rate[age<=15 | age>=25] <- 0
+  return(rate)
 }
-medToHighEduRates <- function(age, calTime=1990, duration=0){
- rate <- dnorm(age,mean=20,sd=3)
- rate[age<=18 | age>=35] <- 0
- return(rate)
+medToHighEduRates <- function(age, calTime, duration){
+  rate <- dnorm(age,mean=20,sd=3)
+  rate[age<=18 | age>=35] <- 0
+  return(rate)
 }
 # (7) Mortality rates (Gompertz model)
-mortRates <- function(age, calTime=1990, duration=0){
+mortRates <- function(age, calTime, duration){
   a <- ifelse(calTime<=1950, 0.00003, 0.00003)
   b <- ifelse(calTime<=1950, 0.1, 0.097)
   rate <- a*exp(b*age)
   return(rate)
 }
 # (8) Emigration rates 
-emigrRates <- function(age, calTime=1990, duration=0){
+emigrRates <- function(age, calTime, duration){
   rate <- ifelse(age<=18,0,0.0025)
   return(rate)
 }
 
 # Transition pattern and assignment of functions specifying transition rates
-fertTrMatrix <- cbind(c("0->1","1->2","2->3+","3+->3+"),                         
-                c("fert1Rates", "fert2Rates", "fert2Rates","fert2Rates"))
+fertTrMatrix <- cbind(c("0->1+","1+->1+"),                         
+                      c("fert1Rates", "fert2Rates"))
 maritalTrMatrix <- cbind(c("NM->M","M->D","M->W","D->M","W->M"),              
-                   c("marriage1Rates","divorceRates","widowhoodRates",
-                     "marriage2Rates","marriage2Rates"))
+                         c("marriage1Rates","divorceRates","widowhoodRates",
+                           "marriage2Rates","marriage2Rates"))
 eduTrMatrix <- cbind(c("no->low","low->med","med->high"),
-               c("noToLowEduRates","lowToMedEduRates","medToHighEduRates")) 
+                     c("noToLowEduRates","lowToMedEduRates","medToHighEduRates")) 
 allTransitions <- rbind(fertTrMatrix, maritalTrMatrix, eduTrMatrix)
 absTransitions <- rbind(c("dead","mortRates"),c("rest","emigrRates"))
 transitionMatrix <- buildTransitionMatrix(allTransitions=allTransitions,
-  absTransitions=absTransitions, stateSpace=stateSpace)
+                        absTransitions=absTransitions, stateSpace=stateSpace)
 
 # Define transitions triggering a birth event
 fertTr <- fertTrMatrix[,1]
 
-# Execute microsimulation (sequentially, i.e., using only one CPU)
-pop <- micSim(initPop=initPop, immigrPop=immigrPop, transitionMatrix=transitionMatrix, 
-  absStates=absStates, initStates=initStates, initStatesProb=initStatesProb, 
-  maxAge=maxAge, simHorizon=simHorizon, fertTr=fertTr, dateSchoolEnrol=dateSchoolEnrol)
+# Execute microsimulation (sequentially, i.e., using only one CPU core)
+pop <- micSim(initPop=initPop, immigrPop=immigrPop, 
+        transitionMatrix=transitionMatrix, absStates=absStates, 
+        initStates=initStates, initStatesProb=initStatesProb, 
+        maxAge=maxAge, simHorizon=simHorizon, fertTr=fertTr, 
+        dateSchoolEnrol=dateSchoolEnrol)
 }

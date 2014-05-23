@@ -46,9 +46,7 @@ micSim <- function(initPop, immigrPop=NULL, transitionMatrix, absStates=NULL, in
   if(length(dateSchoolEnrol)==0){
     dateSchoolEnrol <- "09/01"
   } 
-  
-      
-    
+     
   # --------------------------------------------------------------------------------------------------------------------
   # --------------------------------------------------------------------------------------------------------------------
   # B. DEFINITION OF GLOBAL PARAMETERS
@@ -228,8 +226,8 @@ micSim <- function(initPop, immigrPop=NULL, transitionMatrix, absStates=NULL, in
 #         cat("ID: ",inp, "\n - currState: ", currState, "- currAge: ",ageInYears, "durSinceLastTr",durSinceLastCovCh, 
 #             " -pos: ",which(detE == Inf)[1]," - tr: ", 
 #             tr, " - timeToNext: ",timeToNext,"\n-----\n")
-
-      } else {
+        timeToNext <- timeToNext
+      } else {   
         u <- -log(1-runif(1)) 
           #cat("It: ",i,"--u: ",u,"\n")
         # Extract individual transition rate (depending on age, calendar time, and time elapsed)  
@@ -275,7 +273,7 @@ micSim <- function(initPop, immigrPop=NULL, transitionMatrix, absStates=NULL, in
       nE <- nE[1,,drop=F]
     if(nE[1,2]!=Inf){
       # Cal. time of next event of individual. (If there is one.)
-      tt <- chron(as.numeric(calTime) + as.numeric(nE[1,2]), out.format=c(dates="d/m/year", times="h/m/s"))
+      tt <- chron(as.numeric(calTime) + as.numeric(nE[1,2]) - ageInYears%%1, out.format=c(dates="d/m/year", times="h/m/s"))
        #print(tt)
        #cat(nE[1,1],"---",tt,"\n")  
       # Check whether next event implies school enrolment. If yes, adjust transition time to ensure that the individual

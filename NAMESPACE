@@ -1,5 +1,5 @@
 #functions
-export(setSimHorizon, buildTransitionMatrix, micSim, micSimParallel, convertToLongFormat)
+export(setSimHorizon, buildTransitionMatrix, micSim, micSimParallel, convertToLongFormat, convertToWideFormat)
 
 importFrom(chron)
 importFrom(snowfall)

@@ -21,8 +21,8 @@ convertToWideFormat <- function(pop){
   popTemp$Episode <- unlist(sapply(nsU,giveSeq))
   popTemp <- popTemp[,c("ID","birthDate","initState","ns","Episode","From","To","transitionTime","transitionAge")]
   popWide <- reshape(popTemp, timevar = "Episode", idvar = "ID", direction = "wide", 
-                     v.names=c("From","To", "transitionTime", "transitionAge"))
-  popWide$ns[which(is.na(popWide$transitionTime1))] <- 0
+                     v.names=c("From","To", "transitionTime", "transitionAge"))  
+  popWide$ns[which(is.na(popWide$transitionTime.1))] <- 0
   return(popWide)
 }
 

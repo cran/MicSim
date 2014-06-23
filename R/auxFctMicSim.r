@@ -14,6 +14,8 @@ setSimHorizon <- function(startDate, endDate){
 
 # Construct matrix indicating transition pattern and naming the corresponding transition rate functions.
 buildTransitionMatrix <- function(allTransitions,absTransitions,stateSpace){  
+  if(is.vector(allTransitions))
+    allTransitions <- matrix(allTransitions, ncol=2, nrow=1)  
   if(is.vector(absTransitions))
     absTransitions <- matrix(absTransitions, ncol=2, nrow=1)  
   absStates <- absTransitions[,1]  
@@ -24,9 +26,14 @@ buildTransitionMatrix <- function(allTransitions,absTransitions,stateSpace){
     absStNam <- c(absStNam, "rest") 
   transitionMatrix <- matrix(0,nrow=dim(stateSpace)[1], ncol=dim(stateSpace)[1]+length(absStNam))
   colnames(transitionMatrix) <- c(apply(stateSpace,1,paste,collapse="/"),absStNam)
-  rownames(transitionMatrix) <- apply(stateSpace,1,paste,collapse="/")
+  rownames(transitionMatrix) <- apply(stateSpace,1,paste,collapse="/")  
+  # Function to identify whether a set of attributes (`substates') is part of a state space state
+  isInThisState <- function(ss,state){
+    if(sum(ss %in% as.character(unlist(state)))==length(ss))
+      return(TRUE)
+    return(FALSE)
+  }   
   for(i in 1:length(absStates)){
-    #i <- 2
     strAb <- unlist(strsplit(absStates[i],split="/"))   
     if(length(strAb)==1){
       ia <- which(colnames(transitionMatrix)==absStates[i])
@@ -35,16 +42,10 @@ buildTransitionMatrix <- function(allTransitions,absTransitions,stateSpace){
       iAB <- which(strAb %in% c("dead","rest"))
       aS <- strAb[iAB]
       strAbCov <- strAb[-iAB]
-      strAbCov <- paste(strAbCov,collapse="/")
-      rA <- which(grepl(strAbCov, rownames(transitionMatrix)))
+      rA <- which(apply(stateSpace,1,isInThisState, ss=strAbCov)==TRUE)
       ia <- which(colnames(transitionMatrix)==aS) 
       transitionMatrix[rA,ia] <- absTransitions[i,2]
     }
-  }  
-  isInThisState <- function(ss,state){
-    if(sum(ss %in% as.character(unlist(state)))==length(ss))
-      return(TRUE)
-    return(FALSE)
   }        
   if(!is.null(allTransitions)){
     tr <- do.call(rbind,strsplit(allTransitions[,1],"->"))

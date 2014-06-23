@@ -1,5 +1,11 @@
 \name{NEWS}
 \title{NEWS file for the MicSim package}
+\section{Changes in version 1.0.5}{
+ \itemize{
+   \item Fix minor conversion problem in function `convertToWideFormat', related to request for NA values.
+   \item Now function `buildTransitionMatrix' can handle covariate dependent mortality rates of every kind, e.g.,     mortality rates depending on health status and gender.
+  }
+}
 \section{Changes in version 1.0.4}{
  \itemize{
    \item Add function `convertToWideFormat' to convert simulation output into wide format.

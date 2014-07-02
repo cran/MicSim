@@ -149,7 +149,7 @@ convertToLongFormat <- function(pop, migr=FALSE) {
   simStartYear <- exactYear(simHorizon[1])  
   bornInSimId <- which(is.na(popLong$Tstart) & popLong$birthyear >= simStartYear)
   bornOutSimId <- which(is.na(popLong$Tstart)& popLong$birthyear < simStartYear)
-  popLong$Tstart[bornInSimId] <- popLong$birthdate[bornInSimId] 
+  popLong$Tstart[bornInSimId] <- popLong$birthDate[bornInSimId] 
   popLong$Tstart[bornOutSimId] <- simHorizon[1]
   popLong$statusEntry[bornOutSimId] <- 0
   # The timing of the first episodes reported for immigrants has to be adjusted to account for the fact that we have not

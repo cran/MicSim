@@ -1,5 +1,10 @@
 \name{NEWS}
 \title{NEWS file for the MicSim package}
+\section{Changes in version 1.0.6}{
+ \itemize{
+   \item Fix bug in function `convertToLongFormat' leading to wrong ordering of the event sequences of individuals born during simulation.
+  }
+}
 \section{Changes in version 1.0.5}{
  \itemize{
    \item Fix minor conversion problem in function `convertToWideFormat', related to request for NA values.

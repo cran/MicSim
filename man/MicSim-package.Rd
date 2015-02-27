@@ -21,8 +21,8 @@ The transition rates (also denoted as hazard rates or intensities) of Markovian 
 \tabular{ll}{
 Package: \tab MicSim\cr
 Type: \tab Package\cr
-Version: \tab 1.0.6\cr
-Date: \tab 2014-07-02\cr
+Version: \tab 1.0.7\cr
+Date: \tab 2015-02-27\cr
 License: \tab GPL-2\cr
 }
 }
@@ -32,19 +32,13 @@ Sabine Zinn
 Maintainer: sabine.zinn@lifbi.de
 }
 \references{
-Willekens, F. (2014) Multistate analysis of life histories with R. Springer, forthcoming. 
+S. Zinn (2014). The MicSim Package of R: An Entry-Level Toolkit for Continuous-Time Microsimulation. In International Journal of Microsimulation 7(3), 3-32.
 
 Willekens, F. and H. Putter eds. (2014) Multistate event history analysis. Special Collection of Demographic Research, forthcoming. 
-
-Zinn, S., J. Himmelspach, A.M. Uhrmacher and J. Gampe (2013). Building Mic-Core, a Specialized M&S Software to Simulate Multi-State Demographic Micro Models, Based on JAMES II, a General M&S Framework. In Journal of Artificial Societies and Social Simulation 16(3)5.
-
-Willekens, F. (2009) Continuous-time microsimulation in longitudinal analysis. In: A. Zaidi, A. Harding and P. Williamson eds. New frontiers in microsimulation modelling. Ashgate, Surrey, UK, pp. 413-436. 
 
 Zinn, S., J.Himmelspach, J.Gampe, and A.M. Uhrmacher (2009). Mic-core: A tool for microsimulation. In M.D. Rossetti, R.R. Hill, B.Johansson, A.Dunkin, and R.G. Ingalls (Eds.), Proceedings of the 2009 Winter Simulation Conference.
 
 Gampe, J. and S. Zinn (2007). Description of the microsimulation model. Technical report, MicMac project, MPIDR, Rostock.
-
-van Imhoff, E. and W. Post (1998). Microsimulation methods for population projection. Population: An English Selection, New Methodological Approaches in Social Sciences 10 (1), 97-138.
 }
 \keyword{ package }
 

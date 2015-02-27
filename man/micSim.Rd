@@ -84,13 +84,6 @@ The function \link{convertToLongFormat} reshapes the microsimulation output into
 \note{
   Concerning run times \code{micSim} is not very performant. That is because it is purely implemented in R, i.e., it does not incorporate routines implemented in a high level programming language like Java, C++ or Python. This is work in progress. For the meantime, if a computer cluster is accessible, we recommend parallel computing using \link{micSimParallel}.
 }
-\references{
-Zinn, S., J. Himmelspach, A.M. Uhrmacher and J. Gampe (2013). Building Mic-Core, a Specialized M&S Software to Simulate Multi-State Demographic Micro Models, Based on JAMES II, a General M&S Framework. In Journal of Artificial Societies and Social Simulation 16(3)5.
-
-Zinn, S., J.Himmelspach, J.Gampe, and A.M. Uhrmacher (2009). Mic-core: A tool for microsimulation. In M.D. Rossetti, R.R. Hill, B.Johansson, A.Dunkin, and R.G. Ingalls (Eds.), Proceedings of the 2009 Winter Simulation Conference.
-
-Gampe, J. and S. Zinn (2007). Description of the microsimulation model. Technical report, MicMac project, MPIDR, Rostock.
-}
 \author{
 Sabine Zinn
 }

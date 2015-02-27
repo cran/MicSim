@@ -360,7 +360,7 @@ micSim <- function(initPop, immigrPop=NULL, transitionMatrix, absStates=NULL, in
     }
     #cat("\n-----------\n")
   }
-  transitions <- transitions[order(as.numeric(transitions[,1])),]
+  transitions <- transitions[order(as.numeric(transitions[,1])),,drop=F]
   cat("Simulation has finished.\n------------------\n")
   
   # ----------------------------------------------------------------------------------------------------------------------
@@ -390,13 +390,13 @@ micSimParallel <- function(initPop, immigrPop=NULL, transitionMatrix, absStates=
         maxAge=99, simHorizon, fertTr=c(), dateSchoolEnrol="09/01", cores=1, seeds=1254){
      
    cat("Starting at ");print(Sys.time())
+   N <- dim(initPop)[1]
+   M <- ifelse(is.null(immigrPop),0,dim(immigrPop)[1])
    # Split starting population and (if available) immigrant population accordinf to available cores     
-   if(is.null(cores) | cores==1) {
+   if(is.null(cores) | cores==1 | N+M<=20) {
      pop <- micSim(initPop, immigrPop, transitionMatrix, absStates, initStates, initStatesProb, 
           maxAge, simHorizon, fertTr, dateSchoolEnrol)
    } else { 
-    N <- dim(initPop)[1]
-    M <- ifelse(is.null(immigrPop),0,dim(immigrPop)[1])
     widthV <- max(trunc(N/cores), 10)
     widthW <- max(trunc(M/cores), 10)
     intV <- matrix(NA,ncol=2,nrow=cores)

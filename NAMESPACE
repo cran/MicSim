@@ -1,6 +1,12 @@
-#functions
-export(setSimHorizon, buildTransitionMatrix, micSim, micSimParallel, convertToLongFormat, convertToWideFormat)
+export(setSimHorizon, 
+       buildTransitionMatrix, 
+       micSim, 
+       micSimParallel, 
+       convertToLongFormat, 
+       convertToWideFormat)
 
 importFrom(chron, chron, years, days, dates)
 importFrom(snowfall, sfInit, sfLibrary, sfExportAll, sfClusterSetupRNGstream, sfLapply, sfStop)
+import(rlecuyer)
+
 

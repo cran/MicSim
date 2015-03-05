@@ -1,5 +1,10 @@
 \name{NEWS}
 \title{NEWS file for the MicSim package}
+\section{Changes in version 1.0.8}{
+ \itemize{
+   \item Missing package dependency has been added. MicSim requires `rlecuyer'.
+  }
+}
 \section{Changes in version 1.0.7}{
  \itemize{
    \item Add a new reference.

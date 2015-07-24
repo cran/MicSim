@@ -1,5 +1,11 @@
 \name{NEWS}
 \title{NEWS file for the MicSim package}
+\section{Changes in version 1.0.9}{
+ \itemize{
+   \item Add error message arising if negative rate values appear.
+   \item Besides not defining impossible transitions in the transition matrix, they can now also be specified by giving only zero rate values for the respective rate function/s. 
+  }
+}
 \section{Changes in version 1.0.8}{
  \itemize{
    \item Missing package dependency has been added. MicSim requires `rlecuyer'.

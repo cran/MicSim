@@ -8,5 +8,7 @@ export(setSimHorizon,
 importFrom(chron, chron, years, days, dates)
 importFrom(snowfall, sfInit, sfLibrary, sfExportAll, sfClusterSetupRNGstream, sfLapply, sfStop)
 import(rlecuyer)
+importFrom(stats, integrate, reshape, runif, uniroot)
+
 
 

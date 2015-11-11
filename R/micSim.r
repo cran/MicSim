@@ -107,7 +107,11 @@ micSim <- function(initPop, immigrPop=NULL, transitionMatrix, absStates=NULL, in
   # Funtion adds to simulation population a newborn.
   addNewNewborn <- function(birthTime){    
     birthState <- sample(apply(initStates,1,paste,collapse='/'),size=1,replace=T,prob=initStatesProb)
-    id <- as.numeric(max(as.numeric(initPop[,'ID'])))+1
+    if(is.null(immigrPop)){
+      id <- as.numeric(max(as.numeric(initPop[,'ID'])))+1
+    } else {
+      id <- as.numeric(max(c(as.numeric(immigrPop[,'ID']),as.numeric(initPop[,'ID']))))+1
+    }
     birthDate <- dates(chron(birthTime,
                              format=c(dates='d/m/Y', times='h:m:s'),out.format=c(dates='d/m/year', times='h:m:s')))    
     newInd <- c(id,as.character(birthDate),birthState)
@@ -465,14 +469,20 @@ micSimParallel <- function(initPop, immigrPop=NULL, transitionMatrix, absStates=
         immigrPopL <- immigrPopList[[itt]]
       } else {
         immigrPopL <- NULL
-      }      
-      popIt <- micSim(initPop=initPopList[[itt]], immigrPop=immigrPopL, transitionMatrix=transitionMatrix, 
+      }     
+      if (itt<=nL) {
+        initPopL <- initPopList[[itt]]
+      } else {
+        initPopL <- NULL
+        stop("\nCompared to the number of migrants, the starting population is too small to justify running a distributed simulation on several cores.")
+      }
+      popIt <- micSim(initPop=initPopL, immigrPop=immigrPopL, transitionMatrix=transitionMatrix, 
                       absStates=absStates, initStates=initStates, initStatesProb=initStatesProb, maxAge=maxAge, 
                       simHorizon=simHorizon, fertTr=fertTr, dateSchoolEnrol=dateSchoolEnrol)
       #cat('Thread: ',itt,' has stopped.\n') 
       return(popIt)      
     }
-    pop <- sfLapply(1:nL, myPar)   
+    pop <- sfLapply(1:max(nL,mL), myPar)   
     # create unique IDs for newborns 
     refID <- 0
     replaceID <- function(rr){
@@ -480,7 +490,9 @@ micSimParallel <- function(initPop, immigrPop=NULL, transitionMatrix, absStates=
       return(NULL)
     }
     for(i in 1:length(pop)){
-      repl <- setdiff(unique(as.numeric(pop[[i]][pop[[i]][,2]>simHorizon[1],1])), as.numeric(immigrPop[,1])) 
+      allIDs <- c(initPopList[[i]]$ID, immigrPopList[[i]]$ID)
+      exIDs <- unique(as.numeric(pop[[i]][,1]))
+      repl <- setdiff(exIDs, allIDs)
       if(length(repl)>0) {
         newIDs <- cbind(repl,-(refID+(1:length(repl))))
         idch <- apply(newIDs,1,replaceID)

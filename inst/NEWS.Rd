@@ -1,5 +1,12 @@
 \name{NEWS}
 \title{NEWS file for the MicSim package}
+\section{Changes in version 1.0.10}{
+ \itemize{
+   \item Fix bug concerning the uniqueness of IDs of newborns when simulating natives and migrants on several cores, i.e., when using the function `micSimParallel'.
+   \item Slight changes in the description of the (life-course) model used in MicSim.
+  }
+}
+
 \section{Changes in version 1.0.9}{
  \itemize{
    \item Add error message arising if negative rate values appear.
@@ -49,8 +56,8 @@
 }
 \section{Changes in version 1.0.1}{
  \itemize{
-   \item Extend function "buildTransitionMatrix" to facilitate using transition rates which depend on covariates such as gender and marital status.
-   \item Correct typing error in Details section of help page of function "buildTransitionMatrix".
-   \item Fix a problem in function "micSim" occuring if the simulation is asked not to produce newborns (concerns argument "fertTr=c()").
+   \item Extend function `buildTransitionMatrix' to facilitate using transition rates which depend on covariates such as gender and marital status.
+   \item Correct typing error in Details section of help page of function `buildTransitionMatrix'.
+   \item Fix a problem in function `micSim' occuring if the simulation is asked not to produce newborns (concerns argument `fertTr=c()').
   }
 }

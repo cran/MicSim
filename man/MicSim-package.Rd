@@ -10,9 +10,9 @@ In demography, the central device of microsimulations is the life course of an i
 
 A standard approach to describe individual behavior is a continuous-time multi-state model. A multi-state model is a stochastic process that at any point in time occupies one out of a set of discrete states. These states summarize the demographically relevant categories an individual can belong to. Generally, the state space is determined by the problem to be studied, but commonly it will at least comprise the elementary demographic characteristics of sex and marital status. One element always present in the state space is "dead", a risk to which each individual is always exposed to.
 
-In demographic microsimulations life-courses usually evolve along two time scales: individual age and calendar time. A possible third time scale is the time that an individual has already spent in his/her current demographic state, e.g., the time that has elapsed since the individual's wedding.A demographic event implies a change in the state of an individual.It should be emphasized that age runs parallel to the process time in the model, and therefore birthdays, i.e., completion of another year of life, is not an event in itself. 
+In demographic microsimulations life-courses usually evolve along two time scales: individual age and calendar time. A possible third time scale is the time that an individual has already spent in his/her current demographic state, e.g., the time that has elapsed since the individual's wedding. A demographic event implies a change in the state of an individual. It should be emphasized that age runs parallel to the process time in the model, and therefore birthdays, i.e., completion of another year of life, is not an event in itself. 
 
-A common way to characterize an individual life-course is via a trajectory of a stochastic process from the family of Markovian processes, where the process time maps the time span over which we "observe" an individual life-course.If in the microsimulation model life-courses are specified only along age and calendar time, the accordant class used is the class of non-homogeneous continuous-time Markov chains. If in addition, the time that has elapsed since the last event is considered, non-homogeneous semi-Markov processes are used to describe individual life-courses.
+A common way to characterize an individual life-course is via a trajectory of a stochastic process from the family of Markovian processes, where the process time maps the time span over which we "observe" an individual life-course. The MicSim package uses non-homogeneous continuous-time Markov chains to describe individual life-courses.
 
 The transition rates (also denoted as hazard rates or intensities) of Markovian processes are their key quantities. Once they are known one can compute the distribution functions of sojourn times and thus simulate synthetic life-courses. That is, to run a microsimulation model, for all transitions and time scales considered transition rates have to be provided.
 
@@ -21,8 +21,8 @@ The transition rates (also denoted as hazard rates or intensities) of Markovian 
 \tabular{ll}{
 Package: \tab MicSim\cr
 Type: \tab Package\cr
-Version: \tab 1.0.9\cr
-Date: \tab 2015-07-23\cr
+Version: \tab 1.0.10\cr
+Date: \tab 2015-11-10\cr
 License: \tab GPL-2\cr
 }
 }

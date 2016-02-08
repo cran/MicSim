@@ -146,11 +146,11 @@ micSim <- function(initPop, immigrPop=NULL, transitionMatrix, absStates=NULL, in
     calTime <- as.numeric(unlist(inp[4]))         # calendat time in days
     # first event of an immigrant: he/she enters the population later than sim. starting time
     lagToWaitingTime <- ifelse(isIMInitEvent, (as.numeric(calTime) - as.numeric(simHorizon[1]))/365.25,0) 
-    # cat('\n-----\nID: ',id,'\n')
-    # print(inp)
+     #cat('\n-----\nID: ',id,'\n')
+     #print(inp)
     
     ageInYears <- getAgeInYears(currAge)
-    # cat('Age: ',ageInYears,' - CalTime: ',years(calTime),'-',months(calTime),'-',days(calTime),'\n')
+     #cat('Age: ',ageInYears,' - CalTime: ',years(calTime),'-',months(calTime),'-',days(calTime),'\n')
     # Possible destination states
     possTr <- transitionMatrix[which(rownames(transitionMatrix) %in% currState),]  
     possTr <- possTr[which(possTr !=0)]
@@ -219,13 +219,11 @@ micSim <- function(initPop, immigrPop=NULL, transitionMatrix, absStates=NULL, in
                             args=list(age=trunc(ageInYears)+x,calTime=trunc(1970.001+calTime/365.25)+x,duration=trunc(durSinceLastCovCh/365.25)+x)))
         return(res)
       }      
-      detE <- indRateFctDET(0:ran)
-      if((Inf %in% detE) & (trunc(ageInYears) + (which(detE == Inf)[1]-1)) - ageInYears>0){ # deterministic event, still upcoming
-        timeToNext <-  which(detE == Inf)[1]-1
-        #         cat('ID: ',inp, '\n - currState: ', currState, '- currAge: ',ageInYears, 'durSinceLastTr',durSinceLastCovCh, 
-        #             ' -pos: ',which(detE == Inf)[1],' - tr: ', 
-        #             tr, ' - timeToNext: ',timeToNext,'\n-----\n')
-        timeToNext <- timeToNext
+      ranAccuracyInDays <- (0:(trunc(ran*365.25)+1))/365.25
+      detE <- indRateFctDET(ranAccuracyInDays)
+      daysToTrInYears <- (which(detE == Inf)[1] - 1)/365.25
+      if (Inf %in% detE) {
+        timeToNext <- daysToTrInYears
       } else {   
         u <- -log(1-runif(1)) 
         #cat('It: ',i,'--u: ',u,'\n')

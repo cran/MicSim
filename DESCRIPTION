@@ -1,8 +1,8 @@
 Package: MicSim
 Type: Package
 Title: Performing Continuous-Time Microsimulation
-Version: 1.0.11
-Date: 2016-02-02
+Version: 1.0.12
+Date: 2016-06-06
 Author: Sabine Zinn
 Maintainer: Sabine Zinn <sabine.zinn@lifbi.de>
 Description: This entry-level toolkit allows performing continuous-time microsimulation for a wide range of demographic applications. Individual life-courses are specified by a continuous-time multi-state model. 
@@ -10,6 +10,6 @@ LazyData: yes
 Depends: R (>= 3.0.1), chron, snowfall, rlecuyer
 License: GPL-2
 NeedsCompilation: no
-Packaged: 2016-02-08 13:20:28 UTC; Biene
+Packaged: 2016-06-09 20:28:53 UTC; Biene
 Repository: CRAN
-Date/Publication: 2016-02-08 14:59:55
+Date/Publication: 2016-06-10 07:48:22

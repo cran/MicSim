@@ -57,7 +57,7 @@ micSim <- function(initPop, immigrPop=NULL, transitionMatrix, absStates=NULL, in
   colnames(queue) <- c('ID','currTime','currState','currAge','nextState','timeToNextState')
   # Global time
   t.clock <- as.numeric(simHorizon[1])  # counts in days
-  # Recording of transitions performedfer
+  # Recording transitions performed
   transitions <- matrix(NA,ncol=5,nrow=0)
   colnames(transitions) <- c('ID', 'From', 'To', 'transitionTime', 'transitionAge') 
   
@@ -143,7 +143,7 @@ micSim <- function(initPop, immigrPop=NULL, transitionMatrix, absStates=NULL, in
     id <- as.numeric(unlist(inp[1]))
     currState <- as.character(unlist(inp[2]))
     currAge <- as.numeric(unlist(inp[3]))         # age in days
-    calTime <- as.numeric(unlist(inp[4]))         # calendat time in days
+    calTime <- as.numeric(unlist(inp[4]))         # calendar time in days
     # first event of an immigrant: he/she enters the population later than sim. starting time
     lagToWaitingTime <- ifelse(isIMInitEvent, (as.numeric(calTime) - as.numeric(simHorizon[1]))/365.25,0) 
      #cat('\n-----\nID: ',id,'\n')
@@ -296,7 +296,7 @@ micSim <- function(initPop, immigrPop=NULL, transitionMatrix, absStates=NULL, in
         nE[1,2] <- as.numeric(nE[1,2]) + diffToEn 
       }
       # Enqueue new event (if there is one).
-      queue <<- rbind(queue, c(id, t.clock, currState, currAge, nE[1,1], nE[1,2]))
+      queue <<- rbind(queue, c(id, t.clock, currState, currAge - lagToWaitingTime*365.25, nE[1,1], nE[1,2]))
     }  
     #cat('\n----------\n')      
     return(nE)

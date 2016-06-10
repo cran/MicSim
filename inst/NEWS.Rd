@@ -1,5 +1,10 @@
 \name{NEWS}
 \title{NEWS file for the MicSim package}
+\section{Changes in version 1.0.12}{
+ \itemize{
+   \item Fix bug concerning the transition age of immigrants.
+  }
+}
 \section{Changes in version 1.0.11}{
  \itemize{
    \item Up to version 1.0.10 deterministic events could only be defined to occur after whole numbered years. Now, they can also be defined to happen after whole numbered days.

@@ -1,5 +1,10 @@
 \name{NEWS}
 \title{NEWS file for the MicSim package}
+\section{Changes in version 1.0.13}{
+ \itemize{
+   \item Update of chron package caused an error due to new date format. This problem has been fixed. 
+  }
+}
 \section{Changes in version 1.0.12}{
  \itemize{
    \item Fix bug concerning the transition age of immigrants.

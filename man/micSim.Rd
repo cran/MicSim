@@ -91,6 +91,7 @@ Sabine Zinn
 ######################################################################################
 # 1. Simple example only dealing with mortality events
 ######################################################################################
+\donttest{
 # Clean workspace 
 rm(list=ls())
 
@@ -294,4 +295,5 @@ pop <- micSim(initPop=initPop, immigrPop=immigrPop,
   initStates=initStates, initStatesProb=initStatesProb, 
   maxAge=maxAge, simHorizon=simHorizon, fertTr=fertTr, 
   dateSchoolEnrol=dateSchoolEnrol)
+}
 }

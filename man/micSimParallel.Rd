@@ -57,6 +57,7 @@ Sabine Zinn
 # status, in the educational attainment, as well as dealing with migration
 # (A simpler example is given on the help page of the "micSim" function of this package.)
 ######################################################################################
+\donttest{
 # Clean workspace 
 rm(list=ls())
 
@@ -208,6 +209,7 @@ transitionMatrix <- buildTransitionMatrix(allTransitions=allTransitions,
 
 # Define transitions triggering a birth event
 fertTr <- fertTrMatrix[,1]
+}
 
 # Run microsimulation on cluster with five cores (settings depend on cluster used) 
 \dontrun{

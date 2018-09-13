@@ -45,6 +45,7 @@ For absorbing states, a prefix indicates the attributes on which a transition is
 #########################################################################################
 # 1. Example: Transition rates are specified to depend on only one state variable
 #########################################################################################
+\donttest{
 # Defintion of state space, i.e., nonabsorbing and absorbing states
 sex <- c("m","f")                     
 fert <- c("0","1","2","3+")           
@@ -125,7 +126,7 @@ absTransitions <- rbind(c("f/dead","mortRates_f"), c("m/dead","mortRates_m"))
 transitionMatrix <- buildTransitionMatrix(allTransitions=allTransitions,
                       absTransitions=absTransitions, stateSpace=stateSpace)
 
-
+}
 
 }
 

@@ -310,7 +310,7 @@ micSim <- function(initPop, immigrPop=NULL, transitionMatrix, absStates=NULL, in
   # Compute next events for members of starting population
   cat('Initialization ... \n')
   IN <- data.frame(ID=initPop[,'ID'],currState=initPop[,'initState'],age=(simHorizon[1]-initPop[,'birthDate']),
-                   calTime=rep(simHorizon[1],dim(initPop)[1]),stringsAsFactors=FALSE) 
+                   calTime=rep(as.numeric(simHorizon[1]),dim(initPop)[1]),stringsAsFactors=FALSE) 
   init <- apply(IN, 1, getNextStep)
   # If immigrants enter the population, compute next events for them.
   if(!is.null(immigrPop)){

@@ -21,24 +21,21 @@ The transition rates (also denoted as hazard rates or intensities) of Markovian 
 \tabular{ll}{
 Package: \tab MicSim\cr
 Type: \tab Package\cr
-Version: \tab 1.0.13\cr
-Date: \tab 2018-09-13\cr
+Version: \tab 1.0.15\cr
+Date: \tab 2019-08-30\cr
 License: \tab GPL-2\cr
 }
 }
 \author{
 Sabine Zinn
 
-Maintainer: sabine.zinn@lifbi.de
+Maintainer: szinn@diw.de
 }
 \references{
 S. Zinn (2014). The MicSim Package of R: An Entry-Level Toolkit for Continuous-Time Microsimulation. In International Journal of Microsimulation 7(3), 3-32.
 
-Willekens, F. and H. Putter eds. (2014) Multistate event history analysis. Special Collection of Demographic Research, forthcoming. 
+Willekens, F., & Putter, H. (2014). Software for multistate analysis. Demographic Research, 31, 381-420. 
 
-Zinn, S., J.Himmelspach, J.Gampe, and A.M. Uhrmacher (2009). Mic-core: A tool for microsimulation. In M.D. Rossetti, R.R. Hill, B.Johansson, A.Dunkin, and R.G. Ingalls (Eds.), Proceedings of the 2009 Winter Simulation Conference.
-
-Gampe, J. and S. Zinn (2007). Description of the microsimulation model. Technical report, MicMac project, MPIDR, Rostock.
 }
 \keyword{ package }
 

@@ -1,5 +1,15 @@
 \name{NEWS}
 \title{NEWS file for the MicSim package}
+\section{Changes in version 1.0.15}{
+ \itemize{
+   \item Fix bug in parallel computing function concerning case when there are migrants in the model (this bug      resulted from fix to version 1.0.14). 
+  }
+}
+\section{Changes in version 1.0.14}{
+ \itemize{
+   \item Fix bug in parallel computing function concerning case when there are no migrants in the model. 
+  }
+}
 \section{Changes in version 1.0.13}{
  \itemize{
    \item Update of chron package caused an error due to new date format. This problem has been fixed. 

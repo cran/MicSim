@@ -488,7 +488,11 @@ micSimParallel <- function(initPop, immigrPop=NULL, transitionMatrix, absStates=
       return(NULL)
     }
     for(i in 1:length(pop)){
-      allIDs <- c(initPopList[[i]]$ID, immigrPopList[[i]]$ID)
+      if(!is.na(immigrPopList[[i]])[1]){
+        allIDs <- c(initPopList[[i]]$ID, immigrPopList[[i]]$ID)
+      } else {
+        allIDs <- initPopList[[i]]$ID
+      }
       exIDs <- unique(as.numeric(pop[[i]][,1]))
       repl <- setdiff(exIDs, allIDs)
       if(length(repl)>0) {

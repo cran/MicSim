@@ -1,11 +1,11 @@
-f8e9d58bfa6e894f76f732f1e1aaab36 *DESCRIPTION
+d2297f894354a9a7c5bdc2e182877369 *DESCRIPTION
 394322dbe7bf3e35fd2a0e8356442057 *NAMESPACE
 8ce8d092292ec5ab4fdeaaf14d62722e *R/auxFctMicSim.r
 a38a5712944e728fb51af1604d57e92b *R/convertToLong.r
 0d25ed14c11705d95433f0d9ea0f415c *R/convertToWide.r
-00fc9ba64dc0d56c01f340e7b1f3366b *R/micSim.r
-33f9f963390d2b3447d58c66d5da78fd *inst/NEWS.Rd
-a0cf1e8e6585a2eee9ae356795cc8486 *man/MicSim-package.Rd
+5da20375ee3fc534a171af45ca91c5b6 *R/micSim.r
+ca98aed9a5702e106bafa632130b23b6 *inst/NEWS.Rd
+550c4170703010d8e99d41c840974969 *man/MicSim-package.Rd
 cfc3f529583742dafc82a9109e157e04 *man/buildTransitionMatrix.Rd
 735d087e0a604ff446a4ca74d65bf159 *man/convertToLongFormat.Rd
 aa1440c9b59698af5c240b709a201f17 *man/convertToWideFormat.Rd

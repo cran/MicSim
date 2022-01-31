@@ -9,7 +9,7 @@ The function \code{micSimParallel} is a parallelized version of the function \li
 \usage{
 micSimParallel(initPop, immigrPop = NULL, transitionMatrix, absStates = NULL, 
   initStates = c(), initStatesProb = c(), maxAge = 99, simHorizon, fertTr = c(), 
-  dateSchoolEnrol="09/01", cores=1, seeds=1254)
+  dateSchoolEnrol="09/01", reportMothers=FALSE, cores=1, seeds=1254)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -31,7 +31,9 @@ micSimParallel(initPop, immigrPop = NULL, transitionMatrix, absStates = NULL,
 }
  \item{fertTr}{
 }
- \item{dateSchoolEnrol}{See \link{micSim}.
+ \item{dateSchoolEnrol}{
+}
+ \item{reportMothers}{See \link{micSim}.
 }
  \item{cores}{
   Number of CPUs to be used.

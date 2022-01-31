@@ -6,7 +6,7 @@
 MicSim: Continuous-time microsimulation for population projection
 }
 \description{
-In demography, the central device of microsimulations is the life-course of an individual, which is defined by the sequence of states that the individual visits over time, and the waiting times between these state transitions. Modelling and simulating the life courses of a representative share of population members allows mapping population dynamics on a very detailed scale.
+In life sciences, the central device of microsimulations is the life-course of an individual, which is defined by the sequence of states that the individual visits over time, and the waiting times between these state transitions. Modelling and simulating the life courses of a representative share of population members allows mapping population dynamics on a very detailed scale.
 
 A standard approach to describe individual behavior is a continuous-time multi-state model. A multi-state model is a stochastic process that at any point in time occupies one out of a set of discrete states. These states summarize the demographically relevant categories an individual can belong to. Generally, the state space is determined by the problem to be studied, but commonly it will at least comprise the elementary demographic characteristics of sex and marital status. One element always present in the state space is "dead", a risk to which each individual is always exposed to.
 
@@ -21,8 +21,8 @@ The transition rates (also denoted as hazard rates or intensities) of Markovian 
 \tabular{ll}{
 Package: \tab MicSim\cr
 Type: \tab Package\cr
-Version: \tab 1.0.15\cr
-Date: \tab 2019-08-30\cr
+Version: \tab 1.1.0\cr
+Date: \tab 2022-01-28\cr
 License: \tab GPL-2\cr
 }
 }

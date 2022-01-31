@@ -11,6 +11,9 @@ convertToWideFormat <- function(pop){
     return(1:nu)
   }
   
+  if("motherID" %in% colnames(pop))
+    pop <- pop[,!(colnames(pop) %in% "motherID")]
+  
   popTemp <- pop
   ns <-  data.frame(table(popTemp$ID),stringsAsFactors=FALSE)
   ns <- ns[order(as.numeric(as.character(ns[,1]))),]

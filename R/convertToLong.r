@@ -27,7 +27,7 @@ convertToLongFormat <- function(pop, migr=FALSE) {
     colnames(stateSpaceTMP) <- attr(stateSpace,'name')
     stateSpace <- stateSpaceTMP
   }
-    
+  
   # --------------------------------------------------------------------------------------------------------------------
   # --------------------------------------------------------------------------------------------------------------------
   # Set of auxiliary function used in transformation process 
@@ -90,6 +90,8 @@ convertToLongFormat <- function(pop, migr=FALSE) {
   # Transform output of microsimulation into data in long format
   # --------------------------------------------------------------------------------------------------------------------
   # -------------------------------------------------------------------------------------------------------------------- 
+  if("motherID" %in% colnames(pop))
+    pop <- pop[,!(colnames(pop) %in% "motherID")]
   id <- pop[,'ID', drop=F]
   birthDate <- pop[,'birthDate']
   birthyear <- sapply(pop[,'birthDate'],exactYear)

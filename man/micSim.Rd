@@ -10,7 +10,7 @@
 \usage{
 micSim(initPop, immigrPop = NULL, transitionMatrix, absStates = NULL, 
   initStates = c(), initStatesProb = c(), maxAge = 99, simHorizon, 
-  fertTr = c(), dateSchoolEnrol="09/01")
+  fertTr = c(), dateSchoolEnrol="09/01", reportMothers=FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -44,6 +44,10 @@ A vector indicating all transitions triggering a child birth event during simula
   \item{dateSchoolEnrol}{
 A string of the form "month/day" indicating the general enrollment date for elementary school, e.g., "09/01" for September 1st. The default setting is "09/01". 
 }
+  \item{reportMothers}{
+  A logical indicating whether the ID of the mother should be stored in the function's output for all newborns generated during simulation. 
+}
+
 }
 \details{
 All nonabsorbing states considered during simulation have to be defined as composite states. In more detail, they consist of labels indicating values of state variables. Within states, labels are separated by a forward slash "/". Possible state variables are, for example, gender, number of children ever born, and educational attainment. Corresponding values are, for example, "m" and "f" (gender), "0","1","2", and "3+" (number of children ever born), "no", "low", "med", and "high" (educational attainment). Possible examples of states are "m/0/low" for a childless male with elementary education  or "f/1/high" for a female with one child and a higher secondary school degree. All state variables considered plus accordant value labels have to be provided by the user. The only exception is gender which is predefined by labels "m" and "f" indicating male and female individuals. The label values "no" and "low" are reserved for enrolment events to elementary school (see below).
@@ -77,12 +81,12 @@ It is recommended to set \code{simHorizon} using the function \link{setSimHorizo
 Each element of \code{fertTr} has to be of the form "A->B", that is, "A" indicates the starting attribute of the transition and "B" the arrival attribute. ("->" is the placeholder defined to mark a transition.) For example, "0" (childless) gives the starting point of the transition marking a first birth event and "1" (first child) its arrival point. All fertility attributes given in \code{fertTr} have to be part of the state variable specifiying fertility in the state space. That is, if there is none, \code{fertTr} is empty: \code{fertTr=c()}.
 }
 \value{
- The data frame \code{pop} contains the whole synthetic population considered during simulation including all events generated. In more detail, \code{pop} contains as many rows as there are transitions performed by the individuals. (Also, "entering the population" is considered as an event. In general, individuals can enter the simulation via three channels: by being part of the starting population, by immigration, and by being born during simulation). 
+ The data frame \code{pop} contains the whole synthetic population considered during simulation including all events generated. In more detail, \code{pop} contains as many rows as there are transitions performed by the individuals. (Also, "entering the population" is considered as an event. In general, individuals can enter the simulation via three channels: by being part of the starting population, by immigration, and by being born during simulation). If \code{reportMothers} is set to \code{TRUE} in the function's input arguments and fertility events are part of the model's specification, \code{pop} contains an additional column indicating the ID of the mother for individuals born during simulation.
  
-The function \link{convertToLongFormat} reshapes the microsimulation output into long format. 
+The function \link{convertToLongFormat} reshapes the microsimulation output into long format, while the function \link{convertToWideFormat} gives the microsimulation in wide format. 
 }
 \note{
-  Concerning run times \code{micSim} is not very performant. That is because it is purely implemented in R, i.e., it does not incorporate routines implemented in a high level programming language like Java, C++ or Python. This is work in progress. For the meantime, if a computer cluster is accessible, we recommend parallel computing using \link{micSimParallel}.
+  Concerning run times \code{micSim} is not very performant. That is because it is purely implemented in R, i.e., it does not incorporate routines implemented in a high level programming language like Java, C++ or Python. Furthermore, the current code contains a lot of string splits and format conversions. The reason for this are twofold (i) minimize dependencies to other R packages and (ii) a allow a handy and flexible model specification and structure. The long long run times are certainly an issue to tackle with the next version(s) of the package. For the meantime, if a computer cluster is accessible, I recommend parallel computing using \link{micSimParallel}. This speeds up execution times considerably.
 }
 \author{
 Sabine Zinn
@@ -160,6 +164,9 @@ absStates <- c("dead","rest")
 
 # General date of enrollment to elementary school
 dateSchoolEnrol <- "09/01"
+
+# Assign to all newborns born during simulation the ID of the mother
+reportMothers <- TRUE
 
 # Definition of an initial population (for illustration purposes, create a random population)
 N = 100                                                       
@@ -294,6 +301,6 @@ pop <- micSim(initPop=initPop, immigrPop=immigrPop,
   transitionMatrix=transitionMatrix, absStates=absStates, 
   initStates=initStates, initStatesProb=initStatesProb, 
   maxAge=maxAge, simHorizon=simHorizon, fertTr=fertTr, 
-  dateSchoolEnrol=dateSchoolEnrol)
+  dateSchoolEnrol=dateSchoolEnrol, reportMothers=reportMothers)
 }
 }

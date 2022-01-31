@@ -12,7 +12,7 @@
 # ----------------------------------------------------------------------------------------------------------------------
 # ----------------------------------------------------------------------------------------------------------------------
 micSim <- function(initPop, immigrPop=NULL, transitionMatrix, absStates=NULL, initStates=c(), initStatesProb=c(), 
-                   maxAge=99, simHorizon, fertTr=c(), dateSchoolEnrol='09/01') {
+                   maxAge=99, simHorizon, fertTr=c(), dateSchoolEnrol='09/01', reportMothers = FALSE) {
   
   # --------------------------------------------------------------------------------------------------------------------
   # --------------------------------------------------------------------------------------------------------------------
@@ -43,6 +43,9 @@ micSim <- function(initPop, immigrPop=NULL, transitionMatrix, absStates=NULL, in
     if(is.null(initStates) | is.null(initStatesProb))
       stop('For children potentially born during simulation no inital state(s) and/or corresponding occurrence probabilities have been defined.')
   }
+  if(length(fertTr)==0 & reportMothers){
+      warning('No fertility events are specified. Therefore, no offspring are produced during the simulation and linking of maternal IDs to newborn IDs is not possible. Check reportMothers argument or the definition of the fertility matrix fertTr.')
+  }
   if(length(dateSchoolEnrol)==0){
     dateSchoolEnrol <- '09/01'
   } 
@@ -60,7 +63,11 @@ micSim <- function(initPop, immigrPop=NULL, transitionMatrix, absStates=NULL, in
   # Recording transitions performed
   transitions <- matrix(NA,ncol=5,nrow=0)
   colnames(transitions) <- c('ID', 'From', 'To', 'transitionTime', 'transitionAge') 
-  
+  # Record linkage of mothers to newborns via their IDs
+  if(reportMothers){
+    mothers <- matrix(NA,ncol=2,nrow=0) # 'motherID', 'childID' 
+  }
+    
   # ----------------------------------------------------------------------------------------------------------------------
   # ----------------------------------------------------------------------------------------------------------------------
   # C. FUNCTIONS REQUIRED FOR SIMULATION
@@ -68,9 +75,7 @@ micSim <- function(initPop, immigrPop=NULL, transitionMatrix, absStates=NULL, in
   # ----------------------------------------------------------------------------------------------------------------------
   # Function checks whether given `year' is a leap year.
   isLeapYear <- function(year) {  
-    if (((year %% 4 == 0) & (year %% 100 != 0)) || (year %% 400 == 0))
-      return(TRUE)    
-    return(FALSE) 
+    return(((year %% 4 == 0) & (year %% 100 != 0)) | (year %% 400 == 0))
   }
   
   # Function computes the correct age in years (accounting for leap years); arguments are the birth date and the current date
@@ -88,7 +93,7 @@ micSim <- function(initPop, immigrPop=NULL, transitionMatrix, absStates=NULL, in
   isBirthEvent <- function(currState, destState){
     if(length(fertTr)==0)
       return(FALSE)
-    fert <- matrix(unlist(strsplit(fertTr,split='->')), ncol=2)
+    fert <- matrix(unlist(strsplit(fertTr,split='->')), ncol=2, byrow=TRUE)
     cS <- unlist(strsplit(currState,'/'))
     if(!("f" %in% cS))
       return(FALSE)      
@@ -97,7 +102,9 @@ micSim <- function(initPop, immigrPop=NULL, transitionMatrix, absStates=NULL, in
       ff <- fert[i,]
       oS <- unlist(strsplit(ff[1],'/'))
       bS <- unlist(strsplit(ff[2],'/'))    
-      if(!(F %in% (oS %in% cS)) & !(F %in% (bS %in% dS))){
+      cond1 <- !(F %in% (oS %in% cS)) & !(F %in% (bS %in% dS))
+      cond2 <- paste((cS[!(cS %in% oS)]),collapse="/") == paste((dS[!(dS %in% bS)]),collapse="/")
+      if(cond1 & cond2){
         return(TRUE)
       } 
     }  
@@ -105,7 +112,7 @@ micSim <- function(initPop, immigrPop=NULL, transitionMatrix, absStates=NULL, in
   }
   
   # Funtion adds to simulation population a newborn.
-  addNewNewborn <- function(birthTime){    
+  addNewNewborn <- function(birthTime=birthTime, motherID=NULL){    
     birthState <- sample(apply(initStates,1,paste,collapse='/'),size=1,replace=T,prob=initStatesProb)
     if(is.null(immigrPop)){
       id <- as.numeric(max(as.numeric(initPop[,'ID'])))+1
@@ -115,10 +122,11 @@ micSim <- function(initPop, immigrPop=NULL, transitionMatrix, absStates=NULL, in
     birthDate <- dates(chron(birthTime,
                              format=c(dates='d/m/Y', times='h:m:s'),out.format=c(dates='d/m/year', times='h:m:s')))    
     newInd <- c(id,as.character(birthDate),birthState)
-    #cat('NewBorn: ',newInd,'\n')
+    # cat('NewBorn: ',newInd,'\n')
     initPop <<- rbind(initPop,newInd)
+    if(reportMothers)
+      mothers <<- rbind(mothers, c(motherID, id))
     nE <- getNextStep(c(id,birthState,0,birthTime))
-    #print(nE)
     #cat('\n------------n')
   }
   
@@ -359,7 +367,11 @@ micSim <- function(initPop, immigrPop=NULL, transitionMatrix, absStates=NULL, in
     if(!indS['nextState'] %in% absStates){
       # Current transition causes a newborn? If yes, add one to simulation population.
       if(isBirthEvent(indS['currState'],indS['nextState'])){
-        addNewNewborn(t.clock)
+        if(reportMothers){
+          addNewNewborn(birthTime=t.clock, motherID=indS['ID'])
+        } else {
+          addNewNewborn(birthTime=t.clock)
+        }
       }  
       res <- getNextStep(c(indS[c('ID','nextState')], age, t.clock))
       #print(res)
@@ -392,9 +404,16 @@ micSim <- function(initPop, immigrPop=NULL, transitionMatrix, absStates=NULL, in
                                  transitionAge = round(getAgeInYears(as.numeric(transitions[,'transitionAge'])),2),
                                  stringsAsFactors = FALSE)
   }
-
+  
   pop <- merge(initPop, transitionsOut, all=T, by='ID')
-  pop <- pop[order(as.numeric(pop[,1])),]  
+  pop <- pop[order(as.numeric(pop[,1])),] 
+  
+  if(reportMothers) {
+   colnames(mothers) <- c("motherID", "ID")
+   pop <- merge(pop, mothers, by="ID", all.x=TRUE) 
+   pop <- pop[order(as.numeric(pop[,1])),] 
+  }
+  
   return(pop)
 }
 
@@ -407,7 +426,7 @@ micSim <- function(initPop, immigrPop=NULL, transitionMatrix, absStates=NULL, in
 # ----------------------------------------------------------------------------------------------------------------------
 # ----------------------------------------------------------------------------------------------------------------------
 micSimParallel <- function(initPop, immigrPop=NULL, transitionMatrix, absStates=NULL, initStates=c(), initStatesProb=c(), 
-                           maxAge=99, simHorizon, fertTr=c(), dateSchoolEnrol='09/01', cores=1, seeds=1254){
+                           maxAge=99, simHorizon, fertTr=c(), dateSchoolEnrol='09/01', reportMothers = FALSE, cores=1, seeds=1254){
   
   cat('Starting at ');print(Sys.time())
   N <- dim(initPop)[1]
@@ -415,7 +434,7 @@ micSimParallel <- function(initPop, immigrPop=NULL, transitionMatrix, absStates=
   # Split starting population and (if available) immigrant population accordinf to available cores     
   if(is.null(cores) | cores==1 | N+M<=20) {
     pop <- micSim(initPop, immigrPop, transitionMatrix, absStates, initStates, initStatesProb, 
-                  maxAge, simHorizon, fertTr, dateSchoolEnrol)
+                  maxAge, simHorizon, fertTr, dateSchoolEnrol, reportMothers = FALSE)
   } else { 
     widthV <- max(trunc(N/cores), 10)
     widthW <- max(trunc(M/cores), 10)
@@ -476,7 +495,7 @@ micSimParallel <- function(initPop, immigrPop=NULL, transitionMatrix, absStates=
       }
       popIt <- micSim(initPop=initPopL, immigrPop=immigrPopL, transitionMatrix=transitionMatrix, 
                       absStates=absStates, initStates=initStates, initStatesProb=initStatesProb, maxAge=maxAge, 
-                      simHorizon=simHorizon, fertTr=fertTr, dateSchoolEnrol=dateSchoolEnrol)
+                      simHorizon=simHorizon, fertTr=fertTr, dateSchoolEnrol=dateSchoolEnrol, reportMothers = FALSE)
       #cat('Thread: ',itt,' has stopped.\n') 
       return(popIt)      
     }

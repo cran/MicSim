@@ -1,5 +1,12 @@
 \name{NEWS}
 \title{NEWS file for the MicSim package}
+\section{Changes in version 1.1.0}{
+ \itemize{
+   \item Fix two bugs related to the creation of newborns during simulation: (1) Before that version all transitions of the type "1+"->"1+" led to newborns; now only transitions where no other attributes of the state change cause newborns, e.g. "f/M/+1" -> "f/D/1+" caused a newborn before this version. This is not any longer the case. Now only transitions of the form "f/M/1+" -> "f/M/+1" cause a newborn. (2) There was a bug in transforming the fertility matrix to detect birth events; instead of rows, columns were taken as transitions. This has been fixed now.
+   \item Fix an inconsistency in the computation of transition ages (in years) related to leap years (now the related function is vectorized).
+   \item A further functionality was added to the package: now it is possible to link individuals born during simulation to their mothers (see argument 'reportMothers' in the \code{micSim} or \code{micSimParallel} function). 
+  }
+}
 \section{Changes in version 1.0.15}{
  \itemize{
    \item Fix bug in parallel computing function concerning case when there are migrants in the model (this bug      resulted from fix to version 1.0.14). 

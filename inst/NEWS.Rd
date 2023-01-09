@@ -1,5 +1,16 @@
 \name{NEWS}
 \title{NEWS file for the MicSim package}
+\section{Changes in version 2.0.0}{
+ \itemize{
+   \item The simulation engine has been speed up by making its source code more efficient.
+   \item The dependency to the chron package of R has been removed to get rid of unhandy format definitions of dates in the input data to the simulation. Instead now a new date format has been defined that is based on numerical values. It is `yyyymmdd', e.g. `20221017' for October 17th, 2022. New functions have been designed and included into the package facilitating the handling of dates within the simulation. 
+   \item There is now an initial check in the package to see whether the input data is in the right format and the rates required to run the simulation are available for the complete simulation horizon and along all ages considered.
+   \item A vignette has been added to show the capabilities of the package for running large-scale simulation applications. The example of the vignette has been designed by researchers of the Eureopean Commission. It is on the modelling and simulation of migration flows within Europe. They are now added as contributors to the MicSim package. They have also tested and checked the code of the package to remove bugs.
+   \item The example section of the `micSim' function has been extended by another more complex example to highlight the versality of the package. 
+   \item It is possible with this new version to define which parts of the initial population and/or migrant population go to which CPUs/cores when conducting parallel computing.
+  }
+}
+
 \section{Changes in version 1.1.0}{
  \itemize{
    \item Fix two bugs related to the creation of newborns during simulation: (1) Before that version all transitions of the type "1+"->"1+" led to newborns; now only transitions where no other attributes of the state change cause newborns, e.g. "f/M/+1" -> "f/D/1+" caused a newborn before this version. This is not any longer the case. Now only transitions of the form "f/M/1+" -> "f/M/+1" cause a newborn. (2) There was a bug in transforming the fertility matrix to detect birth events; instead of rows, columns were taken as transitions. This has been fixed now.

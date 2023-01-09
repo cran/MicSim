@@ -1,11 +1,16 @@
-export(setSimHorizon, 
+export(getInDays, 
+       getAgeInDays, 
+       getInDays_my,
+       getYear, 
+       getMonth, 
+       getDay, 
+       getInDateFormat, 
        buildTransitionMatrix, 
        micSim, 
        micSimParallel, 
        convertToLongFormat, 
        convertToWideFormat)
 
-importFrom(chron, chron, years, days, dates)
 importFrom(snowfall, sfInit, sfLibrary, sfExportAll, sfClusterSetupRNGstream, sfLapply, sfStop)
 import(rlecuyer)
 importFrom(stats, integrate, reshape, runif, uniroot)

@@ -1,15 +1,76 @@
 ####################################################################################
 ####################################################################################
-## AUXILIARY FUNCTIONS TO DEFINE MICROSIMULATION INPUT                            ##
-## SZ, November 2013                                                              ##
+## AUXILIARY FUNCTIONS                                                            ## 
+## - TO DEFINE MICROSIMULATION INPUT                                              ##
+## - FOR COMPUTATION WITH DATES                                                   ##
+## SZ, June 2022                                                                  ##
 ####################################################################################
 ####################################################################################
 
-# Set simulation horizon
-setSimHorizon <- function(startDate, endDate){
-  dts <- c(startDate,endDate)
-  simHorizon <- chron(dts,format=c(dates='d/m/Y'),out.format=c(dates='d/m/year'))
-  return(simHorizon)
+# Function computes the days that have pasted since 1970-01-01 up to the currDate (in format 'yyyymmdd')
+getInDays <- function(currDate) {
+  currDate <- as.numeric(currDate)
+  cD_year  <- trunc(currDate/10000)
+  cD_month <- trunc((round(currDate/10000,2)-cD_year)*100) 
+  cD_days  <- trunc(currDate - (trunc(currDate/100)*100))
+  cD_fullYearsInDays <- (cD_year - 1970)*365.25 
+  daysInCurrYear <- cD_month*30.42 # approx. days in a month over the year
+  cD_fracYearsInDays <- daysInCurrYear + (cD_days - 1)
+  cD_daysSince01011970 <- cD_fullYearsInDays + cD_fracYearsInDays    
+  return(cD_daysSince01011970)
+}
+
+# Function computes the correct age in days; arguments are the birth date and the current date in numeric format 'yyyymmdd'
+getAgeInDays <- function(currDate, birthDate) {
+  return(getInDays(currDate) - getInDays(birthDate))
+}
+
+# Get the number of days that have pasted from 1970-01-01 till 'yyyymm11'.
+getInDays_my <- function(year, month){
+  return((year - 1970)*365.25 + month*30.42 - 30.41)
+}
+
+# Function computes from days since 01-01-1970: year
+getYear <- function(daysSince01011970){
+  return(trunc(1970+daysSince01011970/365.25))
+}
+
+# Function computes from days since 01-01-1970: month (approx.)
+getMonth <- function(daysSince01011970){
+  y <- getYear(daysSince01011970) 
+  fracInDays <- ((1970+daysSince01011970/365.25) - y)*365.25
+  return(trunc(fracInDays/30.42)+1)
+}
+
+# Function computes from days since 01-01-1970: day (approx.)
+getDay <- function(daysSince01011970){
+  y <- getYear(daysSince01011970) 
+  fracInDays <- ((1970+daysSince01011970/365.25) - y)*365.25
+  month_b <- trunc(fracInDays/30.42)
+  return((fracInDays- month_b*30.42)+1)
+}
+
+getInDateFormat <- function(daysSince01011970){
+  y <- getYear(daysSince01011970) 
+  m <- getMonth(daysSince01011970)
+  d <- trunc(getDay(daysSince01011970))
+  y <- ifelse(m %in% 13, y+1, y) # check for 13th month (occurs rarely due to rounding, simply replace by correct date)
+  d <- ifelse(m %in% 13, 1, d)
+  m <- ifelse(m %in% 13, 1, m)
+  falseDates <- c("231", "431", "631", "931", "1131") # check for 31th in month
+  conFD <- paste(m,d, sep="") %in% falseDates
+  m <- ifelse(conFD, m+1, m)  
+  d <- ifelse(conFD, 1, d)   
+  cond0230 <- paste(m,d, sep="") %in% "230"  # check for 30th in Feb (irrespective of leap years)  
+  m <- ifelse(cond0230, m+1, m)  
+  d <- ifelse(cond0230, 1, d)     
+  leapYear <- (y%%100!=0 & y%%4==0) | (y%%400==0) # check for 29th in Feb in years that are not leap years
+  cond0229 <- paste(m,d, sep="") %in% "229"  
+  m <- ifelse(!leapYear & cond0229, m+1,m)
+  d <- ifelse(!leapYear & cond0229, 1,d)
+  m <- ifelse(nchar(m)<2,as.character(paste(0,m, sep="")),m)
+  d <- ifelse(nchar(d)<2,as.character(paste(0,d, sep="")),d)    
+  return(apply(cbind.data.frame(cbind.data.frame(y,m),d), 1, paste, collapse ="")        )
 }
 
 # Construct matrix indicating transition pattern and naming the corresponding transition rate functions.

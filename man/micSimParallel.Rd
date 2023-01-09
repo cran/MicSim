@@ -7,23 +7,31 @@
 \description{
 The function \code{micSimParallel} is a parallelized version of the function \link{micSim}. That is, it runs a continuous-time microsimulation simulation distributed, i.e., using more than one CPU core.}
 \usage{
-micSimParallel(initPop, immigrPop = NULL, transitionMatrix, absStates = NULL, 
-  initStates = c(), initStatesProb = c(), maxAge = 99, simHorizon, fertTr = c(), 
-  dateSchoolEnrol="09/01", reportMothers=FALSE, cores=1, seeds=1254)
+micSimParallel(initPop, immigrPop = NULL, initPopList = c(), immigrPopList = c(), 
+  transitionMatrix, absStates = NULL, varInitStates = c(), initStatesProb = c(), 
+  fixInitStates = c(), maxAge = 99, simHorizon, fertTr = c(), 
+  monthSchoolEnrol=c(), cores=1, seeds=1254)
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
- \item{initPop}{
+ \item{initPop}{Either an initial population has to be given as a whole or splitted to be run at the distinct cores, see arguments \code{initPopList}. If it is given as a whole it is automatically splitted by MicSim such that the population parts run on the distinct cores are approx. equally sized.
 }
- \item{immigrPop}{
+ \item{immigrPop}{Optionally, a population of migrants entering the virtual population along simulation time can be given, see arguments \code{immigrPopList}. This migrants population can either be given as a whole or splitted to be run at the distinct cores. If it is given as a whole it is automatically splitted by MicSim such that the population parts run on the distinct cores are approx. equally sized.   
 }
  \item{transitionMatrix}{
 }
  \item{absStates}{
 }
- \item{initStates}{
+ \item{varInitStates}{
 }
  \item{initStatesProb}{
+}
+ \item{initPopList}{
+ Optional: A list containing the initial population split for the distinct cores. 
+}
+ \item{immigrPopList}{
+ Optional: A list containing the immigration population split for the distinct cores. 
+}
+ \item{fixInitStates}{
 }
  \item{maxAge}{
 }
@@ -31,9 +39,7 @@ micSimParallel(initPop, immigrPop = NULL, transitionMatrix, absStates = NULL,
 }
  \item{fertTr}{
 }
- \item{dateSchoolEnrol}{
-}
- \item{reportMothers}{See \link{micSim}.
+ \item{monthSchoolEnrol}{See \link{micSim}.
 }
  \item{cores}{
   Number of CPUs to be used.
@@ -46,6 +52,8 @@ micSimParallel(initPop, immigrPop = NULL, transitionMatrix, absStates = NULL,
 The argument \code{cores} must not exceed the number of cores of the computer (cluster) used. 
 
 In \code{seeds} as many seeds should be given as cores are used. If less are given, the latter are repeated to complete the set of seeds. 
+
+
 }
 \value{
  The data frame \code{pop} contains the whole synthetic population considered during simulation including all events generated. For more details, see \link{micSim}.
@@ -54,17 +62,15 @@ In \code{seeds} as many seeds should be given as cores are used. If less are giv
 Sabine Zinn
 }
 \examples{
-######################################################################################
-# Complex example dealing with mortality, changes in the fertily and the marital 
-# status, in the educational attainment, as well as dealing with migration
-# (A simpler example is given on the help page of the "micSim" function of this package.)
-######################################################################################
 \donttest{
+
 # Clean workspace 
 rm(list=ls())
 
 # Defining simulation horizon
-simHorizon <- setSimHorizon(startDate="01/01/2014", endDate="31/12/2024")
+startDate <- 20140101 # yyyymmdd
+endDate   <- 20241231 # yyyymmdd
+simHorizon <- c(startDate=startDate, endDate=endDate)
 
 # Seed for random number generator
 set.seed(234)
@@ -80,44 +86,41 @@ edu <- c("no","low","med","high")
 stateSpace <- expand.grid(sex=sex,fert=fert,marital=marital,edu=edu)
 absStates <- c("dead","rest")   
 
-# General date of enrollment to elementary school
-dateSchoolEnrol <- "09/01"
+# General month of enrollment to elementary school
+monthSchoolEnrol <- 9
 
 # Definition of an initial population (for illustration purposes, create a random population)
 N = 10000                                                       
-initBirthDatesRange <- chron(dates=c("31/12/1950","01/01/2014"),format=c(dates="d/m/Y"),
-  out.format=c(dates="d/m/year"))
-set.seed(124) # Set a seed for the random number generator (to make results repeatable)
-birthDates <- dates(initBirthDatesRange[1] + runif(N, min=0, max=diff(initBirthDatesRange)))
+birthDates <- runif(N, min=getInDays(19500101), max=getInDays(20131231)) 
 getRandInitState <- function(birthDate){
-  age <- trunc(as.numeric(simHorizon[1] - birthDate)/365.25)
+  age <- trunc((getInDays(simHorizon[1]) - birthDate)/365.25) 
   s1 <- sample(sex,1)
   s2 <- ifelse(age<=18, fert[1], sample(fert,1))
   s3 <- ifelse(age<=18, marital[1], ifelse(age<=22, sample(marital[1:3],1), 
-    sample(marital,1)))
+                                           sample(marital,1)))
   s4 <- ifelse(age<=7, edu[1], ifelse(age<=18, edu[2], ifelse(age<=23, sample(edu[2:3],1), 
-    sample(edu[-1],1))))
+                                                              sample(edu[-1],1))))
   initState <- paste(c(s1,s2,s3,s4),collapse="/")
   return(initState)
 }
-initPop <- data.frame(ID=1:N, birthDate=birthDates, 
-  initState=sapply(birthDates, getRandInitState))
+initPop <- data.frame(ID=1:N, birthDate=birthDates, initState=sapply(birthDates, getRandInitState))
+initPop$birthDate <- getInDateFormat(initPop$birthDate)
+range(initPop$birthDate)
 
 # Definition of immigrants entering the population (for illustration purposes, create immigrants 
 # randomly)
 M = 2000                                                           
-immigrDatesRange <- as.numeric(simHorizon)
-immigrDates <- dates(chron(immigrDatesRange[1] + runif(M, min=0,max=diff(immigrDatesRange)), 
-  format=c(dates="d/m/Y", times="h:m:s"), out.format=c(dates="d/m/year",times="h:m:s")))
+immigrDates <- runif(M, min=getInDays(20140101), max=getInDays(20241231)) 
 immigrAges <- runif(M, min=15*365.25, max=70*365.25)
-immigrBirthDates <- dates(chron(as.numeric(immigrDates) - immigrAges, 
-  format=c(dates="d/m/Y", times="h:m:s"), out.format=c(dates="d/m/year", times="h:m:s")))
+immigrBirthDates <- immigrDates - immigrAges
 IDmig <- max(as.numeric(initPop[,"ID"]))+(1:M)
 immigrPop <- data.frame(ID = IDmig, immigrDate = immigrDates, birthDate=immigrBirthDates, 
-  immigrInitState=sapply(immigrBirthDates, getRandInitState))  
+                        immigrInitState=sapply(immigrBirthDates, getRandInitState))  
+immigrPop$birthDate <- getInDateFormat(immigrPop$birthDate)
+immigrPop$immigrDate <- getInDateFormat(immigrPop$immigrDate)
 
 # Definition of initial states for newborns 
-initStates <- rbind(c("m","0","NM","no"),c("f","0","NM","no")) 
+varInitStates <- rbind(c("m","0","NM","no"),c("f","0","NM","no")) 
 # Definition of related occurrence probabilities
 initStatesProb <- c(0.515,0.485)                              
 
@@ -148,7 +151,7 @@ marriage1Rates <- function(age, calTime, duration){
 # (3) Remariage rates (log-logistic model)
 marriage2Rates <- function(age, calTime, duration){  
   b <- ifelse(calTime<=2020, 0.07, 0.10)
-  p <- ifelse(calTime<=2020, 2.7, 2.7)
+  p <- ifelse(calTime<=2020, 2.7,2.7)
   lambda <- ifelse(calTime<=1950, 0.04, 0.03)
   rate <- b*p*(lambda*age)^(p-1)/(1+(lambda*age)^p)
   rate[age<=18] <- 0
@@ -185,7 +188,7 @@ medToHighEduRates <- function(age, calTime, duration){
 }
 # (7) Mortality rates (Gompertz model)
 mortRates <- function(age, calTime, duration){
-  a <- 0.00003
+  a <- .00003
   b <- ifelse(calTime<=2020, 0.1, 0.097)
   rate <- a*exp(b*age)
   return(rate)
@@ -201,7 +204,7 @@ fertTrMatrix <- cbind(c("0->1+","1+->1+"),
   c("fert1Rates", "fert2Rates"))
 maritalTrMatrix <- cbind(c("NM->M","M->D","M->W","D->M","W->M"),              
   c("marriage1Rates","divorceRates","widowhoodRates",
-  "marriage2Rates","marriage2Rates"))
+ "marriage2Rates","marriage2Rates"))
 eduTrMatrix <- cbind(c("no->low","low->med","med->high"),
   c("noToLowEduRates","lowToMedEduRates","medToHighEduRates")) 
 allTransitions <- rbind(fertTrMatrix, maritalTrMatrix, eduTrMatrix)
@@ -211,16 +214,19 @@ transitionMatrix <- buildTransitionMatrix(allTransitions=allTransitions,
 
 # Define transitions triggering a birth event
 fertTr <- fertTrMatrix[,1]
-}
 
-# Run microsimulation on cluster with five cores (settings depend on cluster used) 
+# Run microsimulation on cluster with three cores (settings depend on cluster used)
 \dontrun{
-cores <- 5
-seeds <- c(1233,1245,1234,5,2)
-pop <- micSimParallel(initPop=initPop, immigrPop=immigrPop, 
-  transitionMatrix=transitionMatrix, absStates=absStates, initStates=initStates, 
+cores <- 3
+seeds <- c(1233,1245,265)
+initPopList <- list(initPop[1:5000,], initPop[5001:8000,],initPop[8001:nrow(initPop),])
+immigrPopList <- list(immigrPop[1:1000,], immigrPop[1001:1500,],immigrPop[1501:nrow(immigrPop),])
+
+pop <- micSimParallel(initPopList=initPopList, immigrPopList=immigrPopList, 
+  transitionMatrix=transitionMatrix, absStates=absStates, varInitStates=varInitStates, 
   initStatesProb=initStatesProb, maxAge=maxAge, simHorizon=simHorizon, 
-  fertTr=fertTr, dateSchoolEnrol=dateSchoolEnrol, 
+  fertTr=fertTr, monthSchoolEnrol=monthSchoolEnrol, 
   cores=cores, seeds=seeds)
+}
 }
 }

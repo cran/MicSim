@@ -1,14 +1,26 @@
 Package: MicSim
 Type: Package
 Title: Performing Continuous-Time Microsimulation
-Version: 1.1.0
-Date: 2022-01-28
-Author: Sabine Zinn
+Version: 2.0.0
+Date: 2023-01-02
+Authors@R: c(person("Sabine", "Zinn", role = c("aut","cre"),
+    email = "szinn@diw.de"),
+    person("Claudio","Bosco", role = "ctb",
+    email = "Claudio.BOSCO@ec.europa.eu"),
+    person("Maurizio","Teobaldell", role = "ctb",
+    email = "Maurizio.TEOBALDELLI@ext.ec.europa.eu"))
 Maintainer: Sabine Zinn <szinn@diw.de>
-Description: This entry-level toolkit allows performing continuous-time microsimulation for a wide range of life science (demography, social sciences, epidemiology) applications. Individual life-courses are specified by a continuous-time multi-state model. 
-Depends: R (>= 3.0.1), chron, snowfall, rlecuyer
+Description: This toolkit allows performing continuous-time microsimulation for a wide range of life science (demography, social sciences, epidemiology) applications. Individual life-courses are specified by a continuous-time multi-state model as described in Zinn (2014) <doi:10.34196/IJM.00105>. 
+LazyData: true
+Depends: R (>= 4.2.0), snowfall, rlecuyer
 License: GPL-2
+Suggests: rmarkdown, knitr, glue
+VignetteBuilder: knitr
+Encoding: UTF-8
 NeedsCompilation: no
-Packaged: 2022-01-28 13:04:36 UTC; Freddie
+Packaged: 2023-01-09 11:41:52 UTC; Freddie
+Author: Sabine Zinn [aut, cre],
+  Claudio Bosco [ctb],
+  Maurizio Teobaldell [ctb]
 Repository: CRAN
-Date/Publication: 2022-01-31 11:50:02 UTC
+Date/Publication: 2023-01-09 12:23:11 UTC

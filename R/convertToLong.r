@@ -1,7 +1,7 @@
 ####################################################################################
 ####################################################################################
 ## FUNCTION TO CONVERT MICROSIMULATION OUTPUT INTO LONG FORMAT                    ##
-## SZ, December 2013                                                              ##
+## SZ, June 2022                                                                  ##
 ####################################################################################
 ####################################################################################
 # Function requires as global variables (from microsimulation definition):  
@@ -33,19 +33,6 @@ convertToLongFormat <- function(pop, migr=FALSE) {
   # Set of auxiliary function used in transformation process 
   # --------------------------------------------------------------------------------------------------------------------
   # --------------------------------------------------------------------------------------------------------------------
-  # Check whether given year is leap year
-  isLeapYear <- function(year){
-    return(ifelse(year%%400==0, T, ifelse(year%%4==0 & year%%100!=0, T,F)))}
-  # Return `dAte' as year
-  exactYear <- function(dAte){   
-    if(is.na(dAte))
-      return(NA)
-    year <- as.numeric(as.character(years(dAte)))
-    daysTo <- as.numeric(chron(paste(c('31/12',year-1),collapse='/'), format=c(dates='d/m/Y', times='h:m:s')))
-    daysInYear <- ifelse(isLeapYear(year),366,365)
-    prop <- c(as.numeric(dAte)-daysTo)/daysInYear
-    return(year+prop)
-  }
   # Extract transition between values of state variables (using information given in `absTranstions' and `allTransitions')
   getTransition <- function(oSdS){
      oS <- oSdS[1]
@@ -56,8 +43,8 @@ convertToLongFormat <- function(pop, migr=FALSE) {
      } else {
        oS <- as.character(unlist(oS))
        dS <- as.character(unlist(dS))
-       if(dS %in% absTransitions[,1]){
-        tr <- dS
+       if(dS %in% c("dead", "rest", absTransitions[,1])){
+         tr <- dS
        } else {
         oS <- unlist(strsplit(oS,split='/'))
         dS <- unlist(strsplit(dS,split='/'))
@@ -94,8 +81,8 @@ convertToLongFormat <- function(pop, migr=FALSE) {
     pop <- pop[,!(colnames(pop) %in% "motherID")]
   id <- pop[,'ID', drop=F]
   birthDate <- pop[,'birthDate']
-  birthyear <- sapply(pop[,'birthDate'],exactYear)
-  trYear <- sapply(pop[,'transitionTime'],exactYear)
+  birthyear <- ifelse(is.na(pop[,'birthDate']), NA, 1970+getInDays(pop[,'birthDate'])/365.25) # exact birth year with digits
+  trYear <- ifelse(is.na(pop[,'transitionTime']), NA, 1970+getInDays(pop[,'transitionTime'])/365.25) # exact transition time (in years) with digits   
   trDate <- pop[,'transitionTime'] 
   Tstop <- pop[,'transitionTime']
   date <- Tstop
@@ -130,7 +117,7 @@ convertToLongFormat <- function(pop, migr=FALSE) {
   # Beware of transitions into absorbent states and censored transitions. 
   # Furthermore, account for the fact that all individuals who are still alive at simulation end will experience
   # a censoring event then.
-  idSet <- popLong[which((popLong[,'OD'] %in% absTransitions[,1]) | (popLong[,'statusExit'] == 0)),'ID']
+  idSet <- popLong[which((popLong[,'OD'] %in% c("dead", "rest", absTransitions[,1])) | (popLong[,'statusExit'] == 0)),'ID']
   idCensSE <- setdiff(unique(popLong[,'ID']),idSet)
   if(length(idCensSE)>0){
     popLongCensSE <- popLong[popLong[,'ID'] %in% idCensSE,]
@@ -145,10 +132,10 @@ convertToLongFormat <- function(pop, migr=FALSE) {
   }
   popLong <- popLong[order(as.numeric(popLong[,'ID'])),]
   # Extract episode starting time and age at episode starting time.
-  popLong$Tstart <- c(chron(NA),popLong$Tstop[-length(popLong[,1])])
-  suppressWarnings(popLong$Tstart[!duplicated(popLong[,'ID'])] <- chron(NA))
+  popLong$Tstart <- c(NA,popLong$Tstop[-length(popLong[,1])])
+  suppressWarnings(popLong$Tstart[!duplicated(popLong[,'ID'])] <- NA)
   # Beware we have not observed the episode start of individuals being part of the starting population (=left truncation). 
-  simStartYear <- exactYear(simHorizon[1])  
+  simStartYear <- 1970 + getInDays(simHorizon[1])/365.25 
   bornInSimId <- which(is.na(popLong$Tstart) & popLong$birthyear >= simStartYear)
   bornOutSimId <- which(is.na(popLong$Tstart)& popLong$birthyear < simStartYear)
   popLong$Tstart[bornInSimId] <- popLong$birthDate[bornInSimId] 
@@ -186,7 +173,6 @@ convertToLongFormat <- function(pop, migr=FALSE) {
   popLong <- popLong[,c(idC,idCovs)]   
   idCovs <- 10:(9+dim(stateSpace)[2])
   popLong <- popLong[,c(1,2,7,3,4,5,6,8,9,idCovs)]
-  popLong[,'Tstart'] <- chron(popLong[,'Tstart'], format=c(dates='d/m/y'), out.format=c(dates='d/m/year'))
   return(popLong)
 }
 

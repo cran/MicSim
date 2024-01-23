@@ -200,8 +200,11 @@ micSim <- function(initPop, immigrPop=NULL, transitionMatrix, absStates=NULL, fi
     currState <- as.character(unlist(inp[2], use.names = FALSE)) 
     currAge <- as.numeric(unlist(inp[3], use.names = FALSE)) # age in days 
     calTime <- as.numeric(unlist(inp[4], use.names = FALSE)) # calendar time in days since 01-01-1970
+    
     # first event of an immigrant: he/she enters the population later than sim. starting time
-    lagToWaitingTime <- ifelse(isIMInitEvent, (calTime - simStartInDays)/365.25,0) # in years
+    if(isIMInitEvent) lagToWaitingTime <- (calTime - simStartInDays)/365.25 # in years   
+    if(!isIMInitEvent) lagToWaitingTime <- 0 # in years   
+    
      #cat('\n-----\nID: ',id,'\n')
      #print(inp)
     ageInYears <- currAge/365.25 
@@ -670,7 +673,7 @@ micSimParallel <- function(initPop=NULL, immigrPop=NULL, initPopList = c(), immi
   # create unique IDs for newborns 
   refID <- 0
   replaceID <- function(rr){
-    pop[[i]][which(as.numeric(pop[[i]][,1])==rr[1]),1] <<- rr[2]
+    pop[[i]][which(as.numeric(pop[[i]][,1])==rr[1]),1] <<- rr[2] # TODO replace
     return(NULL)
   }
   for(i in 1:length(pop)){

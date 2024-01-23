@@ -70,7 +70,7 @@ For each transition that should be considered during simulation accordant transi
 
 \eqn{p_{ij} = 1 - exp(- lambda_{ij} * t)} which yields \eqn{lambda_{ij} = - 1/t * ln(1-p_{ij})}.
 
-Be aware that this is only an approximation since this formula belongs to a time-homogeneuous Markov model and not to the more flexible time-inhomogeneuous Markov model (as used by MicSim). Thus, here for the time interval covered by $p_{ij}$ a time-homogeneuous Markov model is assumed. Many users may have annual transition probabilities at hand, i.e., \eqn{t=1}. 
+Be aware that this is only an approximation since this formula belongs to a time-homogeneuous Markov model and not to the more flexible time-inhomogeneuous Markov model (as used by MicSim). Thus, here for the time interval covered by \eqn{p_{ij}} a time-homogeneuous Markov model is assumed. Many users may have annual transition probabilities at hand, i.e., \eqn{t=1}. 
 
 \code{micSim} requires these rates in form of functions which are handed over via the transition matrix \code{transitionMatrix} (described in the subsequent paragraph). The \code{MicSim} package allows rates to depend on three time scales: age, calendar time, and the time that has elapsed since the last change of a particular state variable (e.g., the time elapsed since wedding). 
 In accordance therewith, \code{micSim} requires transition rates functions to feature three input parameters, namely \code{age}, \code{calTime}, and \code{duration}.

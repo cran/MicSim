@@ -349,65 +349,65 @@ University Berlin). EUROSTAT data were used as the data source. The
 sample was intentionally kept small. MicSim can also handle larger
 numbers of cases, but to be efficient in terms of run times, this
 requires a bit more computing power with more CPUs.</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load library</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(MicSim)</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Lade nötiges Paket: snowfall</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Lade nötiges Paket: snow</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Lade nötiges Paket: rlecuyer</span></span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="co"># Load library</span></span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(MicSim)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="co">#&gt; Lade nötiges Paket: snowfall</span></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="co">#&gt; Lade nötiges Paket: snow</span></span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="co">#&gt; Lade nötiges Paket: rlecuyer</span></span></code></pre></div>
 <div id="definition-of-basic-simulation-frame" class="section level3">
 <h3>Definition of Basic Simulation Frame</h3>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Defining simulation horizon</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>startDate <span class="ot">&lt;-</span> <span class="dv">20140101</span> <span class="co"># yyyymmdd</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>endDate   <span class="ot">&lt;-</span> <span class="dv">20181231</span> <span class="co"># yyyymmdd</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>simHorizon <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="at">startDate=</span>startDate, <span class="at">endDate=</span>endDate)</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Seed for random number generator</span></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">12</span>)</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Definition of maximal age (sharp, i.e. max age is 100.0)</span></span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>maxAge <span class="ot">&lt;-</span> <span class="dv">100</span></span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Definition of state space</span></span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>sex <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;m&quot;</span>,<span class="st">&quot;f&quot;</span>)                     </span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>country_R <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;NL&quot;</span>,<span class="st">&quot;ES&quot;</span>,<span class="st">&quot;SE&quot;</span>)</span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>fert <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;0&quot;</span>,<span class="st">&quot;1&quot;</span>,<span class="st">&quot;2&quot;</span>,<span class="st">&quot;3&quot;</span>,<span class="st">&quot;4+&quot;</span>,<span class="st">&quot;999&quot;</span>)           </span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>stateSpace <span class="ot">&lt;-</span> <span class="fu">expand.grid</span>(<span class="at">sex=</span>sex,<span class="at">country_R=</span>country_R,<span class="at">fert=</span>fert)</span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Definition of nonabsorbing and absorbing states</span></span>
-<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>absStates <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;dead&quot;</span>,<span class="st">&quot;rest&quot;</span>)   </span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="co"># Defining simulation horizon</span></span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>startDate <span class="ot">&lt;-</span> <span class="dv">20140101</span> <span class="co"># yyyymmdd</span></span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>endDate   <span class="ot">&lt;-</span> <span class="dv">20181231</span> <span class="co"># yyyymmdd</span></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>simHorizon <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="at">startDate=</span>startDate, <span class="at">endDate=</span>endDate)</span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="co"># Seed for random number generator</span></span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">12</span>)</span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a><span class="co"># Definition of maximal age (sharp, i.e. max age is 100.0)</span></span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a>maxAge <span class="ot">&lt;-</span> <span class="dv">100</span></span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a></span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a><span class="co"># Definition of state space</span></span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a>sex <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;m&quot;</span>,<span class="st">&quot;f&quot;</span>)                     </span>
+<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a>country_R <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;NL&quot;</span>,<span class="st">&quot;ES&quot;</span>,<span class="st">&quot;SE&quot;</span>)</span>
+<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a>fert <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;0&quot;</span>,<span class="st">&quot;1&quot;</span>,<span class="st">&quot;2&quot;</span>,<span class="st">&quot;3&quot;</span>,<span class="st">&quot;4+&quot;</span>,<span class="st">&quot;999&quot;</span>)           </span>
+<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a>stateSpace <span class="ot">&lt;-</span> <span class="fu">expand.grid</span>(<span class="at">sex=</span>sex,<span class="at">country_R=</span>country_R,<span class="at">fert=</span>fert)</span>
+<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a></span>
+<span id="cb2-18"><a href="#cb2-18" tabindex="-1"></a><span class="co"># Definition of nonabsorbing and absorbing states</span></span>
+<span id="cb2-19"><a href="#cb2-19" tabindex="-1"></a>absStates <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;dead&quot;</span>,<span class="st">&quot;rest&quot;</span>)   </span></code></pre></div>
 </div>
 <div id="definition-of-initial-population-and-newborn-characteristics" class="section level3">
 <h3>Definition of initial population and newborn characteristics</h3>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># initial population included in the MicSim package</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>initPop <span class="ot">&lt;-</span> initPopMigrExp</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(initPop)</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ID birthDate initState</span></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1  1  19411206  m/NL/999</span></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2  2  20070608  m/SE/999</span></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3  3  19750709    m/ES/0</span></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4  4  19220312  f/NL/999</span></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5  5  19740425    f/ES/0</span></span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6  6  20110828  m/ES/999</span></span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="co"># population of immigrants entering to virtual population over simulation time</span></span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>immigrPop <span class="ot">&lt;-</span> immigrPopMigrExp <span class="co"># included in the MicSim package</span></span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(immigrPop)</span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      ID immigrDate birthDate immigrInitState</span></span>
-<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 72966   20180925  19830404          m/ES/0</span></span>
-<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 72967   20171208  20100319          f/ES/0</span></span>
-<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 72968   20151217  19910316          f/NL/0</span></span>
-<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 72969   20170105  20070602          m/NL/0</span></span>
-<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 72970   20140609  19880623          f/ES/0</span></span>
-<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 72971   20171003  19881129          m/NL/0</span></span>
-<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Definition of initial states for newborns</span></span>
-<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>fixInitStates <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="co"># give indices for attribute/substate that will be taken over from the mother, here: nat (nationality)</span></span>
-<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>varInitStates <span class="ot">&lt;-</span> <span class="fu">rbind</span>(<span class="fu">c</span>(<span class="st">&quot;m&quot;</span>,<span class="st">&quot;ES&quot;</span>,<span class="st">&quot;0&quot;</span>), <span class="fu">c</span>(<span class="st">&quot;f&quot;</span>,<span class="st">&quot;ES&quot;</span>,<span class="st">&quot;0&quot;</span>), <span class="co"># to have possibility to define distinct sex ratios in distinct countries, </span></span>
-<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>                       <span class="fu">c</span>(<span class="st">&quot;m&quot;</span>,<span class="st">&quot;NL&quot;</span>,<span class="st">&quot;0&quot;</span>), <span class="fu">c</span>(<span class="st">&quot;f&quot;</span>,<span class="st">&quot;NL&quot;</span>,<span class="st">&quot;0&quot;</span>), <span class="co"># hold substate that are inherited by mother in the init state (i.e. nationality)</span></span>
-<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>                       <span class="fu">c</span>(<span class="st">&quot;m&quot;</span>,<span class="st">&quot;SE&quot;</span>,<span class="st">&quot;0&quot;</span>), <span class="fu">c</span>(<span class="st">&quot;f&quot;</span>,<span class="st">&quot;SE&quot;</span>,<span class="st">&quot;0&quot;</span>)) </span>
-<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>initStatesProb <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">0.5151</span>,<span class="fl">0.4849</span>, <span class="co"># probabilities for female / male newborns for each nationality separately</span></span>
-<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>                    <span class="fl">0.5124</span>,<span class="fl">0.4876</span>,</span>
-<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>                    <span class="fl">0.5146</span>,<span class="fl">0.4854</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="co"># initial population included in the MicSim package</span></span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>initPop <span class="ot">&lt;-</span> initPopMigrExp</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="fu">head</span>(initPop)</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="co">#&gt;   ID birthDate initState</span></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="co">#&gt; 1  1  19411206  m/NL/999</span></span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="co">#&gt; 2  2  20070608  m/SE/999</span></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="co">#&gt; 3  3  19750709    m/ES/0</span></span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="co">#&gt; 4  4  19220312  f/NL/999</span></span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="co">#&gt; 5  5  19740425    f/ES/0</span></span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="co">#&gt; 6  6  20110828  m/ES/999</span></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a></span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="co"># population of immigrants entering to virtual population over simulation time</span></span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a>immigrPop <span class="ot">&lt;-</span> immigrPopMigrExp <span class="co"># included in the MicSim package</span></span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a><span class="fu">head</span>(immigrPop)</span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a><span class="co">#&gt;      ID immigrDate birthDate immigrInitState</span></span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a><span class="co">#&gt; 1 72966   20180925  19830404          m/ES/0</span></span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a><span class="co">#&gt; 2 72967   20171208  20100319          f/ES/0</span></span>
+<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a><span class="co">#&gt; 3 72968   20151217  19910316          f/NL/0</span></span>
+<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a><span class="co">#&gt; 4 72969   20170105  20070602          m/NL/0</span></span>
+<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a><span class="co">#&gt; 5 72970   20140609  19880623          f/ES/0</span></span>
+<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a><span class="co">#&gt; 6 72971   20171003  19881129          m/NL/0</span></span>
+<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a></span>
+<span id="cb3-23"><a href="#cb3-23" tabindex="-1"></a><span class="co"># Definition of initial states for newborns</span></span>
+<span id="cb3-24"><a href="#cb3-24" tabindex="-1"></a>fixInitStates <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="co"># give indices for attribute/substate that will be taken over from the mother, here: nat (nationality)</span></span>
+<span id="cb3-25"><a href="#cb3-25" tabindex="-1"></a>varInitStates <span class="ot">&lt;-</span> <span class="fu">rbind</span>(<span class="fu">c</span>(<span class="st">&quot;m&quot;</span>,<span class="st">&quot;ES&quot;</span>,<span class="st">&quot;0&quot;</span>), <span class="fu">c</span>(<span class="st">&quot;f&quot;</span>,<span class="st">&quot;ES&quot;</span>,<span class="st">&quot;0&quot;</span>), <span class="co"># to have possibility to define distinct sex ratios in distinct countries, </span></span>
+<span id="cb3-26"><a href="#cb3-26" tabindex="-1"></a>                       <span class="fu">c</span>(<span class="st">&quot;m&quot;</span>,<span class="st">&quot;NL&quot;</span>,<span class="st">&quot;0&quot;</span>), <span class="fu">c</span>(<span class="st">&quot;f&quot;</span>,<span class="st">&quot;NL&quot;</span>,<span class="st">&quot;0&quot;</span>), <span class="co"># hold substate that are inherited by mother in the init state (i.e. nationality)</span></span>
+<span id="cb3-27"><a href="#cb3-27" tabindex="-1"></a>                       <span class="fu">c</span>(<span class="st">&quot;m&quot;</span>,<span class="st">&quot;SE&quot;</span>,<span class="st">&quot;0&quot;</span>), <span class="fu">c</span>(<span class="st">&quot;f&quot;</span>,<span class="st">&quot;SE&quot;</span>,<span class="st">&quot;0&quot;</span>)) </span>
+<span id="cb3-28"><a href="#cb3-28" tabindex="-1"></a>initStatesProb <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">0.5151</span>,<span class="fl">0.4849</span>, <span class="co"># probabilities for female / male newborns for each nationality separately</span></span>
+<span id="cb3-29"><a href="#cb3-29" tabindex="-1"></a>                    <span class="fl">0.5124</span>,<span class="fl">0.4876</span>,</span>
+<span id="cb3-30"><a href="#cb3-30" tabindex="-1"></a>                    <span class="fl">0.5146</span>,<span class="fl">0.4854</span>)</span></code></pre></div>
 </div>
 <div id="rates-definition" class="section level3">
 <h3>Rates Definition</h3>
@@ -415,238 +415,238 @@ requires a bit more computing power with more CPUs.</p>
 all years within the simulation horizon. At this the exact value of
 <em>maxAge</em> is excluded, i.e. here 100.00 but not
 e.g. age=99.9999.</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load rates from data included in the MicSim package (one column for one transition)</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>rates <span class="ot">&lt;-</span> migrExpRates</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Define function to easily transform rates in function format required by MicSim </span></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="fu">require</span>(glue)</span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Lade nötiges Paket: glue</span></span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(<span class="fu">names</span>(rates))) {</span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>  script_var <span class="ot">=</span> <span class="fu">names</span>(rates[i])</span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">eval</span>(<span class="fu">parse</span>(<span class="at">text =</span> <span class="fu">glue</span>(<span class="st">&quot;{script_var} &lt;- unlist(as.numeric(rates[,{i}]))&quot;</span>)))</span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="co"># --------------------------------------------------------------------------</span></span>
-<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Fertility Rates</span></span>
-<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="co"># --------------------------------------------------------------------------</span></span>
-<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>fertRates_NL_0_1 <span class="ot">&lt;-</span> <span class="cf">function</span>(age,calTime, duration){</span>
-<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>  rate <span class="ot">&lt;-</span> fert_NL_0_1[<span class="fu">as.integer</span>(age)<span class="sc">+</span><span class="dv">1</span>]</span>
-<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(rate)  </span>
-<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>fertRates_NL_1_2 <span class="ot">&lt;-</span> <span class="cf">function</span>(age,calTime, duration){</span>
-<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>  rate <span class="ot">&lt;-</span> fert_NL_1_2[<span class="fu">as.integer</span>(age)<span class="sc">+</span><span class="dv">1</span>]</span>
-<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(rate)  </span>
-<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>fertRates_NL_2_3 <span class="ot">&lt;-</span> <span class="cf">function</span>(age,calTime, duration){</span>
-<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>  rate <span class="ot">&lt;-</span> fert_NL_2_3[<span class="fu">as.integer</span>(age)<span class="sc">+</span><span class="dv">1</span>]</span>
-<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(rate)  </span>
-<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>fertRates_NL_3_4 <span class="ot">&lt;-</span> <span class="cf">function</span>(age,calTime, duration){</span>
-<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>  rate <span class="ot">&lt;-</span> fert_NL_3_4[<span class="fu">as.integer</span>(age)<span class="sc">-+</span><span class="dv">1</span>]</span>
-<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(rate)  </span>
-<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>fertRates_ES_0_1 <span class="ot">&lt;-</span> <span class="cf">function</span>(age,calTime, duration){</span>
-<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a>  rate <span class="ot">&lt;-</span> fert_ES_0_1[<span class="fu">as.integer</span>(age)<span class="sc">+</span><span class="dv">1</span>]</span>
-<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(rate)  </span>
-<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a>fertRates_ES_1_2 <span class="ot">&lt;-</span> <span class="cf">function</span>(age,calTime, duration){</span>
-<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a>  rate <span class="ot">&lt;-</span> fert_ES_1_2[<span class="fu">as.integer</span>(age)<span class="sc">+</span><span class="dv">1</span>]</span>
-<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(rate)  </span>
-<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a>fertRates_ES_2_3 <span class="ot">&lt;-</span> <span class="cf">function</span>(age,calTime, duration){</span>
-<span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a>  rate <span class="ot">&lt;-</span> fert_ES_2_3[<span class="fu">as.integer</span>(age)<span class="sc">+</span><span class="dv">1</span>]</span>
-<span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(rate)  </span>
-<span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb4-50"><a href="#cb4-50" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-51"><a href="#cb4-51" aria-hidden="true" tabindex="-1"></a>fertRates_ES_3_4 <span class="ot">&lt;-</span> <span class="cf">function</span>(age,calTime, duration){</span>
-<span id="cb4-52"><a href="#cb4-52" aria-hidden="true" tabindex="-1"></a>  rate <span class="ot">&lt;-</span> fert_ES_3_4[<span class="fu">as.integer</span>(age)<span class="sc">+</span><span class="dv">1</span>]</span>
-<span id="cb4-53"><a href="#cb4-53" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(rate)  </span>
-<span id="cb4-54"><a href="#cb4-54" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb4-55"><a href="#cb4-55" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-56"><a href="#cb4-56" aria-hidden="true" tabindex="-1"></a>fertRates_SE_0_1 <span class="ot">&lt;-</span> <span class="cf">function</span>(age,calTime, duration){</span>
-<span id="cb4-57"><a href="#cb4-57" aria-hidden="true" tabindex="-1"></a>  rate <span class="ot">&lt;-</span> fert_SE_0_1[<span class="fu">as.integer</span>(age)<span class="sc">+</span><span class="dv">1</span>]</span>
-<span id="cb4-58"><a href="#cb4-58" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(rate)  </span>
-<span id="cb4-59"><a href="#cb4-59" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb4-60"><a href="#cb4-60" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-61"><a href="#cb4-61" aria-hidden="true" tabindex="-1"></a>fertRates_SE_1_2 <span class="ot">&lt;-</span> <span class="cf">function</span>(age,calTime, duration){</span>
-<span id="cb4-62"><a href="#cb4-62" aria-hidden="true" tabindex="-1"></a>  rate <span class="ot">&lt;-</span> fert_SE_1_2[<span class="fu">as.integer</span>(age)<span class="sc">+</span><span class="dv">1</span>]</span>
-<span id="cb4-63"><a href="#cb4-63" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(rate)  </span>
-<span id="cb4-64"><a href="#cb4-64" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb4-65"><a href="#cb4-65" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-66"><a href="#cb4-66" aria-hidden="true" tabindex="-1"></a>fertRates_SE_2_3 <span class="ot">&lt;-</span> <span class="cf">function</span>(age,calTime, duration){</span>
-<span id="cb4-67"><a href="#cb4-67" aria-hidden="true" tabindex="-1"></a>  rate <span class="ot">&lt;-</span> fert_SE_2_3[<span class="fu">as.integer</span>(age)<span class="sc">+</span><span class="dv">1</span>]</span>
-<span id="cb4-68"><a href="#cb4-68" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(rate)  </span>
-<span id="cb4-69"><a href="#cb4-69" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb4-70"><a href="#cb4-70" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-71"><a href="#cb4-71" aria-hidden="true" tabindex="-1"></a>fertRates_SE_3_4 <span class="ot">&lt;-</span> <span class="cf">function</span>(age,calTime, duration){</span>
-<span id="cb4-72"><a href="#cb4-72" aria-hidden="true" tabindex="-1"></a>  rate <span class="ot">&lt;-</span> fert_SE_3_4[<span class="fu">as.integer</span>(age)<span class="sc">+</span><span class="dv">1</span>]</span>
-<span id="cb4-73"><a href="#cb4-73" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(rate)  </span>
-<span id="cb4-74"><a href="#cb4-74" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb4-75"><a href="#cb4-75" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-76"><a href="#cb4-76" aria-hidden="true" tabindex="-1"></a><span class="co"># --------------------------------------------------------------------------</span></span>
-<span id="cb4-77"><a href="#cb4-77" aria-hidden="true" tabindex="-1"></a><span class="co"># Internal Migration Rates</span></span>
-<span id="cb4-78"><a href="#cb4-78" aria-hidden="true" tabindex="-1"></a><span class="co"># --------------------------------------------------------------------------</span></span>
-<span id="cb4-79"><a href="#cb4-79" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-80"><a href="#cb4-80" aria-hidden="true" tabindex="-1"></a><span class="st">`</span><span class="at">%!in%</span><span class="st">`</span> <span class="ot">&lt;-</span> <span class="fu">Negate</span>(<span class="st">`</span><span class="at">%in%</span><span class="st">`</span>)</span>
-<span id="cb4-81"><a href="#cb4-81" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-82"><a href="#cb4-82" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(country_R)) {</span>
-<span id="cb4-83"><a href="#cb4-83" aria-hidden="true" tabindex="-1"></a>  other_provinces <span class="ot">=</span> country_R[<span class="fu">which</span>(country_R <span class="sc">%!in%</span> country_R[i])]</span>
-<span id="cb4-84"><a href="#cb4-84" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(k <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(other_provinces)) {</span>
-<span id="cb4-85"><a href="#cb4-85" aria-hidden="true" tabindex="-1"></a>    eq <span class="ot">=</span> <span class="fu">paste</span>(<span class="fu">sprintf</span>(<span class="st">&#39;%s_%s_rates&#39;</span>, <span class="fu">glue</span>(<span class="st">&quot;{country_R[i]}&quot;</span>),  <span class="fu">glue</span>(<span class="st">&quot;{other_provinces[k]}&quot;</span>)), </span>
-<span id="cb4-86"><a href="#cb4-86" aria-hidden="true" tabindex="-1"></a>               <span class="st">&#39;&lt;- function(age,calTime, duration)&#39;</span>, <span class="st">&#39;{&#39;</span>,</span>
-<span id="cb4-87"><a href="#cb4-87" aria-hidden="true" tabindex="-1"></a>               <span class="fu">sprintf</span>(<span class="st">&#39;rate &lt;- rate_%s_%s[as.integer(age)+1]&#39;</span>, <span class="fu">glue</span>(<span class="st">&quot;{country_R[i]}&quot;</span>), </span>
-<span id="cb4-88"><a href="#cb4-88" aria-hidden="true" tabindex="-1"></a>               <span class="fu">glue</span>(<span class="st">&quot;{other_provinces[k]}&quot;</span>)), <span class="st">&quot;</span><span class="sc">\n</span><span class="st"> &quot;</span>, <span class="st">&#39;return(rate)&#39;</span>,<span class="st">&#39;}&#39;</span>)</span>
-<span id="cb4-89"><a href="#cb4-89" aria-hidden="true" tabindex="-1"></a>    <span class="fu">eval</span>(<span class="fu">parse</span>(<span class="at">text =</span> eq))</span>
-<span id="cb4-90"><a href="#cb4-90" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb4-91"><a href="#cb4-91" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb4-92"><a href="#cb4-92" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-93"><a href="#cb4-93" aria-hidden="true" tabindex="-1"></a><span class="co"># --------------------------------------------------------------------------</span></span>
-<span id="cb4-94"><a href="#cb4-94" aria-hidden="true" tabindex="-1"></a><span class="co"># Mortality Rates</span></span>
-<span id="cb4-95"><a href="#cb4-95" aria-hidden="true" tabindex="-1"></a><span class="co"># --------------------------------------------------------------------------</span></span>
-<span id="cb4-96"><a href="#cb4-96" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-97"><a href="#cb4-97" aria-hidden="true" tabindex="-1"></a><span class="co"># Female mortality</span></span>
-<span id="cb4-98"><a href="#cb4-98" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(country_R)) {</span>
-<span id="cb4-99"><a href="#cb4-99" aria-hidden="true" tabindex="-1"></a>  eq <span class="ot">=</span> <span class="fu">paste</span>(<span class="fu">sprintf</span>(<span class="st">&#39;mortRates_f_%s&#39;</span>, <span class="fu">glue</span>(<span class="st">&quot;{country_R[i]}&quot;</span>)), <span class="st">&#39;&lt;- function(age,calTime, duration)&#39;</span>,</span>
-<span id="cb4-100"><a href="#cb4-100" aria-hidden="true" tabindex="-1"></a>             <span class="st">&#39;{&#39;</span>,</span>
-<span id="cb4-101"><a href="#cb4-101" aria-hidden="true" tabindex="-1"></a>             <span class="fu">sprintf</span>(<span class="st">&#39;rate &lt;- mort_f_%s[as.integer(age)+1]&#39;</span>, <span class="fu">glue</span>(<span class="st">&quot;{country_R[i]}&quot;</span>)),</span>
-<span id="cb4-102"><a href="#cb4-102" aria-hidden="true" tabindex="-1"></a>             <span class="st">&quot;</span><span class="sc">\n</span><span class="st"> &quot;</span>,</span>
-<span id="cb4-103"><a href="#cb4-103" aria-hidden="true" tabindex="-1"></a>             <span class="st">&#39;return(rate)&#39;</span>,</span>
-<span id="cb4-104"><a href="#cb4-104" aria-hidden="true" tabindex="-1"></a>             <span class="st">&#39;}&#39;</span>)</span>
-<span id="cb4-105"><a href="#cb4-105" aria-hidden="true" tabindex="-1"></a>  <span class="fu">eval</span>(<span class="fu">parse</span>(<span class="at">text =</span> eq))</span>
-<span id="cb4-106"><a href="#cb4-106" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb4-107"><a href="#cb4-107" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-108"><a href="#cb4-108" aria-hidden="true" tabindex="-1"></a><span class="co"># Male mortality</span></span>
-<span id="cb4-109"><a href="#cb4-109" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(country_R)) {</span>
-<span id="cb4-110"><a href="#cb4-110" aria-hidden="true" tabindex="-1"></a>  eq <span class="ot">=</span> <span class="fu">paste</span>(<span class="fu">sprintf</span>(<span class="st">&#39;mortRates_m_%s&#39;</span>, <span class="fu">glue</span>(<span class="st">&quot;{country_R[i]}&quot;</span>)), <span class="st">&#39;&lt;- function(age,calTime, duration)&#39;</span>,</span>
-<span id="cb4-111"><a href="#cb4-111" aria-hidden="true" tabindex="-1"></a>             <span class="st">&#39;{&#39;</span>,</span>
-<span id="cb4-112"><a href="#cb4-112" aria-hidden="true" tabindex="-1"></a>             <span class="fu">sprintf</span>(<span class="st">&#39;rate &lt;- mort_m_%s[as.integer(age)+1]&#39;</span>, <span class="fu">glue</span>(<span class="st">&quot;{country_R[i]}&quot;</span>)),</span>
-<span id="cb4-113"><a href="#cb4-113" aria-hidden="true" tabindex="-1"></a>             <span class="st">&quot;</span><span class="sc">\n</span><span class="st"> &quot;</span>,</span>
-<span id="cb4-114"><a href="#cb4-114" aria-hidden="true" tabindex="-1"></a>             <span class="st">&#39;return(rate)&#39;</span>,</span>
-<span id="cb4-115"><a href="#cb4-115" aria-hidden="true" tabindex="-1"></a>             <span class="st">&#39;}&#39;</span>)</span>
-<span id="cb4-116"><a href="#cb4-116" aria-hidden="true" tabindex="-1"></a>  <span class="fu">eval</span>(<span class="fu">parse</span>(<span class="at">text =</span> eq))</span>
-<span id="cb4-117"><a href="#cb4-117" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb4-118"><a href="#cb4-118" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-119"><a href="#cb4-119" aria-hidden="true" tabindex="-1"></a><span class="co"># ---------------------------------------------------------------------------</span></span>
-<span id="cb4-120"><a href="#cb4-120" aria-hidden="true" tabindex="-1"></a><span class="co"># Emigration rates</span></span>
-<span id="cb4-121"><a href="#cb4-121" aria-hidden="true" tabindex="-1"></a><span class="co"># ---------------------------------------------------------------------------</span></span>
-<span id="cb4-122"><a href="#cb4-122" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-123"><a href="#cb4-123" aria-hidden="true" tabindex="-1"></a><span class="co"># Emigration rates for females</span></span>
-<span id="cb4-124"><a href="#cb4-124" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(country_R)) {</span>
-<span id="cb4-125"><a href="#cb4-125" aria-hidden="true" tabindex="-1"></a>  eq <span class="ot">=</span> <span class="fu">paste</span>(<span class="fu">sprintf</span>(<span class="st">&#39;emigrRates_f_%s&#39;</span>, <span class="fu">glue</span>(<span class="st">&quot;{country_R[i]}&quot;</span>)), <span class="st">&#39;&lt;- function(age,calTime, duration)&#39;</span>,</span>
-<span id="cb4-126"><a href="#cb4-126" aria-hidden="true" tabindex="-1"></a>             <span class="st">&#39;{&#39;</span>,</span>
-<span id="cb4-127"><a href="#cb4-127" aria-hidden="true" tabindex="-1"></a>             <span class="fu">sprintf</span>(<span class="st">&#39;rate &lt;- emig_f_%s[as.integer(age)+1]&#39;</span>, <span class="fu">glue</span>(<span class="st">&quot;{country_R[i]}&quot;</span>)),</span>
-<span id="cb4-128"><a href="#cb4-128" aria-hidden="true" tabindex="-1"></a>             <span class="st">&quot;</span><span class="sc">\n</span><span class="st"> &quot;</span>,</span>
-<span id="cb4-129"><a href="#cb4-129" aria-hidden="true" tabindex="-1"></a>             <span class="st">&#39;return(rate)&#39;</span>,</span>
-<span id="cb4-130"><a href="#cb4-130" aria-hidden="true" tabindex="-1"></a>             <span class="st">&#39;}&#39;</span>)</span>
-<span id="cb4-131"><a href="#cb4-131" aria-hidden="true" tabindex="-1"></a>  <span class="fu">eval</span>(<span class="fu">parse</span>(<span class="at">text =</span> eq))</span>
-<span id="cb4-132"><a href="#cb4-132" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb4-133"><a href="#cb4-133" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-134"><a href="#cb4-134" aria-hidden="true" tabindex="-1"></a><span class="co"># Emigration rates for males</span></span>
-<span id="cb4-135"><a href="#cb4-135" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(country_R)) {</span>
-<span id="cb4-136"><a href="#cb4-136" aria-hidden="true" tabindex="-1"></a>  eq <span class="ot">=</span> <span class="fu">paste</span>(<span class="fu">sprintf</span>(<span class="st">&#39;emigrRates_m_%s&#39;</span>, <span class="fu">glue</span>(<span class="st">&quot;{country_R[i]}&quot;</span>)), <span class="st">&#39;&lt;- function(age,calTime, duration)&#39;</span>,</span>
-<span id="cb4-137"><a href="#cb4-137" aria-hidden="true" tabindex="-1"></a>             <span class="st">&#39;{&#39;</span>,</span>
-<span id="cb4-138"><a href="#cb4-138" aria-hidden="true" tabindex="-1"></a>             <span class="fu">sprintf</span>(<span class="st">&#39;rate &lt;- emig_m_%s[as.integer(age)+1]&#39;</span>, <span class="fu">glue</span>(<span class="st">&quot;{country_R[i]}&quot;</span>)),</span>
-<span id="cb4-139"><a href="#cb4-139" aria-hidden="true" tabindex="-1"></a>             <span class="st">&quot;</span><span class="sc">\n</span><span class="st"> &quot;</span>,</span>
-<span id="cb4-140"><a href="#cb4-140" aria-hidden="true" tabindex="-1"></a>             <span class="st">&#39;return(rate)&#39;</span>,</span>
-<span id="cb4-141"><a href="#cb4-141" aria-hidden="true" tabindex="-1"></a>             <span class="st">&#39;}&#39;</span>)</span>
-<span id="cb4-142"><a href="#cb4-142" aria-hidden="true" tabindex="-1"></a>  <span class="fu">eval</span>(<span class="fu">parse</span>(<span class="at">text =</span> eq))</span>
-<span id="cb4-143"><a href="#cb4-143" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="co"># Load rates from data included in the MicSim package (one column for one transition)</span></span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>rates <span class="ot">&lt;-</span> migrExpRates</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="co"># Define function to easily transform rates in function format required by MicSim </span></span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="fu">require</span>(glue)</span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="co">#&gt; Lade nötiges Paket: glue</span></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(<span class="fu">names</span>(rates))) {</span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a>  script_var <span class="ot">=</span> <span class="fu">names</span>(rates[i])</span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a>  <span class="fu">eval</span>(<span class="fu">parse</span>(<span class="at">text =</span> <span class="fu">glue</span>(<span class="st">&quot;{script_var} &lt;- unlist(as.numeric(rates[,{i}]))&quot;</span>)))</span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a>}</span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a></span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a><span class="co"># --------------------------------------------------------------------------</span></span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a><span class="co"># Fertility Rates</span></span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="co"># --------------------------------------------------------------------------</span></span>
+<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a></span>
+<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a>fertRates_NL_0_1 <span class="ot">&lt;-</span> <span class="cf">function</span>(age,calTime, duration){</span>
+<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a>  rate <span class="ot">&lt;-</span> fert_NL_0_1[<span class="fu">as.integer</span>(age)<span class="sc">+</span><span class="dv">1</span>]</span>
+<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a>  <span class="fu">return</span>(rate)  </span>
+<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a>}</span>
+<span id="cb4-20"><a href="#cb4-20" tabindex="-1"></a></span>
+<span id="cb4-21"><a href="#cb4-21" tabindex="-1"></a>fertRates_NL_1_2 <span class="ot">&lt;-</span> <span class="cf">function</span>(age,calTime, duration){</span>
+<span id="cb4-22"><a href="#cb4-22" tabindex="-1"></a>  rate <span class="ot">&lt;-</span> fert_NL_1_2[<span class="fu">as.integer</span>(age)<span class="sc">+</span><span class="dv">1</span>]</span>
+<span id="cb4-23"><a href="#cb4-23" tabindex="-1"></a>  <span class="fu">return</span>(rate)  </span>
+<span id="cb4-24"><a href="#cb4-24" tabindex="-1"></a>}</span>
+<span id="cb4-25"><a href="#cb4-25" tabindex="-1"></a></span>
+<span id="cb4-26"><a href="#cb4-26" tabindex="-1"></a>fertRates_NL_2_3 <span class="ot">&lt;-</span> <span class="cf">function</span>(age,calTime, duration){</span>
+<span id="cb4-27"><a href="#cb4-27" tabindex="-1"></a>  rate <span class="ot">&lt;-</span> fert_NL_2_3[<span class="fu">as.integer</span>(age)<span class="sc">+</span><span class="dv">1</span>]</span>
+<span id="cb4-28"><a href="#cb4-28" tabindex="-1"></a>  <span class="fu">return</span>(rate)  </span>
+<span id="cb4-29"><a href="#cb4-29" tabindex="-1"></a>}</span>
+<span id="cb4-30"><a href="#cb4-30" tabindex="-1"></a></span>
+<span id="cb4-31"><a href="#cb4-31" tabindex="-1"></a>fertRates_NL_3_4 <span class="ot">&lt;-</span> <span class="cf">function</span>(age,calTime, duration){</span>
+<span id="cb4-32"><a href="#cb4-32" tabindex="-1"></a>  rate <span class="ot">&lt;-</span> fert_NL_3_4[<span class="fu">as.integer</span>(age)<span class="sc">-+</span><span class="dv">1</span>]</span>
+<span id="cb4-33"><a href="#cb4-33" tabindex="-1"></a>  <span class="fu">return</span>(rate)  </span>
+<span id="cb4-34"><a href="#cb4-34" tabindex="-1"></a>}</span>
+<span id="cb4-35"><a href="#cb4-35" tabindex="-1"></a></span>
+<span id="cb4-36"><a href="#cb4-36" tabindex="-1"></a>fertRates_ES_0_1 <span class="ot">&lt;-</span> <span class="cf">function</span>(age,calTime, duration){</span>
+<span id="cb4-37"><a href="#cb4-37" tabindex="-1"></a>  rate <span class="ot">&lt;-</span> fert_ES_0_1[<span class="fu">as.integer</span>(age)<span class="sc">+</span><span class="dv">1</span>]</span>
+<span id="cb4-38"><a href="#cb4-38" tabindex="-1"></a>  <span class="fu">return</span>(rate)  </span>
+<span id="cb4-39"><a href="#cb4-39" tabindex="-1"></a>}</span>
+<span id="cb4-40"><a href="#cb4-40" tabindex="-1"></a></span>
+<span id="cb4-41"><a href="#cb4-41" tabindex="-1"></a>fertRates_ES_1_2 <span class="ot">&lt;-</span> <span class="cf">function</span>(age,calTime, duration){</span>
+<span id="cb4-42"><a href="#cb4-42" tabindex="-1"></a>  rate <span class="ot">&lt;-</span> fert_ES_1_2[<span class="fu">as.integer</span>(age)<span class="sc">+</span><span class="dv">1</span>]</span>
+<span id="cb4-43"><a href="#cb4-43" tabindex="-1"></a>  <span class="fu">return</span>(rate)  </span>
+<span id="cb4-44"><a href="#cb4-44" tabindex="-1"></a>}</span>
+<span id="cb4-45"><a href="#cb4-45" tabindex="-1"></a></span>
+<span id="cb4-46"><a href="#cb4-46" tabindex="-1"></a>fertRates_ES_2_3 <span class="ot">&lt;-</span> <span class="cf">function</span>(age,calTime, duration){</span>
+<span id="cb4-47"><a href="#cb4-47" tabindex="-1"></a>  rate <span class="ot">&lt;-</span> fert_ES_2_3[<span class="fu">as.integer</span>(age)<span class="sc">+</span><span class="dv">1</span>]</span>
+<span id="cb4-48"><a href="#cb4-48" tabindex="-1"></a>  <span class="fu">return</span>(rate)  </span>
+<span id="cb4-49"><a href="#cb4-49" tabindex="-1"></a>}</span>
+<span id="cb4-50"><a href="#cb4-50" tabindex="-1"></a></span>
+<span id="cb4-51"><a href="#cb4-51" tabindex="-1"></a>fertRates_ES_3_4 <span class="ot">&lt;-</span> <span class="cf">function</span>(age,calTime, duration){</span>
+<span id="cb4-52"><a href="#cb4-52" tabindex="-1"></a>  rate <span class="ot">&lt;-</span> fert_ES_3_4[<span class="fu">as.integer</span>(age)<span class="sc">+</span><span class="dv">1</span>]</span>
+<span id="cb4-53"><a href="#cb4-53" tabindex="-1"></a>  <span class="fu">return</span>(rate)  </span>
+<span id="cb4-54"><a href="#cb4-54" tabindex="-1"></a>}</span>
+<span id="cb4-55"><a href="#cb4-55" tabindex="-1"></a></span>
+<span id="cb4-56"><a href="#cb4-56" tabindex="-1"></a>fertRates_SE_0_1 <span class="ot">&lt;-</span> <span class="cf">function</span>(age,calTime, duration){</span>
+<span id="cb4-57"><a href="#cb4-57" tabindex="-1"></a>  rate <span class="ot">&lt;-</span> fert_SE_0_1[<span class="fu">as.integer</span>(age)<span class="sc">+</span><span class="dv">1</span>]</span>
+<span id="cb4-58"><a href="#cb4-58" tabindex="-1"></a>  <span class="fu">return</span>(rate)  </span>
+<span id="cb4-59"><a href="#cb4-59" tabindex="-1"></a>}</span>
+<span id="cb4-60"><a href="#cb4-60" tabindex="-1"></a></span>
+<span id="cb4-61"><a href="#cb4-61" tabindex="-1"></a>fertRates_SE_1_2 <span class="ot">&lt;-</span> <span class="cf">function</span>(age,calTime, duration){</span>
+<span id="cb4-62"><a href="#cb4-62" tabindex="-1"></a>  rate <span class="ot">&lt;-</span> fert_SE_1_2[<span class="fu">as.integer</span>(age)<span class="sc">+</span><span class="dv">1</span>]</span>
+<span id="cb4-63"><a href="#cb4-63" tabindex="-1"></a>  <span class="fu">return</span>(rate)  </span>
+<span id="cb4-64"><a href="#cb4-64" tabindex="-1"></a>}</span>
+<span id="cb4-65"><a href="#cb4-65" tabindex="-1"></a></span>
+<span id="cb4-66"><a href="#cb4-66" tabindex="-1"></a>fertRates_SE_2_3 <span class="ot">&lt;-</span> <span class="cf">function</span>(age,calTime, duration){</span>
+<span id="cb4-67"><a href="#cb4-67" tabindex="-1"></a>  rate <span class="ot">&lt;-</span> fert_SE_2_3[<span class="fu">as.integer</span>(age)<span class="sc">+</span><span class="dv">1</span>]</span>
+<span id="cb4-68"><a href="#cb4-68" tabindex="-1"></a>  <span class="fu">return</span>(rate)  </span>
+<span id="cb4-69"><a href="#cb4-69" tabindex="-1"></a>}</span>
+<span id="cb4-70"><a href="#cb4-70" tabindex="-1"></a></span>
+<span id="cb4-71"><a href="#cb4-71" tabindex="-1"></a>fertRates_SE_3_4 <span class="ot">&lt;-</span> <span class="cf">function</span>(age,calTime, duration){</span>
+<span id="cb4-72"><a href="#cb4-72" tabindex="-1"></a>  rate <span class="ot">&lt;-</span> fert_SE_3_4[<span class="fu">as.integer</span>(age)<span class="sc">+</span><span class="dv">1</span>]</span>
+<span id="cb4-73"><a href="#cb4-73" tabindex="-1"></a>  <span class="fu">return</span>(rate)  </span>
+<span id="cb4-74"><a href="#cb4-74" tabindex="-1"></a>}</span>
+<span id="cb4-75"><a href="#cb4-75" tabindex="-1"></a></span>
+<span id="cb4-76"><a href="#cb4-76" tabindex="-1"></a><span class="co"># --------------------------------------------------------------------------</span></span>
+<span id="cb4-77"><a href="#cb4-77" tabindex="-1"></a><span class="co"># Internal Migration Rates</span></span>
+<span id="cb4-78"><a href="#cb4-78" tabindex="-1"></a><span class="co"># --------------------------------------------------------------------------</span></span>
+<span id="cb4-79"><a href="#cb4-79" tabindex="-1"></a></span>
+<span id="cb4-80"><a href="#cb4-80" tabindex="-1"></a><span class="st">`</span><span class="at">%!in%</span><span class="st">`</span> <span class="ot">&lt;-</span> <span class="fu">Negate</span>(<span class="st">`</span><span class="at">%in%</span><span class="st">`</span>)</span>
+<span id="cb4-81"><a href="#cb4-81" tabindex="-1"></a></span>
+<span id="cb4-82"><a href="#cb4-82" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(country_R)) {</span>
+<span id="cb4-83"><a href="#cb4-83" tabindex="-1"></a>  other_provinces <span class="ot">=</span> country_R[<span class="fu">which</span>(country_R <span class="sc">%!in%</span> country_R[i])]</span>
+<span id="cb4-84"><a href="#cb4-84" tabindex="-1"></a>  <span class="cf">for</span>(k <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(other_provinces)) {</span>
+<span id="cb4-85"><a href="#cb4-85" tabindex="-1"></a>    eq <span class="ot">=</span> <span class="fu">paste</span>(<span class="fu">sprintf</span>(<span class="st">&#39;%s_%s_rates&#39;</span>, <span class="fu">glue</span>(<span class="st">&quot;{country_R[i]}&quot;</span>),  <span class="fu">glue</span>(<span class="st">&quot;{other_provinces[k]}&quot;</span>)), </span>
+<span id="cb4-86"><a href="#cb4-86" tabindex="-1"></a>               <span class="st">&#39;&lt;- function(age,calTime, duration)&#39;</span>, <span class="st">&#39;{&#39;</span>,</span>
+<span id="cb4-87"><a href="#cb4-87" tabindex="-1"></a>               <span class="fu">sprintf</span>(<span class="st">&#39;rate &lt;- rate_%s_%s[as.integer(age)+1]&#39;</span>, <span class="fu">glue</span>(<span class="st">&quot;{country_R[i]}&quot;</span>), </span>
+<span id="cb4-88"><a href="#cb4-88" tabindex="-1"></a>               <span class="fu">glue</span>(<span class="st">&quot;{other_provinces[k]}&quot;</span>)), <span class="st">&quot;</span><span class="sc">\n</span><span class="st"> &quot;</span>, <span class="st">&#39;return(rate)&#39;</span>,<span class="st">&#39;}&#39;</span>)</span>
+<span id="cb4-89"><a href="#cb4-89" tabindex="-1"></a>    <span class="fu">eval</span>(<span class="fu">parse</span>(<span class="at">text =</span> eq))</span>
+<span id="cb4-90"><a href="#cb4-90" tabindex="-1"></a>  }</span>
+<span id="cb4-91"><a href="#cb4-91" tabindex="-1"></a>}</span>
+<span id="cb4-92"><a href="#cb4-92" tabindex="-1"></a></span>
+<span id="cb4-93"><a href="#cb4-93" tabindex="-1"></a><span class="co"># --------------------------------------------------------------------------</span></span>
+<span id="cb4-94"><a href="#cb4-94" tabindex="-1"></a><span class="co"># Mortality Rates</span></span>
+<span id="cb4-95"><a href="#cb4-95" tabindex="-1"></a><span class="co"># --------------------------------------------------------------------------</span></span>
+<span id="cb4-96"><a href="#cb4-96" tabindex="-1"></a></span>
+<span id="cb4-97"><a href="#cb4-97" tabindex="-1"></a><span class="co"># Female mortality</span></span>
+<span id="cb4-98"><a href="#cb4-98" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(country_R)) {</span>
+<span id="cb4-99"><a href="#cb4-99" tabindex="-1"></a>  eq <span class="ot">=</span> <span class="fu">paste</span>(<span class="fu">sprintf</span>(<span class="st">&#39;mortRates_f_%s&#39;</span>, <span class="fu">glue</span>(<span class="st">&quot;{country_R[i]}&quot;</span>)), <span class="st">&#39;&lt;- function(age,calTime, duration)&#39;</span>,</span>
+<span id="cb4-100"><a href="#cb4-100" tabindex="-1"></a>             <span class="st">&#39;{&#39;</span>,</span>
+<span id="cb4-101"><a href="#cb4-101" tabindex="-1"></a>             <span class="fu">sprintf</span>(<span class="st">&#39;rate &lt;- mort_f_%s[as.integer(age)+1]&#39;</span>, <span class="fu">glue</span>(<span class="st">&quot;{country_R[i]}&quot;</span>)),</span>
+<span id="cb4-102"><a href="#cb4-102" tabindex="-1"></a>             <span class="st">&quot;</span><span class="sc">\n</span><span class="st"> &quot;</span>,</span>
+<span id="cb4-103"><a href="#cb4-103" tabindex="-1"></a>             <span class="st">&#39;return(rate)&#39;</span>,</span>
+<span id="cb4-104"><a href="#cb4-104" tabindex="-1"></a>             <span class="st">&#39;}&#39;</span>)</span>
+<span id="cb4-105"><a href="#cb4-105" tabindex="-1"></a>  <span class="fu">eval</span>(<span class="fu">parse</span>(<span class="at">text =</span> eq))</span>
+<span id="cb4-106"><a href="#cb4-106" tabindex="-1"></a>}</span>
+<span id="cb4-107"><a href="#cb4-107" tabindex="-1"></a></span>
+<span id="cb4-108"><a href="#cb4-108" tabindex="-1"></a><span class="co"># Male mortality</span></span>
+<span id="cb4-109"><a href="#cb4-109" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(country_R)) {</span>
+<span id="cb4-110"><a href="#cb4-110" tabindex="-1"></a>  eq <span class="ot">=</span> <span class="fu">paste</span>(<span class="fu">sprintf</span>(<span class="st">&#39;mortRates_m_%s&#39;</span>, <span class="fu">glue</span>(<span class="st">&quot;{country_R[i]}&quot;</span>)), <span class="st">&#39;&lt;- function(age,calTime, duration)&#39;</span>,</span>
+<span id="cb4-111"><a href="#cb4-111" tabindex="-1"></a>             <span class="st">&#39;{&#39;</span>,</span>
+<span id="cb4-112"><a href="#cb4-112" tabindex="-1"></a>             <span class="fu">sprintf</span>(<span class="st">&#39;rate &lt;- mort_m_%s[as.integer(age)+1]&#39;</span>, <span class="fu">glue</span>(<span class="st">&quot;{country_R[i]}&quot;</span>)),</span>
+<span id="cb4-113"><a href="#cb4-113" tabindex="-1"></a>             <span class="st">&quot;</span><span class="sc">\n</span><span class="st"> &quot;</span>,</span>
+<span id="cb4-114"><a href="#cb4-114" tabindex="-1"></a>             <span class="st">&#39;return(rate)&#39;</span>,</span>
+<span id="cb4-115"><a href="#cb4-115" tabindex="-1"></a>             <span class="st">&#39;}&#39;</span>)</span>
+<span id="cb4-116"><a href="#cb4-116" tabindex="-1"></a>  <span class="fu">eval</span>(<span class="fu">parse</span>(<span class="at">text =</span> eq))</span>
+<span id="cb4-117"><a href="#cb4-117" tabindex="-1"></a>}</span>
+<span id="cb4-118"><a href="#cb4-118" tabindex="-1"></a></span>
+<span id="cb4-119"><a href="#cb4-119" tabindex="-1"></a><span class="co"># ---------------------------------------------------------------------------</span></span>
+<span id="cb4-120"><a href="#cb4-120" tabindex="-1"></a><span class="co"># Emigration rates</span></span>
+<span id="cb4-121"><a href="#cb4-121" tabindex="-1"></a><span class="co"># ---------------------------------------------------------------------------</span></span>
+<span id="cb4-122"><a href="#cb4-122" tabindex="-1"></a></span>
+<span id="cb4-123"><a href="#cb4-123" tabindex="-1"></a><span class="co"># Emigration rates for females</span></span>
+<span id="cb4-124"><a href="#cb4-124" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(country_R)) {</span>
+<span id="cb4-125"><a href="#cb4-125" tabindex="-1"></a>  eq <span class="ot">=</span> <span class="fu">paste</span>(<span class="fu">sprintf</span>(<span class="st">&#39;emigrRates_f_%s&#39;</span>, <span class="fu">glue</span>(<span class="st">&quot;{country_R[i]}&quot;</span>)), <span class="st">&#39;&lt;- function(age,calTime, duration)&#39;</span>,</span>
+<span id="cb4-126"><a href="#cb4-126" tabindex="-1"></a>             <span class="st">&#39;{&#39;</span>,</span>
+<span id="cb4-127"><a href="#cb4-127" tabindex="-1"></a>             <span class="fu">sprintf</span>(<span class="st">&#39;rate &lt;- emig_f_%s[as.integer(age)+1]&#39;</span>, <span class="fu">glue</span>(<span class="st">&quot;{country_R[i]}&quot;</span>)),</span>
+<span id="cb4-128"><a href="#cb4-128" tabindex="-1"></a>             <span class="st">&quot;</span><span class="sc">\n</span><span class="st"> &quot;</span>,</span>
+<span id="cb4-129"><a href="#cb4-129" tabindex="-1"></a>             <span class="st">&#39;return(rate)&#39;</span>,</span>
+<span id="cb4-130"><a href="#cb4-130" tabindex="-1"></a>             <span class="st">&#39;}&#39;</span>)</span>
+<span id="cb4-131"><a href="#cb4-131" tabindex="-1"></a>  <span class="fu">eval</span>(<span class="fu">parse</span>(<span class="at">text =</span> eq))</span>
+<span id="cb4-132"><a href="#cb4-132" tabindex="-1"></a>}</span>
+<span id="cb4-133"><a href="#cb4-133" tabindex="-1"></a></span>
+<span id="cb4-134"><a href="#cb4-134" tabindex="-1"></a><span class="co"># Emigration rates for males</span></span>
+<span id="cb4-135"><a href="#cb4-135" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(country_R)) {</span>
+<span id="cb4-136"><a href="#cb4-136" tabindex="-1"></a>  eq <span class="ot">=</span> <span class="fu">paste</span>(<span class="fu">sprintf</span>(<span class="st">&#39;emigrRates_m_%s&#39;</span>, <span class="fu">glue</span>(<span class="st">&quot;{country_R[i]}&quot;</span>)), <span class="st">&#39;&lt;- function(age,calTime, duration)&#39;</span>,</span>
+<span id="cb4-137"><a href="#cb4-137" tabindex="-1"></a>             <span class="st">&#39;{&#39;</span>,</span>
+<span id="cb4-138"><a href="#cb4-138" tabindex="-1"></a>             <span class="fu">sprintf</span>(<span class="st">&#39;rate &lt;- emig_m_%s[as.integer(age)+1]&#39;</span>, <span class="fu">glue</span>(<span class="st">&quot;{country_R[i]}&quot;</span>)),</span>
+<span id="cb4-139"><a href="#cb4-139" tabindex="-1"></a>             <span class="st">&quot;</span><span class="sc">\n</span><span class="st"> &quot;</span>,</span>
+<span id="cb4-140"><a href="#cb4-140" tabindex="-1"></a>             <span class="st">&#39;return(rate)&#39;</span>,</span>
+<span id="cb4-141"><a href="#cb4-141" tabindex="-1"></a>             <span class="st">&#39;}&#39;</span>)</span>
+<span id="cb4-142"><a href="#cb4-142" tabindex="-1"></a>  <span class="fu">eval</span>(<span class="fu">parse</span>(<span class="at">text =</span> eq))</span>
+<span id="cb4-143"><a href="#cb4-143" tabindex="-1"></a>}</span></code></pre></div>
 </div>
 <div id="transition-pattern-and-assignment-of-functions-specifying-transition-rates" class="section level3">
 <h3>Transition pattern and assignment of functions specifying transition
 rates</h3>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ---------------------------------------------------------------------------</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Transition matrix for fertility</span></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co"># ---------------------------------------------------------------------------</span></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>fertTrMatrix <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="fu">c</span>(<span class="st">&quot;f/ES/0-&gt;f/ES/1&quot;</span>,<span class="st">&quot;f/ES/1-&gt;f/ES/2&quot;</span>,<span class="st">&quot;f/ES/2-&gt;f/ES/3&quot;</span>,<span class="st">&quot;f/ES/3-&gt;f/ES/4+&quot;</span>,</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>                        <span class="st">&quot;f/SE/0-&gt;f/SE/1&quot;</span>,<span class="st">&quot;f/SE/1-&gt;f/SE/2&quot;</span>,<span class="st">&quot;f/SE/2-&gt;f/SE/3&quot;</span>,<span class="st">&quot;f/SE/3-&gt;f/SE/4+&quot;</span>,</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>                        <span class="st">&quot;f/NL/0-&gt;f/NL/1&quot;</span>,<span class="st">&quot;f/NL/1-&gt;f/NL/2&quot;</span>,<span class="st">&quot;f/NL/2-&gt;f/NL/3&quot;</span>,<span class="st">&quot;f/NL/3-&gt;f/NL/4+&quot;</span>),</span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>                      <span class="fu">c</span>(<span class="st">&quot;fertRates_ES_0_1&quot;</span>, <span class="st">&quot;fertRates_ES_1_2&quot;</span>, <span class="st">&quot;fertRates_ES_2_3&quot;</span>, <span class="st">&quot;fertRates_ES_3_4&quot;</span>,</span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>                        <span class="st">&quot;fertRates_SE_0_1&quot;</span>, <span class="st">&quot;fertRates_SE_1_2&quot;</span>, <span class="st">&quot;fertRates_SE_2_3&quot;</span>, <span class="st">&quot;fertRates_SE_3_4&quot;</span>,</span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>                        <span class="st">&quot;fertRates_NL_0_1&quot;</span>, <span class="st">&quot;fertRates_NL_1_2&quot;</span>, <span class="st">&quot;fertRates_NL_2_3&quot;</span>, <span class="st">&quot;fertRates_NL_3_4&quot;</span>))</span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="co"># ---------------------------------------------------------------------------</span></span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Transition matrix for migration</span></span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="co"># ---------------------------------------------------------------------------</span></span>
-<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="co"># First: make names for transition matrix, i.e. stateOfOrigin-&gt;stateOfDestination </span></span>
-<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>testo1 <span class="ot">&lt;-</span> <span class="st">&quot;intmigTrMatrix &lt;- cbind(c(&quot;</span></span>
-<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(country_R)) {</span>
-<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(m <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(country_R)) {</span>
-<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(m <span class="sc">!=</span> i) {</span>
-<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>      eq1 <span class="ot">=</span> <span class="fu">paste</span>(<span class="fu">sprintf</span>(<span class="st">&quot;&#39;%s-&gt;%s&#39;&quot;</span>, <span class="fu">glue</span>(<span class="st">&quot;{country_R[i]}&quot;</span>), <span class="fu">glue</span>(<span class="st">&quot;{country_R[m]}&quot;</span>)))</span>
-<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (i <span class="sc">==</span> <span class="fu">length</span>(country_R) <span class="sc">&amp;</span> m <span class="sc">==</span> (i<span class="dv">-1</span>)) {</span>
-<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>        testo1 <span class="ot">=</span> <span class="fu">paste</span>(testo1,eq1)</span>
-<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>      } <span class="cf">else</span> {</span>
-<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>        testo1 <span class="ot">=</span> <span class="fu">paste</span>(testo1 ,eq1, <span class="st">&quot;,&quot;</span>)</span>
-<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>      }</span>
-<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (m <span class="sc">==</span> i <span class="sc">&amp;</span> m <span class="sc">==</span> <span class="fu">length</span>(country_R)){</span>
-<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>      testo1 <span class="ot">=</span> <span class="fu">paste</span>(testo1, <span class="st">&quot;),&quot;</span>)</span>
-<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>      </span>
-<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a><span class="co">#Second: set names for transition functions</span></span>
-<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>testo1 <span class="ot">=</span> <span class="fu">paste</span> (testo1,<span class="st">&quot;c(&quot;</span>)</span>
-<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(country_R)) {</span>
-<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(m <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(country_R)) {</span>
-<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(m <span class="sc">!=</span> i) {</span>
-<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a>      eq1 <span class="ot">=</span> <span class="fu">paste</span>(<span class="fu">sprintf</span>(<span class="st">&quot;&#39;%s_%s_rates&#39;&quot;</span>, <span class="fu">glue</span>(<span class="st">&quot;{country_R[i]}&quot;</span>), <span class="fu">glue</span>(<span class="st">&quot;{country_R[m]}&quot;</span>)))</span>
-<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (i <span class="sc">==</span> <span class="fu">length</span>(country_R) <span class="sc">&amp;</span> m <span class="sc">==</span> (i<span class="dv">-1</span>)) {</span>
-<span id="cb5-40"><a href="#cb5-40" aria-hidden="true" tabindex="-1"></a>        testo1 <span class="ot">=</span> <span class="fu">paste</span>(testo1,eq1)</span>
-<span id="cb5-41"><a href="#cb5-41" aria-hidden="true" tabindex="-1"></a>      } <span class="cf">else</span> {</span>
-<span id="cb5-42"><a href="#cb5-42" aria-hidden="true" tabindex="-1"></a>        testo1 <span class="ot">=</span> <span class="fu">paste</span>(testo1 ,eq1, <span class="st">&quot;,&quot;</span>)</span>
-<span id="cb5-43"><a href="#cb5-43" aria-hidden="true" tabindex="-1"></a>      }</span>
-<span id="cb5-44"><a href="#cb5-44" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb5-45"><a href="#cb5-45" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (m <span class="sc">==</span> i <span class="sc">&amp;</span> m <span class="sc">==</span> <span class="fu">length</span>(country_R)){</span>
-<span id="cb5-46"><a href="#cb5-46" aria-hidden="true" tabindex="-1"></a>      testo1 <span class="ot">=</span> <span class="fu">paste</span>(testo1, <span class="st">&quot;))&quot;</span>)</span>
-<span id="cb5-47"><a href="#cb5-47" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb5-48"><a href="#cb5-48" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb5-49"><a href="#cb5-49" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb5-50"><a href="#cb5-50" aria-hidden="true" tabindex="-1"></a><span class="fu">eval</span>(<span class="fu">parse</span>(<span class="at">text =</span> testo1))</span>
-<span id="cb5-51"><a href="#cb5-51" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-52"><a href="#cb5-52" aria-hidden="true" tabindex="-1"></a><span class="co"># ---------------------------------------------------------------------------</span></span>
-<span id="cb5-53"><a href="#cb5-53" aria-hidden="true" tabindex="-1"></a><span class="co"># Transition matrix for mortality and emigration</span></span>
-<span id="cb5-54"><a href="#cb5-54" aria-hidden="true" tabindex="-1"></a><span class="co"># ---------------------------------------------------------------------------</span></span>
-<span id="cb5-55"><a href="#cb5-55" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-56"><a href="#cb5-56" aria-hidden="true" tabindex="-1"></a>testo <span class="ot">&lt;-</span> <span class="st">&quot;absTransitions &lt;- rbind(&quot;</span></span>
-<span id="cb5-57"><a href="#cb5-57" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(country_R)) {</span>
-<span id="cb5-58"><a href="#cb5-58" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(m <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(sex)) {</span>
-<span id="cb5-59"><a href="#cb5-59" aria-hidden="true" tabindex="-1"></a>    eq1 <span class="ot">=</span> <span class="fu">paste</span>(<span class="fu">sprintf</span>(<span class="st">&quot;c(&#39;%s/%s/dead&#39;, &#39;mortRates_%s_%s&#39;)&quot;</span>, <span class="fu">glue</span>(<span class="st">&quot;{sex[m]}&quot;</span>), <span class="fu">glue</span>(<span class="st">&quot;{country_R[i]}&quot;</span>) ,</span>
-<span id="cb5-60"><a href="#cb5-60" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">glue</span>(<span class="st">&quot;{sex[m]}&quot;</span>), <span class="fu">glue</span>(<span class="st">&quot;{country_R[i]}&quot;</span>)),<span class="st">&#39;,&#39;</span>,</span>
-<span id="cb5-61"><a href="#cb5-61" aria-hidden="true" tabindex="-1"></a>                <span class="fu">sprintf</span>(<span class="st">&quot;c(&#39;%s/%s/rest&#39;, &#39;emigrRates_%s_%s&#39;)&quot;</span>, <span class="fu">glue</span>(<span class="st">&quot;{sex[m]}&quot;</span>),<span class="fu">glue</span>(<span class="st">&quot;{country_R[i]}&quot;</span>) ,</span>
-<span id="cb5-62"><a href="#cb5-62" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">glue</span>(<span class="st">&quot;{sex[m]}&quot;</span>), <span class="fu">glue</span>(<span class="st">&quot;{country_R[i]}&quot;</span>)))</span>
-<span id="cb5-63"><a href="#cb5-63" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(i <span class="sc">==</span> <span class="fu">length</span>(country_R) <span class="sc">&amp;</span> m <span class="sc">==</span> <span class="fu">length</span>(sex)) {</span>
-<span id="cb5-64"><a href="#cb5-64" aria-hidden="true" tabindex="-1"></a>      testo <span class="ot">=</span> <span class="fu">paste</span>(testo, eq1, <span class="st">&quot;)&quot;</span>)</span>
-<span id="cb5-65"><a href="#cb5-65" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
-<span id="cb5-66"><a href="#cb5-66" aria-hidden="true" tabindex="-1"></a>      testo <span class="ot">=</span> <span class="fu">paste</span>(testo,eq1, <span class="st">&quot;,&quot;</span>)</span>
-<span id="cb5-67"><a href="#cb5-67" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb5-68"><a href="#cb5-68" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb5-69"><a href="#cb5-69" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb5-70"><a href="#cb5-70" aria-hidden="true" tabindex="-1"></a><span class="fu">eval</span>(<span class="fu">parse</span>(<span class="at">text =</span> testo))</span>
-<span id="cb5-71"><a href="#cb5-71" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-72"><a href="#cb5-72" aria-hidden="true" tabindex="-1"></a><span class="co"># ---------------------------------------------------------------------------</span></span>
-<span id="cb5-73"><a href="#cb5-73" aria-hidden="true" tabindex="-1"></a><span class="co"># Combine all</span></span>
-<span id="cb5-74"><a href="#cb5-74" aria-hidden="true" tabindex="-1"></a><span class="co"># ---------------------------------------------------------------------------</span></span>
-<span id="cb5-75"><a href="#cb5-75" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-76"><a href="#cb5-76" aria-hidden="true" tabindex="-1"></a>allTransitions <span class="ot">&lt;-</span> <span class="fu">rbind</span>(fertTrMatrix, intmigTrMatrix)</span>
-<span id="cb5-77"><a href="#cb5-77" aria-hidden="true" tabindex="-1"></a>transitionMatrix <span class="ot">&lt;-</span> <span class="fu">buildTransitionMatrix</span>(<span class="at">allTransitions=</span>allTransitions,</span>
-<span id="cb5-78"><a href="#cb5-78" aria-hidden="true" tabindex="-1"></a>                                          <span class="at">absTransitions=</span>absTransitions, </span>
-<span id="cb5-79"><a href="#cb5-79" aria-hidden="true" tabindex="-1"></a>                                          <span class="at">stateSpace=</span>stateSpace)</span>
-<span id="cb5-80"><a href="#cb5-80" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-81"><a href="#cb5-81" aria-hidden="true" tabindex="-1"></a><span class="co"># ---------------------------------------------------------------------------</span></span>
-<span id="cb5-82"><a href="#cb5-82" aria-hidden="true" tabindex="-1"></a><span class="co"># Define transitions triggering a birth event</span></span>
-<span id="cb5-83"><a href="#cb5-83" aria-hidden="true" tabindex="-1"></a><span class="co"># ---------------------------------------------------------------------------</span></span>
-<span id="cb5-84"><a href="#cb5-84" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-85"><a href="#cb5-85" aria-hidden="true" tabindex="-1"></a>fertTr <span class="ot">&lt;-</span> fertTrMatrix[,<span class="dv">1</span>]</span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="co"># ---------------------------------------------------------------------------</span></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="co"># Transition matrix for fertility</span></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="co"># ---------------------------------------------------------------------------</span></span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>fertTrMatrix <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="fu">c</span>(<span class="st">&quot;f/ES/0-&gt;f/ES/1&quot;</span>,<span class="st">&quot;f/ES/1-&gt;f/ES/2&quot;</span>,<span class="st">&quot;f/ES/2-&gt;f/ES/3&quot;</span>,<span class="st">&quot;f/ES/3-&gt;f/ES/4+&quot;</span>,</span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>                        <span class="st">&quot;f/SE/0-&gt;f/SE/1&quot;</span>,<span class="st">&quot;f/SE/1-&gt;f/SE/2&quot;</span>,<span class="st">&quot;f/SE/2-&gt;f/SE/3&quot;</span>,<span class="st">&quot;f/SE/3-&gt;f/SE/4+&quot;</span>,</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>                        <span class="st">&quot;f/NL/0-&gt;f/NL/1&quot;</span>,<span class="st">&quot;f/NL/1-&gt;f/NL/2&quot;</span>,<span class="st">&quot;f/NL/2-&gt;f/NL/3&quot;</span>,<span class="st">&quot;f/NL/3-&gt;f/NL/4+&quot;</span>),</span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>                      <span class="fu">c</span>(<span class="st">&quot;fertRates_ES_0_1&quot;</span>, <span class="st">&quot;fertRates_ES_1_2&quot;</span>, <span class="st">&quot;fertRates_ES_2_3&quot;</span>, <span class="st">&quot;fertRates_ES_3_4&quot;</span>,</span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>                        <span class="st">&quot;fertRates_SE_0_1&quot;</span>, <span class="st">&quot;fertRates_SE_1_2&quot;</span>, <span class="st">&quot;fertRates_SE_2_3&quot;</span>, <span class="st">&quot;fertRates_SE_3_4&quot;</span>,</span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a>                        <span class="st">&quot;fertRates_NL_0_1&quot;</span>, <span class="st">&quot;fertRates_NL_1_2&quot;</span>, <span class="st">&quot;fertRates_NL_2_3&quot;</span>, <span class="st">&quot;fertRates_NL_3_4&quot;</span>))</span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a></span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a><span class="co"># ---------------------------------------------------------------------------</span></span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a><span class="co"># Transition matrix for migration</span></span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a><span class="co"># ---------------------------------------------------------------------------</span></span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a><span class="co"># First: make names for transition matrix, i.e. stateOfOrigin-&gt;stateOfDestination </span></span>
+<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a>testo1 <span class="ot">&lt;-</span> <span class="st">&quot;intmigTrMatrix &lt;- cbind(c(&quot;</span></span>
+<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(country_R)) {</span>
+<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a>  <span class="cf">for</span>(m <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(country_R)) {</span>
+<span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a>    <span class="cf">if</span>(m <span class="sc">!=</span> i) {</span>
+<span id="cb5-19"><a href="#cb5-19" tabindex="-1"></a>      eq1 <span class="ot">=</span> <span class="fu">paste</span>(<span class="fu">sprintf</span>(<span class="st">&quot;&#39;%s-&gt;%s&#39;&quot;</span>, <span class="fu">glue</span>(<span class="st">&quot;{country_R[i]}&quot;</span>), <span class="fu">glue</span>(<span class="st">&quot;{country_R[m]}&quot;</span>)))</span>
+<span id="cb5-20"><a href="#cb5-20" tabindex="-1"></a>      <span class="cf">if</span> (i <span class="sc">==</span> <span class="fu">length</span>(country_R) <span class="sc">&amp;</span> m <span class="sc">==</span> (i<span class="dv">-1</span>)) {</span>
+<span id="cb5-21"><a href="#cb5-21" tabindex="-1"></a>        testo1 <span class="ot">=</span> <span class="fu">paste</span>(testo1,eq1)</span>
+<span id="cb5-22"><a href="#cb5-22" tabindex="-1"></a>      } <span class="cf">else</span> {</span>
+<span id="cb5-23"><a href="#cb5-23" tabindex="-1"></a>        testo1 <span class="ot">=</span> <span class="fu">paste</span>(testo1 ,eq1, <span class="st">&quot;,&quot;</span>)</span>
+<span id="cb5-24"><a href="#cb5-24" tabindex="-1"></a>      }</span>
+<span id="cb5-25"><a href="#cb5-25" tabindex="-1"></a>    }</span>
+<span id="cb5-26"><a href="#cb5-26" tabindex="-1"></a>    <span class="cf">if</span> (m <span class="sc">==</span> i <span class="sc">&amp;</span> m <span class="sc">==</span> <span class="fu">length</span>(country_R)){</span>
+<span id="cb5-27"><a href="#cb5-27" tabindex="-1"></a>      testo1 <span class="ot">=</span> <span class="fu">paste</span>(testo1, <span class="st">&quot;),&quot;</span>)</span>
+<span id="cb5-28"><a href="#cb5-28" tabindex="-1"></a>      </span>
+<span id="cb5-29"><a href="#cb5-29" tabindex="-1"></a>    }</span>
+<span id="cb5-30"><a href="#cb5-30" tabindex="-1"></a>  }</span>
+<span id="cb5-31"><a href="#cb5-31" tabindex="-1"></a>}</span>
+<span id="cb5-32"><a href="#cb5-32" tabindex="-1"></a></span>
+<span id="cb5-33"><a href="#cb5-33" tabindex="-1"></a><span class="co">#Second: set names for transition functions</span></span>
+<span id="cb5-34"><a href="#cb5-34" tabindex="-1"></a>testo1 <span class="ot">=</span> <span class="fu">paste</span> (testo1,<span class="st">&quot;c(&quot;</span>)</span>
+<span id="cb5-35"><a href="#cb5-35" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(country_R)) {</span>
+<span id="cb5-36"><a href="#cb5-36" tabindex="-1"></a>  <span class="cf">for</span>(m <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(country_R)) {</span>
+<span id="cb5-37"><a href="#cb5-37" tabindex="-1"></a>    <span class="cf">if</span>(m <span class="sc">!=</span> i) {</span>
+<span id="cb5-38"><a href="#cb5-38" tabindex="-1"></a>      eq1 <span class="ot">=</span> <span class="fu">paste</span>(<span class="fu">sprintf</span>(<span class="st">&quot;&#39;%s_%s_rates&#39;&quot;</span>, <span class="fu">glue</span>(<span class="st">&quot;{country_R[i]}&quot;</span>), <span class="fu">glue</span>(<span class="st">&quot;{country_R[m]}&quot;</span>)))</span>
+<span id="cb5-39"><a href="#cb5-39" tabindex="-1"></a>      <span class="cf">if</span> (i <span class="sc">==</span> <span class="fu">length</span>(country_R) <span class="sc">&amp;</span> m <span class="sc">==</span> (i<span class="dv">-1</span>)) {</span>
+<span id="cb5-40"><a href="#cb5-40" tabindex="-1"></a>        testo1 <span class="ot">=</span> <span class="fu">paste</span>(testo1,eq1)</span>
+<span id="cb5-41"><a href="#cb5-41" tabindex="-1"></a>      } <span class="cf">else</span> {</span>
+<span id="cb5-42"><a href="#cb5-42" tabindex="-1"></a>        testo1 <span class="ot">=</span> <span class="fu">paste</span>(testo1 ,eq1, <span class="st">&quot;,&quot;</span>)</span>
+<span id="cb5-43"><a href="#cb5-43" tabindex="-1"></a>      }</span>
+<span id="cb5-44"><a href="#cb5-44" tabindex="-1"></a>    }</span>
+<span id="cb5-45"><a href="#cb5-45" tabindex="-1"></a>    <span class="cf">if</span> (m <span class="sc">==</span> i <span class="sc">&amp;</span> m <span class="sc">==</span> <span class="fu">length</span>(country_R)){</span>
+<span id="cb5-46"><a href="#cb5-46" tabindex="-1"></a>      testo1 <span class="ot">=</span> <span class="fu">paste</span>(testo1, <span class="st">&quot;))&quot;</span>)</span>
+<span id="cb5-47"><a href="#cb5-47" tabindex="-1"></a>    }</span>
+<span id="cb5-48"><a href="#cb5-48" tabindex="-1"></a>  }</span>
+<span id="cb5-49"><a href="#cb5-49" tabindex="-1"></a>}</span>
+<span id="cb5-50"><a href="#cb5-50" tabindex="-1"></a><span class="fu">eval</span>(<span class="fu">parse</span>(<span class="at">text =</span> testo1))</span>
+<span id="cb5-51"><a href="#cb5-51" tabindex="-1"></a></span>
+<span id="cb5-52"><a href="#cb5-52" tabindex="-1"></a><span class="co"># ---------------------------------------------------------------------------</span></span>
+<span id="cb5-53"><a href="#cb5-53" tabindex="-1"></a><span class="co"># Transition matrix for mortality and emigration</span></span>
+<span id="cb5-54"><a href="#cb5-54" tabindex="-1"></a><span class="co"># ---------------------------------------------------------------------------</span></span>
+<span id="cb5-55"><a href="#cb5-55" tabindex="-1"></a></span>
+<span id="cb5-56"><a href="#cb5-56" tabindex="-1"></a>testo <span class="ot">&lt;-</span> <span class="st">&quot;absTransitions &lt;- rbind(&quot;</span></span>
+<span id="cb5-57"><a href="#cb5-57" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(country_R)) {</span>
+<span id="cb5-58"><a href="#cb5-58" tabindex="-1"></a>  <span class="cf">for</span>(m <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(sex)) {</span>
+<span id="cb5-59"><a href="#cb5-59" tabindex="-1"></a>    eq1 <span class="ot">=</span> <span class="fu">paste</span>(<span class="fu">sprintf</span>(<span class="st">&quot;c(&#39;%s/%s/dead&#39;, &#39;mortRates_%s_%s&#39;)&quot;</span>, <span class="fu">glue</span>(<span class="st">&quot;{sex[m]}&quot;</span>), <span class="fu">glue</span>(<span class="st">&quot;{country_R[i]}&quot;</span>) ,</span>
+<span id="cb5-60"><a href="#cb5-60" tabindex="-1"></a>                        <span class="fu">glue</span>(<span class="st">&quot;{sex[m]}&quot;</span>), <span class="fu">glue</span>(<span class="st">&quot;{country_R[i]}&quot;</span>)),<span class="st">&#39;,&#39;</span>,</span>
+<span id="cb5-61"><a href="#cb5-61" tabindex="-1"></a>                <span class="fu">sprintf</span>(<span class="st">&quot;c(&#39;%s/%s/rest&#39;, &#39;emigrRates_%s_%s&#39;)&quot;</span>, <span class="fu">glue</span>(<span class="st">&quot;{sex[m]}&quot;</span>),<span class="fu">glue</span>(<span class="st">&quot;{country_R[i]}&quot;</span>) ,</span>
+<span id="cb5-62"><a href="#cb5-62" tabindex="-1"></a>                        <span class="fu">glue</span>(<span class="st">&quot;{sex[m]}&quot;</span>), <span class="fu">glue</span>(<span class="st">&quot;{country_R[i]}&quot;</span>)))</span>
+<span id="cb5-63"><a href="#cb5-63" tabindex="-1"></a>    <span class="cf">if</span>(i <span class="sc">==</span> <span class="fu">length</span>(country_R) <span class="sc">&amp;</span> m <span class="sc">==</span> <span class="fu">length</span>(sex)) {</span>
+<span id="cb5-64"><a href="#cb5-64" tabindex="-1"></a>      testo <span class="ot">=</span> <span class="fu">paste</span>(testo, eq1, <span class="st">&quot;)&quot;</span>)</span>
+<span id="cb5-65"><a href="#cb5-65" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb5-66"><a href="#cb5-66" tabindex="-1"></a>      testo <span class="ot">=</span> <span class="fu">paste</span>(testo,eq1, <span class="st">&quot;,&quot;</span>)</span>
+<span id="cb5-67"><a href="#cb5-67" tabindex="-1"></a>    }</span>
+<span id="cb5-68"><a href="#cb5-68" tabindex="-1"></a>  }</span>
+<span id="cb5-69"><a href="#cb5-69" tabindex="-1"></a>}</span>
+<span id="cb5-70"><a href="#cb5-70" tabindex="-1"></a><span class="fu">eval</span>(<span class="fu">parse</span>(<span class="at">text =</span> testo))</span>
+<span id="cb5-71"><a href="#cb5-71" tabindex="-1"></a></span>
+<span id="cb5-72"><a href="#cb5-72" tabindex="-1"></a><span class="co"># ---------------------------------------------------------------------------</span></span>
+<span id="cb5-73"><a href="#cb5-73" tabindex="-1"></a><span class="co"># Combine all</span></span>
+<span id="cb5-74"><a href="#cb5-74" tabindex="-1"></a><span class="co"># ---------------------------------------------------------------------------</span></span>
+<span id="cb5-75"><a href="#cb5-75" tabindex="-1"></a></span>
+<span id="cb5-76"><a href="#cb5-76" tabindex="-1"></a>allTransitions <span class="ot">&lt;-</span> <span class="fu">rbind</span>(fertTrMatrix, intmigTrMatrix)</span>
+<span id="cb5-77"><a href="#cb5-77" tabindex="-1"></a>transitionMatrix <span class="ot">&lt;-</span> <span class="fu">buildTransitionMatrix</span>(<span class="at">allTransitions=</span>allTransitions,</span>
+<span id="cb5-78"><a href="#cb5-78" tabindex="-1"></a>                                          <span class="at">absTransitions=</span>absTransitions, </span>
+<span id="cb5-79"><a href="#cb5-79" tabindex="-1"></a>                                          <span class="at">stateSpace=</span>stateSpace)</span>
+<span id="cb5-80"><a href="#cb5-80" tabindex="-1"></a></span>
+<span id="cb5-81"><a href="#cb5-81" tabindex="-1"></a><span class="co"># ---------------------------------------------------------------------------</span></span>
+<span id="cb5-82"><a href="#cb5-82" tabindex="-1"></a><span class="co"># Define transitions triggering a birth event</span></span>
+<span id="cb5-83"><a href="#cb5-83" tabindex="-1"></a><span class="co"># ---------------------------------------------------------------------------</span></span>
+<span id="cb5-84"><a href="#cb5-84" tabindex="-1"></a></span>
+<span id="cb5-85"><a href="#cb5-85" tabindex="-1"></a>fertTr <span class="ot">&lt;-</span> fertTrMatrix[,<span class="dv">1</span>]</span></code></pre></div>
 </div>
 <div id="run-simulation-using-one-core" class="section level3">
 <h3>Run Simulation (using one core)</h3>
@@ -655,68 +655,68 @@ rates</h3>
 run the whole sample, i.e.  using <em>initPop</em> instead of
 <em>initPop[1:500,]</em> and <em>immigrPop</em> instead of
 <em>immigrPop[1:100,]</em>.</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>pop <span class="ot">&lt;-</span> <span class="fu">micSim</span>(<span class="at">initPop=</span>initPop[<span class="dv">1</span><span class="sc">:</span><span class="dv">500</span>,], <span class="at">immigrPop=</span>immigrPop[<span class="dv">1</span><span class="sc">:</span><span class="dv">100</span>,],</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>              <span class="at">transitionMatrix=</span>transitionMatrix, <span class="at">absStates=</span>absStates,</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>              <span class="at">varInitStates=</span>varInitStates, <span class="at">initStatesProb=</span>initStatesProb,</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>              <span class="at">fixInitStates=</span>fixInitStates,</span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>              <span class="at">maxAge=</span>maxAge, <span class="at">simHorizon=</span>simHorizon,<span class="at">fertTr=</span>fertTr)</span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Initialization ... </span></span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Starting at:  2023-01-09 12:39:57&quot;</span></span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Ending at:  2023-01-09 12:39:58&quot;</span></span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Simulation is running ... </span></span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Year:  2014 </span></span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Year:  2015 </span></span>
-<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Year:  2016 </span></span>
-<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Year:  2017 </span></span>
-<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Year:  2018 </span></span>
-<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Simulation has finished.</span></span>
-<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ------------------</span></span>
-<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(pop)</span>
-<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     ID birthDate initState     From   To transitionTime transitionAge motherID</span></span>
-<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1    1  19411206  m/NL/999     &lt;NA&gt; &lt;NA&gt;           &lt;NA&gt;            NA     &lt;NA&gt;</span></span>
-<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 112  2  20070608  m/SE/999     &lt;NA&gt; &lt;NA&gt;           &lt;NA&gt;            NA     &lt;NA&gt;</span></span>
-<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 225  3  19750709    m/ES/0     &lt;NA&gt; &lt;NA&gt;           &lt;NA&gt;            NA     &lt;NA&gt;</span></span>
-<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 337  4  19220312  f/NL/999 f/NL/999 dead       20150626         93.29     &lt;NA&gt;</span></span>
-<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 449  5  19740425    f/ES/0     &lt;NA&gt; &lt;NA&gt;           &lt;NA&gt;            NA     &lt;NA&gt;</span></span>
-<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 461  6  20110828  m/ES/999     &lt;NA&gt; &lt;NA&gt;           &lt;NA&gt;            NA     &lt;NA&gt;</span></span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>pop <span class="ot">&lt;-</span> <span class="fu">micSim</span>(<span class="at">initPop=</span>initPop[<span class="dv">1</span><span class="sc">:</span><span class="dv">500</span>,], <span class="at">immigrPop=</span>immigrPop[<span class="dv">1</span><span class="sc">:</span><span class="dv">100</span>,],</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>              <span class="at">transitionMatrix=</span>transitionMatrix, <span class="at">absStates=</span>absStates,</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>              <span class="at">varInitStates=</span>varInitStates, <span class="at">initStatesProb=</span>initStatesProb,</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>              <span class="at">fixInitStates=</span>fixInitStates,</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>              <span class="at">maxAge=</span>maxAge, <span class="at">simHorizon=</span>simHorizon,<span class="at">fertTr=</span>fertTr)</span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="co">#&gt; Initialization ... </span></span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Starting at:  2024-01-23 14:07:50.88455&quot;</span></span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Ending at:  2024-01-23 14:07:51.858173&quot;</span></span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a><span class="co">#&gt; Simulation is running ... </span></span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a><span class="co">#&gt; Year:  2014 </span></span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a><span class="co">#&gt; Year:  2015 </span></span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a><span class="co">#&gt; Year:  2016 </span></span>
+<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a><span class="co">#&gt; Year:  2017 </span></span>
+<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a><span class="co">#&gt; Year:  2018 </span></span>
+<span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a><span class="co">#&gt; Simulation has finished.</span></span>
+<span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a><span class="co">#&gt; ------------------</span></span>
+<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a><span class="fu">head</span>(pop)</span>
+<span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a><span class="co">#&gt;     ID birthDate initState     From   To transitionTime transitionAge motherID</span></span>
+<span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a><span class="co">#&gt; 1    1  19411206  m/NL/999     &lt;NA&gt; &lt;NA&gt;           &lt;NA&gt;            NA     &lt;NA&gt;</span></span>
+<span id="cb6-20"><a href="#cb6-20" tabindex="-1"></a><span class="co">#&gt; 112  2  20070608  m/SE/999     &lt;NA&gt; &lt;NA&gt;           &lt;NA&gt;            NA     &lt;NA&gt;</span></span>
+<span id="cb6-21"><a href="#cb6-21" tabindex="-1"></a><span class="co">#&gt; 225  3  19750709    m/ES/0     &lt;NA&gt; &lt;NA&gt;           &lt;NA&gt;            NA     &lt;NA&gt;</span></span>
+<span id="cb6-22"><a href="#cb6-22" tabindex="-1"></a><span class="co">#&gt; 337  4  19220312  f/NL/999 f/NL/999 dead       20150626         93.29     &lt;NA&gt;</span></span>
+<span id="cb6-23"><a href="#cb6-23" tabindex="-1"></a><span class="co">#&gt; 449  5  19740425    f/ES/0     &lt;NA&gt; &lt;NA&gt;           &lt;NA&gt;            NA     &lt;NA&gt;</span></span>
+<span id="cb6-24"><a href="#cb6-24" tabindex="-1"></a><span class="co">#&gt; 461  6  20110828  m/ES/999     &lt;NA&gt; &lt;NA&gt;           &lt;NA&gt;            NA     &lt;NA&gt;</span></span></code></pre></div>
 </div>
 <div id="convert-to-long-format" class="section level3">
 <h3>Convert to long format</h3>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>popLong <span class="ot">&lt;-</span> <span class="fu">convertToLongFormat</span>(pop, <span class="at">migr=</span><span class="cn">TRUE</span>)</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(popLong)</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     ID birthDate   Tstart    Tstop statusEntry statusExit   OD ns Episode sex</span></span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1    1  19411206 20140101 20181231           0          0 cens  1       1   m</span></span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 114  2  20070608 20140101 20181231           0          0 cens  1       1   m</span></span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 231  3  19750709 20140101 20181231           0          0 cens  1       1   m</span></span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 348  4  19220312 20140101 20150626           0          1 dead  1       1   f</span></span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 465  5  19740425 20140101 20181231           0          0 cens  1       1   f</span></span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 478  6  20110828 20140101 20181231           0          0 cens  1       1   m</span></span>
-<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     country_R fert</span></span>
-<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1          NL  999</span></span>
-<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 114        SE  999</span></span>
-<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 231        ES    0</span></span>
-<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 348        NL  999</span></span>
-<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 465        ES    0</span></span>
-<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 478        ES  999</span></span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>popLong <span class="ot">&lt;-</span> <span class="fu">convertToLongFormat</span>(pop, <span class="at">migr=</span><span class="cn">TRUE</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="fu">head</span>(popLong)</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="co">#&gt;     ID birthDate   Tstart    Tstop statusEntry statusExit   OD ns Episode sex</span></span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="co">#&gt; 1    1  19411206 20140101 20181231           0          0 cens  1       1   m</span></span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a><span class="co">#&gt; 114  2  20070608 20140101 20181231           0          0 cens  1       1   m</span></span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a><span class="co">#&gt; 231  3  19750709 20140101 20181231           0          0 cens  1       1   m</span></span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a><span class="co">#&gt; 348  4  19220312 20140101 20150626           0          1 dead  1       1   f</span></span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a><span class="co">#&gt; 465  5  19740425 20140101 20181231           0          0 cens  1       1   f</span></span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a><span class="co">#&gt; 478  6  20110828 20140101 20181231           0          0 cens  1       1   m</span></span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a><span class="co">#&gt;     country_R fert</span></span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a><span class="co">#&gt; 1          NL  999</span></span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a><span class="co">#&gt; 114        SE  999</span></span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a><span class="co">#&gt; 231        ES    0</span></span>
+<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a><span class="co">#&gt; 348        NL  999</span></span>
+<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a><span class="co">#&gt; 465        ES    0</span></span>
+<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a><span class="co">#&gt; 478        ES  999</span></span></code></pre></div>
 </div>
 <div id="convert-to-wide-format" class="section level3">
 <h3>Convert to wide format</h3>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>popWide <span class="ot">&lt;-</span> <span class="fu">convertToWideFormat</span>(pop)</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(popWide)</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     ID birthDate initState ns   From.1 To.1 transitionTime.1 transitionAge.1</span></span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1    1  19411206  m/NL/999  0     &lt;NA&gt; &lt;NA&gt;             &lt;NA&gt;              NA</span></span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 112  2  20070608  m/SE/999  0     &lt;NA&gt; &lt;NA&gt;             &lt;NA&gt;              NA</span></span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 225  3  19750709    m/ES/0  0     &lt;NA&gt; &lt;NA&gt;             &lt;NA&gt;              NA</span></span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 337  4  19220312  f/NL/999  1 f/NL/999 dead         20150626           93.29</span></span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 449  5  19740425    f/ES/0  0     &lt;NA&gt; &lt;NA&gt;             &lt;NA&gt;              NA</span></span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 461  6  20110828  m/ES/999  0     &lt;NA&gt; &lt;NA&gt;             &lt;NA&gt;              NA</span></span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     From.2 To.2 transitionTime.2 transitionAge.2</span></span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1     &lt;NA&gt; &lt;NA&gt;             &lt;NA&gt;              NA</span></span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 112   &lt;NA&gt; &lt;NA&gt;             &lt;NA&gt;              NA</span></span>
-<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 225   &lt;NA&gt; &lt;NA&gt;             &lt;NA&gt;              NA</span></span>
-<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 337   &lt;NA&gt; &lt;NA&gt;             &lt;NA&gt;              NA</span></span>
-<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 449   &lt;NA&gt; &lt;NA&gt;             &lt;NA&gt;              NA</span></span>
-<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 461   &lt;NA&gt; &lt;NA&gt;             &lt;NA&gt;              NA</span></span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>popWide <span class="ot">&lt;-</span> <span class="fu">convertToWideFormat</span>(pop)</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a><span class="fu">head</span>(popWide)</span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a><span class="co">#&gt;     ID birthDate initState ns   From.1 To.1 transitionTime.1 transitionAge.1</span></span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a><span class="co">#&gt; 1    1  19411206  m/NL/999  0     &lt;NA&gt; &lt;NA&gt;             &lt;NA&gt;              NA</span></span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a><span class="co">#&gt; 112  2  20070608  m/SE/999  0     &lt;NA&gt; &lt;NA&gt;             &lt;NA&gt;              NA</span></span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a><span class="co">#&gt; 225  3  19750709    m/ES/0  0     &lt;NA&gt; &lt;NA&gt;             &lt;NA&gt;              NA</span></span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a><span class="co">#&gt; 337  4  19220312  f/NL/999  1 f/NL/999 dead         20150626           93.29</span></span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a><span class="co">#&gt; 449  5  19740425    f/ES/0  0     &lt;NA&gt; &lt;NA&gt;             &lt;NA&gt;              NA</span></span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a><span class="co">#&gt; 461  6  20110828  m/ES/999  0     &lt;NA&gt; &lt;NA&gt;             &lt;NA&gt;              NA</span></span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a><span class="co">#&gt;     From.2 To.2 transitionTime.2 transitionAge.2</span></span>
+<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a><span class="co">#&gt; 1     &lt;NA&gt; &lt;NA&gt;             &lt;NA&gt;              NA</span></span>
+<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a><span class="co">#&gt; 112   &lt;NA&gt; &lt;NA&gt;             &lt;NA&gt;              NA</span></span>
+<span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a><span class="co">#&gt; 225   &lt;NA&gt; &lt;NA&gt;             &lt;NA&gt;              NA</span></span>
+<span id="cb8-14"><a href="#cb8-14" tabindex="-1"></a><span class="co">#&gt; 337   &lt;NA&gt; &lt;NA&gt;             &lt;NA&gt;              NA</span></span>
+<span id="cb8-15"><a href="#cb8-15" tabindex="-1"></a><span class="co">#&gt; 449   &lt;NA&gt; &lt;NA&gt;             &lt;NA&gt;              NA</span></span>
+<span id="cb8-16"><a href="#cb8-16" tabindex="-1"></a><span class="co">#&gt; 461   &lt;NA&gt; &lt;NA&gt;             &lt;NA&gt;              NA</span></span></code></pre></div>
 </div>
 <div id="run-simulation-with-parallel-computing-on-several-cores" class="section level3">
 <h3>Run Simulation with parallel computing on several cores</h3>
@@ -724,38 +724,38 @@ run the whole sample, i.e.  using <em>initPop</em> instead of
 the faster the simulation will be executed. This example uses three
 cores. Give as many seeds as you use cores. That way you can replicate
 your results.</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>cores <span class="ot">&lt;-</span> <span class="dv">3</span></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>seeds <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">34</span>,<span class="dv">145</span>,<span class="dv">97</span>)</span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>pop <span class="ot">&lt;-</span> <span class="fu">micSimParallel</span>(<span class="at">initPop=</span>initPop, <span class="at">immigrPop=</span>immigrPop,</span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>                      <span class="at">transitionMatrix=</span>transitionMatrix, <span class="at">absStates=</span>absStates,</span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>                      <span class="at">varInitStates=</span>varInitStates, <span class="at">initStatesProb=</span>initStatesProb,</span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>                      <span class="at">fixInitStates=</span>fixInitStates,</span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>                      <span class="at">maxAge=</span>maxAge, <span class="at">simHorizon=</span>simHorizon,<span class="at">fertTr=</span>fertTr,</span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>                      <span class="at">cores=</span>cores, <span class="at">seeds=</span>seeds)</span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Starting at [1] &quot;2023-01-09 12:39:58 CET&quot;</span></span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Warning in searchCommandline(parallel, cpus = cpus, type = type, socketHosts =</span></span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; socketHosts, : Unknown option on commandline: tools::buildVignettes(dir</span></span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; R Version:  R version 4.2.2 (2022-10-31 ucrt)</span></span>
-<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; snowfall 1.84-6.2 initialized (using snow 0.4-4): parallel execution on 3 CPUs.</span></span>
-<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Stopping cluster</span></span>
-<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Stopped at [1] &quot;2023-01-09 12:41:51 CET&quot;</span></span>
-<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(pop)</span>
-<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       ID birthDate initState     From   To transitionTime transitionAge</span></span>
-<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1      1  19411206  m/NL/999     &lt;NA&gt; &lt;NA&gt;           &lt;NA&gt;            NA</span></span>
-<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 11220  2  20070608  m/SE/999     &lt;NA&gt; &lt;NA&gt;           &lt;NA&gt;            NA</span></span>
-<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 16690  3  19750709    m/ES/0     &lt;NA&gt; &lt;NA&gt;           &lt;NA&gt;            NA</span></span>
-<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 17812  4  19220312  f/NL/999 f/NL/999 dead       20160929         94.55</span></span>
-<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 18937  5  19740425    f/ES/0     &lt;NA&gt; &lt;NA&gt;           &lt;NA&gt;            NA</span></span>
-<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 20057  6  20110828  m/ES/999 m/ES/999 rest       20180917          7.05</span></span>
-<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       motherID</span></span>
-<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1         &lt;NA&gt;</span></span>
-<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 11220     &lt;NA&gt;</span></span>
-<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 16690     &lt;NA&gt;</span></span>
-<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 17812     &lt;NA&gt;</span></span>
-<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 18937     &lt;NA&gt;</span></span>
-<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 20057     &lt;NA&gt;</span></span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a></span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>cores <span class="ot">&lt;-</span> <span class="dv">3</span></span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>seeds <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">34</span>,<span class="dv">145</span>,<span class="dv">97</span>)</span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>pop <span class="ot">&lt;-</span> <span class="fu">micSimParallel</span>(<span class="at">initPop=</span>initPop, <span class="at">immigrPop=</span>immigrPop,</span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>                      <span class="at">transitionMatrix=</span>transitionMatrix, <span class="at">absStates=</span>absStates,</span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a>                      <span class="at">varInitStates=</span>varInitStates, <span class="at">initStatesProb=</span>initStatesProb,</span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a>                      <span class="at">fixInitStates=</span>fixInitStates,</span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a>                      <span class="at">maxAge=</span>maxAge, <span class="at">simHorizon=</span>simHorizon,<span class="at">fertTr=</span>fertTr,</span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a>                      <span class="at">cores=</span>cores, <span class="at">seeds=</span>seeds)</span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a><span class="co">#&gt; Starting at [1] &quot;2024-01-23 14:07:52 CET&quot;</span></span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a><span class="co">#&gt; Warning in searchCommandline(parallel, cpus = cpus, type = type, socketHosts =</span></span>
+<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a><span class="co">#&gt; socketHosts, : Unknown option on commandline: tools::buildVignettes(dir</span></span>
+<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a><span class="co">#&gt; R Version:  R version 4.3.2 (2023-10-31 ucrt)</span></span>
+<span id="cb9-14"><a href="#cb9-14" tabindex="-1"></a><span class="co">#&gt; snowfall 1.84-6.3 initialized (using snow 0.4-4): parallel execution on 3 CPUs.</span></span>
+<span id="cb9-15"><a href="#cb9-15" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-16"><a href="#cb9-16" tabindex="-1"></a><span class="co">#&gt; Stopping cluster</span></span>
+<span id="cb9-17"><a href="#cb9-17" tabindex="-1"></a><span class="co">#&gt; Stopped at [1] &quot;2024-01-23 14:09:42 CET&quot;</span></span>
+<span id="cb9-18"><a href="#cb9-18" tabindex="-1"></a><span class="fu">head</span>(pop)</span>
+<span id="cb9-19"><a href="#cb9-19" tabindex="-1"></a><span class="co">#&gt;       ID birthDate initState     From   To transitionTime transitionAge</span></span>
+<span id="cb9-20"><a href="#cb9-20" tabindex="-1"></a><span class="co">#&gt; 1      1  19411206  m/NL/999     &lt;NA&gt; &lt;NA&gt;           &lt;NA&gt;            NA</span></span>
+<span id="cb9-21"><a href="#cb9-21" tabindex="-1"></a><span class="co">#&gt; 11220  2  20070608  m/SE/999     &lt;NA&gt; &lt;NA&gt;           &lt;NA&gt;            NA</span></span>
+<span id="cb9-22"><a href="#cb9-22" tabindex="-1"></a><span class="co">#&gt; 16690  3  19750709    m/ES/0     &lt;NA&gt; &lt;NA&gt;           &lt;NA&gt;            NA</span></span>
+<span id="cb9-23"><a href="#cb9-23" tabindex="-1"></a><span class="co">#&gt; 17812  4  19220312  f/NL/999 f/NL/999 dead       20160929         94.55</span></span>
+<span id="cb9-24"><a href="#cb9-24" tabindex="-1"></a><span class="co">#&gt; 18937  5  19740425    f/ES/0     &lt;NA&gt; &lt;NA&gt;           &lt;NA&gt;            NA</span></span>
+<span id="cb9-25"><a href="#cb9-25" tabindex="-1"></a><span class="co">#&gt; 20057  6  20110828  m/ES/999 m/ES/999 rest       20180917          7.05</span></span>
+<span id="cb9-26"><a href="#cb9-26" tabindex="-1"></a><span class="co">#&gt;       motherID</span></span>
+<span id="cb9-27"><a href="#cb9-27" tabindex="-1"></a><span class="co">#&gt; 1         &lt;NA&gt;</span></span>
+<span id="cb9-28"><a href="#cb9-28" tabindex="-1"></a><span class="co">#&gt; 11220     &lt;NA&gt;</span></span>
+<span id="cb9-29"><a href="#cb9-29" tabindex="-1"></a><span class="co">#&gt; 16690     &lt;NA&gt;</span></span>
+<span id="cb9-30"><a href="#cb9-30" tabindex="-1"></a><span class="co">#&gt; 17812     &lt;NA&gt;</span></span>
+<span id="cb9-31"><a href="#cb9-31" tabindex="-1"></a><span class="co">#&gt; 18937     &lt;NA&gt;</span></span>
+<span id="cb9-32"><a href="#cb9-32" tabindex="-1"></a><span class="co">#&gt; 20057     &lt;NA&gt;</span></span></code></pre></div>
 </div>
 
 

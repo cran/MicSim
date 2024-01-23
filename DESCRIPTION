@@ -1,8 +1,8 @@
 Package: MicSim
 Type: Package
 Title: Performing Continuous-Time Microsimulation
-Version: 2.0.0
-Date: 2023-01-02
+Version: 2.0.1
+Date: 2024-01-23
 Authors@R: c(person("Sabine", "Zinn", role = c("aut","cre"),
     email = "szinn@diw.de"),
     person("Claudio","Bosco", role = "ctb",
@@ -18,9 +18,9 @@ Suggests: rmarkdown, knitr, glue
 VignetteBuilder: knitr
 Encoding: UTF-8
 NeedsCompilation: no
-Packaged: 2023-01-09 11:41:52 UTC; Freddie
+Packaged: 2024-01-23 13:09:43 UTC; Freddie
 Author: Sabine Zinn [aut, cre],
   Claudio Bosco [ctb],
   Maurizio Teobaldell [ctb]
 Repository: CRAN
-Date/Publication: 2023-01-09 12:23:11 UTC
+Date/Publication: 2024-01-23 17:02:50 UTC

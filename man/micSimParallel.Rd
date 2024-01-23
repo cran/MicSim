@@ -17,13 +17,13 @@ micSimParallel(initPop, immigrPop = NULL, initPopList = c(), immigrPopList = c()
 }
  \item{immigrPop}{Optionally, a population of migrants entering the virtual population along simulation time can be given, see arguments \code{immigrPopList}. This migrants population can either be given as a whole or splitted to be run at the distinct cores. If it is given as a whole it is automatically splitted by MicSim such that the population parts run on the distinct cores are approx. equally sized.   
 }
- \item{transitionMatrix}{
+ \item{transitionMatrix}{See \link{micSim}.
 }
- \item{absStates}{
+ \item{absStates}{See \link{micSim}.
 }
- \item{varInitStates}{
+ \item{varInitStates}{See \link{micSim}.
 }
- \item{initStatesProb}{
+ \item{initStatesProb}{See \link{micSim}.
 }
  \item{initPopList}{
  Optional: A list containing the initial population split for the distinct cores. 
@@ -31,13 +31,13 @@ micSimParallel(initPop, immigrPop = NULL, initPopList = c(), immigrPopList = c()
  \item{immigrPopList}{
  Optional: A list containing the immigration population split for the distinct cores. 
 }
- \item{fixInitStates}{
+ \item{fixInitStates}{See \link{micSim}.
 }
- \item{maxAge}{
+ \item{maxAge}{See \link{micSim}.
 }
- \item{simHorizon}{
+ \item{simHorizon}{See \link{micSim}.
 }
- \item{fertTr}{
+ \item{fertTr}{See \link{micSim}.
 }
  \item{monthSchoolEnrol}{See \link{micSim}.
 }

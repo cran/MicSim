@@ -1,5 +1,15 @@
 \name{NEWS}
 \title{NEWS file for the MicSim package}
+\section{Changes in version 2.1.0}{
+ \itemize{
+   \item The simulation engine for MicSim (and its parallel computing version) has been made more efficient. This has been acchieved by implementing two versions of the micsim engine: one allowing simulation along calender time and age; and one additional allowing in adition simulation along duration.
+   \item A vignette on educational inequalities in depression has been added to provide an additional example for how MicSim can be used in research.
+   \item Vignettes and examples have been edited adopt with changes in the code.
+   \item Fixed an issue with ID 100000 converting itself to scientific notation (detected by @AlexLepe). 
+   \item Fixed an issue where MicSim output was not always sorted by transition age (detected by @AlexLepe).
+   \item Fixed the calculation for cD_month in the getInDays function (detected by @AlexLepe)e.
+  }
+}
 \section{Changes in version 2.0.0}{
  \itemize{
    \item The simulation engine has been speed up by making its source code more efficient.

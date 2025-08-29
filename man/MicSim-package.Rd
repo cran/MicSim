@@ -20,8 +20,8 @@ The transition intensities (also denoted as hazard rates or transition rates) of
 \tabular{ll}{
 Package: \tab MicSim\cr
 Type: \tab Package\cr
-Version: \tab 2.0.1\cr
-Date: \tab 2024-01-23\cr
+Version: \tab 2.0.0\cr
+Date: \tab 2022-11-01\cr
 License: \tab GPL-2\cr
 }
 }

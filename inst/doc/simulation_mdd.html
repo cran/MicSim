@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>Example of Simulating Educational Inequalities in Depression Using the MicSim Package</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+<style type="text/css">
+
+div.csl-bib-body { }
+div.csl-entry {
+clear: both;
+margin-bottom: 0em;
+}
+.hanging div.csl-entry {
+margin-left:2em;
+text-indent:-2em;
+}
+div.csl-left-margin {
+min-width:2em;
+float:left;
+}
+div.csl-right-inline {
+margin-left:2em;
+padding-left:1em;
+}
+div.csl-indent {
+margin-left: 2em;
+}
+</style>
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Example of Simulating Educational
+Inequalities in Depression Using the MicSim Package</h1>
+
+
+
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<p>This vignette demonstrates a simulation study of educational
+inequalities in major depressive disorder (MDD) using the MicSim
+package. The simulation uses sample data derived from the study by <span class="citation">Lepe et al. (2024)</span>, which used data from the
+Lifelines Cohort Study.</p>
+<p>In this vignette we will take you through a standard MicSim workflow.
+First, we define the simulation framework and the initial population,
+then we specify transition rates, build the transition matrix and run
+the simulation. Lastly, we process and analyze the output.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="co"># loading libraries</span></span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(MicSim)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="fu">library</span>(knitr)</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="fu">library</span>(tidyr)</span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a><span class="co"># Clearing the environment</span></span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a><span class="fu">rm</span>(<span class="at">list =</span> <span class="fu">ls</span>())</span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a><span class="fu">invisible</span>(<span class="fu">gc</span>())</span></code></pre></div>
+</div>
+<div id="definition-of-basic-simulation-frame" class="section level1">
+<h1>Definition of Basic Simulation Frame</h1>
+<p>We start with defining the simulation horizon (in a yyyymmdd format).
+Next, we define desired sample size and minimum and maximum ages. In
+this example, sample size is kept intentionally small to reduce
+necessary computation time. A larger population would lead to better,
+more reliable results, but cannot be implemented in this example.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>startDate <span class="ot">&lt;-</span> <span class="dv">20180101</span></span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>endDate   <span class="ot">&lt;-</span> <span class="dv">20651231</span></span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>simHorizon <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="at">startDate =</span> startDate, <span class="at">endDate =</span> endDate)</span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>N <span class="ot">&lt;-</span> <span class="dv">1000</span></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a>minage <span class="ot">&lt;-</span> <span class="dv">18</span></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a>maxage <span class="ot">&lt;-</span> <span class="dv">65</span></span></code></pre></div>
+<p>The state space tells us which attributes the simulated individuals
+can consist of. In this case these are sex, education and health
+status.</p>
+<p>Usually, for a simulation of a life course, death is a risk an
+individual will always be exposed to. Thus, MicSim operates under the
+assumption that an absorbing state will be defined. If this is
+definitely not wanted by the user, such as in this case, best practice
+is to still provide the state, but set the mortality rate to zero <span class="citation">(Zinn 2011, 9)</span>.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>health    <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;NoMDD&quot;</span>, <span class="st">&quot;MDD&quot;</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>education <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;Low&quot;</span>, <span class="st">&quot;High&quot;</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>sex   <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;Male&quot;</span>, <span class="st">&quot;Female&quot;</span>)</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>stateSpace <span class="ot">&lt;-</span> <span class="fu">expand.grid</span>(<span class="at">health =</span> health, <span class="at">education =</span> education, <span class="at">sex =</span> sex)</span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>absStates <span class="ot">&lt;-</span> <span class="st">&quot;dead&quot;</span></span></code></pre></div>
+</div>
+<div id="definition-of-initial-population" class="section level1">
+<h1>Definition of initial population</h1>
+<p>For the user, the definition of the initial population is largely
+left up to needs and preference. Here we create birthdates for a cohort
+born in the year 2000 and then assign a baseline prevalence of MDD as
+estimated from empirical data <span class="citation">(see Lepe et al.
+2024)</span>.</p>
+<p>Next, we split the population equally among sex and education and
+assign the initial states.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1234</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>birthDates <span class="ot">&lt;-</span> <span class="fu">runif</span>(N, <span class="at">min =</span> <span class="fu">getInDays</span>(<span class="dv">20000101</span>), <span class="at">max =</span> <span class="fu">getInDays</span>(<span class="dv">20001231</span>))</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a></span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>prev_lo_m <span class="ot">&lt;-</span> <span class="fl">0.0122</span></span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>prev_lo_f <span class="ot">&lt;-</span> <span class="fl">0.0191</span></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>prev_hi_m <span class="ot">&lt;-</span> <span class="fl">0.0014</span></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a>prev_hi_f <span class="ot">&lt;-</span> <span class="fl">0.0022</span></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a></span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a>m_lo_mdd <span class="ot">&lt;-</span> <span class="fu">sample</span>(</span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a>  <span class="at">x =</span> <span class="fu">c</span>(<span class="st">&quot;MDD/Low/Male&quot;</span>, <span class="st">&quot;NoMDD/Low/Male&quot;</span>),</span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a>  <span class="at">prob =</span> <span class="fu">c</span>(prev_lo_m, <span class="dv">1</span> <span class="sc">-</span> prev_lo_m),</span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a>  <span class="at">size =</span> N <span class="sc">/</span> <span class="dv">4</span>, <span class="at">replace =</span> <span class="cn">TRUE</span></span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a>)</span>
+<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a></span>
+<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a>f_lo_mdd <span class="ot">&lt;-</span> <span class="fu">sample</span>(</span>
+<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a>  <span class="at">x =</span> <span class="fu">c</span>(<span class="st">&quot;MDD/Low/Female&quot;</span>, <span class="st">&quot;NoMDD/Low/Female&quot;</span>),</span>
+<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a>  <span class="at">prob =</span> <span class="fu">c</span>(prev_lo_f, <span class="dv">1</span> <span class="sc">-</span> prev_lo_f),</span>
+<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a>  <span class="at">size =</span> N <span class="sc">/</span> <span class="dv">4</span>, <span class="at">replace =</span> <span class="cn">TRUE</span></span>
+<span id="cb4-20"><a href="#cb4-20" tabindex="-1"></a>)</span>
+<span id="cb4-21"><a href="#cb4-21" tabindex="-1"></a></span>
+<span id="cb4-22"><a href="#cb4-22" tabindex="-1"></a>m_hi_mdd <span class="ot">&lt;-</span> <span class="fu">sample</span>(</span>
+<span id="cb4-23"><a href="#cb4-23" tabindex="-1"></a>  <span class="at">x =</span> <span class="fu">c</span>(<span class="st">&quot;MDD/High/Male&quot;</span>, <span class="st">&quot;NoMDD/High/Male&quot;</span>),</span>
+<span id="cb4-24"><a href="#cb4-24" tabindex="-1"></a>  <span class="at">prob =</span> <span class="fu">c</span>(prev_hi_m, <span class="dv">1</span> <span class="sc">-</span> prev_hi_m),</span>
+<span id="cb4-25"><a href="#cb4-25" tabindex="-1"></a>  <span class="at">size =</span> N <span class="sc">/</span> <span class="dv">4</span>, <span class="at">replace =</span> <span class="cn">TRUE</span></span>
+<span id="cb4-26"><a href="#cb4-26" tabindex="-1"></a>)</span>
+<span id="cb4-27"><a href="#cb4-27" tabindex="-1"></a></span>
+<span id="cb4-28"><a href="#cb4-28" tabindex="-1"></a>f_hi_mdd <span class="ot">&lt;-</span> <span class="fu">sample</span>(</span>
+<span id="cb4-29"><a href="#cb4-29" tabindex="-1"></a>  <span class="at">x =</span> <span class="fu">c</span>(<span class="st">&quot;MDD/High/Female&quot;</span>, <span class="st">&quot;NoMDD/High/Female&quot;</span>),</span>
+<span id="cb4-30"><a href="#cb4-30" tabindex="-1"></a>  <span class="at">prob =</span> <span class="fu">c</span>(prev_hi_f, <span class="dv">1</span> <span class="sc">-</span> prev_hi_f),</span>
+<span id="cb4-31"><a href="#cb4-31" tabindex="-1"></a>  <span class="at">size =</span> N <span class="sc">/</span> <span class="dv">4</span>, <span class="at">replace =</span> <span class="cn">TRUE</span></span>
+<span id="cb4-32"><a href="#cb4-32" tabindex="-1"></a>)</span>
+<span id="cb4-33"><a href="#cb4-33" tabindex="-1"></a></span>
+<span id="cb4-34"><a href="#cb4-34" tabindex="-1"></a>initStates <span class="ot">&lt;-</span> <span class="fu">c</span>(m_lo_mdd, f_lo_mdd, m_hi_mdd, f_hi_mdd)</span></code></pre></div>
+<p>Based on these initial states, we can then create an initial
+population with birthDates reformatted to yyyymmdd format. The initial
+population should then look like the one in table below.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>initPop <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">ID =</span> <span class="dv">1</span><span class="sc">:</span>N, <span class="at">birthDate =</span> birthDates, <span class="at">initState =</span> initStates)</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>initPop<span class="sc">$</span>birthDate <span class="ot">&lt;-</span> <span class="fu">getInDateFormat</span>(initPop<span class="sc">$</span>birthDate)</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>initPop <span class="sc">%&gt;%</span> </span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>  <span class="fu">head</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>  <span class="fu">kable</span>(<span class="st">&quot;pipe&quot;</span>, <span class="at">caption =</span> <span class="st">&quot;**Example of what initPop should look like**&quot;</span>)</span></code></pre></div>
+<table>
+<caption><strong>Example of what initPop should look
+like</strong></caption>
+<thead>
+<tr class="header">
+<th align="right">ID</th>
+<th align="left">birthDate</th>
+<th align="left">initState</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">1</td>
+<td align="left">20000212</td>
+<td align="left">NoMDD/Low/Male</td>
+</tr>
+<tr class="even">
+<td align="right">2</td>
+<td align="left">20000814</td>
+<td align="left">NoMDD/Low/Male</td>
+</tr>
+<tr class="odd">
+<td align="right">3</td>
+<td align="left">20000810</td>
+<td align="left">NoMDD/Low/Male</td>
+</tr>
+<tr class="even">
+<td align="right">4</td>
+<td align="left">20000815</td>
+<td align="left">NoMDD/Low/Male</td>
+</tr>
+<tr class="odd">
+<td align="right">5</td>
+<td align="left">20001110</td>
+<td align="left">NoMDD/Low/Male</td>
+</tr>
+<tr class="even">
+<td align="right">6</td>
+<td align="left">20000821</td>
+<td align="left">NoMDD/Low/Male</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="definition-of-transition-rates" class="section level1">
+<h1>Definition of Transition Rates</h1>
+<p>We only define two sets of rates: 1. Incidence rate ??? how often
+people move from no depression to depression. 2. Remission rate ??? how
+often people move from depression to no depression.</p>
+<p>We begin by estimating the transition rates using the observed data.
+We then generate counterfactual rates under the assumption that
+individuals with low education have the same quality of social contacts
+as individuals with high education. This allows us to assess the
+potential impact of addressing modifiable factors that contribute to
+educational inequalities in MDD.</p>
+<p>In the original study we estimated these rates separately by sex,
+education level, and age group, then fitted smooth curves so a rate
+could be retrieved for any exact age <span class="citation">(see Lepe et
+al. 2024)</span>. In this example we load a simplified dataset: the
+rates are constant within each single-year age band, and we examine only
+one of the counterfactual scenarios from the paper.</p>
+<p>Here we set the mortality rate to 0 as mentioned above and load the
+rates data in.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>mortRates <span class="ot">&lt;-</span> <span class="cf">function</span>(age, calTime) {</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>  <span class="fu">return</span>(<span class="dv">0</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>}</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>rates <span class="ot">&lt;-</span> rates_mdd</span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>rates <span class="sc">%&gt;%</span></span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>  <span class="fu">head</span>(<span class="at">n =</span> <span class="fu">c</span>(<span class="dv">6</span>,<span class="dv">8</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a>  <span class="fu">kable</span>(<span class="st">&quot;html&quot;</span>, <span class="at">caption =</span> <span class="st">&quot;**Subset of transition rates per age**&quot;</span>)</span></code></pre></div>
+<table>
+<caption>
+<strong>Subset of transition rates per age</strong>
+</caption>
+<thead>
+<tr>
+<th style="text-align:right;">
+age
+</th>
+<th style="text-align:right;">
+incidence_lo_m
+</th>
+<th style="text-align:right;">
+incidence_lo_f
+</th>
+<th style="text-align:right;">
+incidence_hi_m
+</th>
+<th style="text-align:right;">
+incidence_hi_f
+</th>
+<th style="text-align:right;">
+remission_lo_m
+</th>
+<th style="text-align:right;">
+remission_lo_f
+</th>
+<th style="text-align:right;">
+remission_hi_m
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right;">
+17
+</td>
+<td style="text-align:right;">
+0.0000000
+</td>
+<td style="text-align:right;">
+0.0000000
+</td>
+<td style="text-align:right;">
+0.0000000
+</td>
+<td style="text-align:right;">
+0.0000000
+</td>
+<td style="text-align:right;">
+0.0000000
+</td>
+<td style="text-align:right;">
+0.0000000
+</td>
+<td style="text-align:right;">
+0.0000000
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+18
+</td>
+<td style="text-align:right;">
+0.0108544
+</td>
+<td style="text-align:right;">
+0.0138612
+</td>
+<td style="text-align:right;">
+0.0040147
+</td>
+<td style="text-align:right;">
+0.0051590
+</td>
+<td style="text-align:right;">
+0.1763242
+</td>
+<td style="text-align:right;">
+0.1942780
+</td>
+<td style="text-align:right;">
+0.1949342
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+19
+</td>
+<td style="text-align:right;">
+0.0106856
+</td>
+<td style="text-align:right;">
+0.0136467
+</td>
+<td style="text-align:right;">
+0.0039518
+</td>
+<td style="text-align:right;">
+0.0050782
+</td>
+<td style="text-align:right;">
+0.1755351
+</td>
+<td style="text-align:right;">
+0.1936338
+</td>
+<td style="text-align:right;">
+0.1942947
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+20
+</td>
+<td style="text-align:right;">
+0.0105168
+</td>
+<td style="text-align:right;">
+0.0134322
+</td>
+<td style="text-align:right;">
+0.0038889
+</td>
+<td style="text-align:right;">
+0.0049974
+</td>
+<td style="text-align:right;">
+0.1747961
+</td>
+<td style="text-align:right;">
+0.1930314
+</td>
+<td style="text-align:right;">
+0.1936966
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+21
+</td>
+<td style="text-align:right;">
+0.0103481
+</td>
+<td style="text-align:right;">
+0.0132176
+</td>
+<td style="text-align:right;">
+0.0038259
+</td>
+<td style="text-align:right;">
+0.0049166
+</td>
+<td style="text-align:right;">
+0.1741070
+</td>
+<td style="text-align:right;">
+0.1924708
+</td>
+<td style="text-align:right;">
+0.1931400
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+22
+</td>
+<td style="text-align:right;">
+0.0101793
+</td>
+<td style="text-align:right;">
+0.0130031
+</td>
+<td style="text-align:right;">
+0.0037630
+</td>
+<td style="text-align:right;">
+0.0048358
+</td>
+<td style="text-align:right;">
+0.1734680
+</td>
+<td style="text-align:right;">
+0.1919519
+</td>
+<td style="text-align:right;">
+0.1926249
+</td>
+</tr>
+</tbody>
+</table>
+<p>The definition of transition rates has to follow the specific format
+required by MicSim, as age and calTime have to always be supplied as
+arguments. Duration is variable and only needs to be specified as a
+function argument if used in the transition rate function.</p>
+<p>In this example the rate function simply looks up the correct value
+in the rate table we loaded earlier. We subtract 16 from each person???s
+age to select the right row because the first data row in the table
+represents age 17. All rates at age 17 are set to zero because
+individuals are not allowed to transition until they turn 18.</p>
+<p>For a more detailed explanation and examples of rate definition,
+refer to the documentation of <code>MicSim()</code> and the vignette on
+Migration Flows in this package.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>create_rate_function <span class="ot">&lt;-</span> <span class="cf">function</span>(vec) {</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>  <span class="co"># Ensures the correct column of transition rates called on by the function</span></span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>  <span class="fu">force</span>(vec)</span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>  </span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>  <span class="cf">function</span>(age, calTime) {</span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>    rate <span class="ot">&lt;-</span> vec[<span class="fu">as.integer</span>(age) <span class="sc">-</span> <span class="dv">16</span>]</span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a>    <span class="fu">return</span>(rate)</span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a>  }</span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a>}</span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a></span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a><span class="co"># Loop over relevant columns to create rate functions.</span></span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a><span class="cf">for</span> (col <span class="cf">in</span> <span class="fu">names</span>(rates)[<span class="sc">-</span><span class="dv">1</span>]) {</span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a>  <span class="co"># Extracting relevant transition rates</span></span>
+<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a>  vec <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(rates[[col]])</span>
+<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a></span>
+<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a>  <span class="co"># Creating a function for each transition rate</span></span>
+<span id="cb7-17"><a href="#cb7-17" tabindex="-1"></a>  f <span class="ot">&lt;-</span> <span class="fu">create_rate_function</span>(vec)</span>
+<span id="cb7-18"><a href="#cb7-18" tabindex="-1"></a></span>
+<span id="cb7-19"><a href="#cb7-19" tabindex="-1"></a>  <span class="co"># Assign the function to the global environment</span></span>
+<span id="cb7-20"><a href="#cb7-20" tabindex="-1"></a>  <span class="fu">assign</span>(col, f, <span class="at">envir =</span> .GlobalEnv)</span>
+<span id="cb7-21"><a href="#cb7-21" tabindex="-1"></a>}</span></code></pre></div>
+</div>
+<div id="definition-of-transition-matrix" class="section level1">
+<h1>Definition of transition matrix</h1>
+<p>Lastly, we need to assign these defined functions to the
+corresponding state transitions. This means constructing a transition
+matrix. We do this also for the absorbing state, “dead”, which no
+individual can transition into as the mortality rate is 0.</p>
+<p>Then all other possible transitions between states are defined. Note
+that we define transitions to states not only one one attribute, such as
+NoMDD -&gt; MDD, but supply transitions that only trigger for a specific
+combination of attributes. As long as transition rate functions are
+assigned to these transitions, it is possible to supply highly specific
+transitions that depend on more than one attribute from the state space
+to MicSim.</p>
+<p>Any transition not defined here is impossible and will not occur.</p>
+<p>To construct the transition matrix, we combine all the information
+into one transition matrix.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>absTransitions <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;dead&quot;</span>, <span class="st">&quot;mortRates&quot;</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>allTransitions <span class="ot">&lt;-</span> <span class="fu">cbind</span>(</span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>  <span class="fu">c</span>(<span class="st">&quot;NoMDD/Low/Male-&gt;MDD/Low/Male&quot;</span>, <span class="st">&quot;NoMDD/Low/Female-&gt;MDD/Low/Female&quot;</span>,</span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>    <span class="st">&quot;NoMDD/High/Male-&gt;MDD/High/Male&quot;</span>, <span class="st">&quot;NoMDD/High/Female-&gt;MDD/High/Female&quot;</span>,</span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>    <span class="st">&quot;MDD/Low/Male-&gt;NoMDD/Low/Male&quot;</span>, <span class="st">&quot;MDD/Low/Female-&gt;NoMDD/Low/Female&quot;</span>,</span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a>    <span class="st">&quot;MDD/High/Male-&gt;NoMDD/High/Male&quot;</span>, <span class="st">&quot;MDD/High/Female-&gt;NoMDD/High/Female&quot;</span>),</span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a>  <span class="fu">c</span>(<span class="st">&quot;incidence_lo_m&quot;</span>, <span class="st">&quot;incidence_lo_f&quot;</span>,</span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a>    <span class="st">&quot;incidence_hi_m&quot;</span>, <span class="st">&quot;incidence_hi_f&quot;</span>,</span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a>    <span class="st">&quot;remission_lo_m&quot;</span>, <span class="st">&quot;remission_lo_f&quot;</span>,</span>
+<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a>    <span class="st">&quot;remission_hi_m&quot;</span>, <span class="st">&quot;remission_hi_f&quot;</span>)</span>
+<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a>)</span>
+<span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a></span>
+<span id="cb8-14"><a href="#cb8-14" tabindex="-1"></a>transitionMatrix <span class="ot">&lt;-</span> <span class="fu">buildTransitionMatrix</span>(</span>
+<span id="cb8-15"><a href="#cb8-15" tabindex="-1"></a>  <span class="at">allTransitions =</span> allTransitions,</span>
+<span id="cb8-16"><a href="#cb8-16" tabindex="-1"></a>  <span class="at">stateSpace =</span> stateSpace,</span>
+<span id="cb8-17"><a href="#cb8-17" tabindex="-1"></a>  <span class="at">absTransitions =</span> absTransitions</span>
+<span id="cb8-18"><a href="#cb8-18" tabindex="-1"></a>)</span></code></pre></div>
+<p>In this example, we consider a counterfactual case, for which we also
+define transitions. These are the same, the only difference is between
+the transition rates. For this reason, we just adjust the column that
+assigns the rate functions.</p>
+<p>Same as above, these transitions are then combined into a transition
+matrix.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>cf_allTransitions <span class="ot">&lt;-</span> allTransitions</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>cf_allTransitions[, <span class="dv">2</span>] <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">&quot;cf_&quot;</span>, cf_allTransitions[, <span class="dv">2</span>])</span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>cf_transitionMatrix <span class="ot">&lt;-</span> <span class="fu">buildTransitionMatrix</span>(</span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>  <span class="at">allTransitions =</span> cf_allTransitions,</span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a>  <span class="at">stateSpace =</span> stateSpace,</span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a>  <span class="at">absTransitions =</span> absTransitions</span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a>)</span></code></pre></div>
+</div>
+<div id="running-the-simulations" class="section level1">
+<h1>Running the simulations</h1>
+<p>We set a seed here to ensure reproducibility and then simulate
+educational inequalities in depression under observed conditions.</p>
+<p>We first run the main simulation and then the counterfactual (cf)
+simulation.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1234</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>simpop <span class="ot">&lt;-</span> <span class="fu">micSim</span>(<span class="at">initPop=</span>initPop, <span class="at">transitionMatrix=</span>transitionMatrix,</span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a>                 <span class="at">absStates=</span>absStates, <span class="at">maxAge=</span>maxage, <span class="at">simHorizon=</span>simHorizon)</span></code></pre></div>
+<pre><code>## Initialization ... 
+## [1] &quot;Starting at:  2025-08-29 10:08:48.8835&quot;
+## [1] &quot;Ending at:  2025-08-29 10:08:53.742976&quot;
+## Simulation is running ... 
+## Year:  2018 
+## Year:  2019 
+## Year:  2020 
+## Year:  2021 
+## Year:  2022 
+## Year:  2023 
+## Year:  2024 
+## Year:  2025 
+## Year:  2026 
+## Year:  2027 
+## Year:  2028 
+## Year:  2029 
+## Year:  2030 
+## Year:  2031 
+## Year:  2032 
+## Year:  2033 
+## Year:  2034 
+## Year:  2035 
+## Year:  2036 
+## Year:  2037 
+## Year:  2038 
+## Year:  2039 
+## Year:  2040 
+## Year:  2041 
+## Year:  2042 
+## Year:  2043 
+## Year:  2044 
+## Year:  2045 
+## Year:  2046 
+## Year:  2047 
+## Year:  2048 
+## Year:  2049 
+## Year:  2050 
+## Year:  2051 
+## Year:  2052 
+## Year:  2053 
+## Year:  2054 
+## Year:  2055 
+## Year:  2056 
+## Year:  2057 
+## Year:  2058 
+## Year:  2059 
+## Year:  2060 
+## Year:  2061 
+## Year:  2062 
+## Year:  2063 
+## Year:  2064 
+## Year:  2065 
+## Simulation has finished.
+## ------------------</code></pre>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a>cf_simpop <span class="ot">&lt;-</span> <span class="fu">micSim</span>(<span class="at">initPop=</span>initPop, <span class="at">transitionMatrix=</span>cf_transitionMatrix,</span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a>                    <span class="at">absStates=</span>absStates, <span class="at">maxAge=</span>maxage, <span class="at">simHorizon=</span>simHorizon)</span></code></pre></div>
+<pre><code>## Initialization ... 
+## [1] &quot;Starting at:  2025-08-29 10:08:56.204804&quot;
+## [1] &quot;Ending at:  2025-08-29 10:09:00.299825&quot;
+## Simulation is running ... 
+## Year:  2018 
+## Year:  2019 
+## Year:  2020 
+## Year:  2021 
+## Year:  2022 
+## Year:  2023 
+## Year:  2024 
+## Year:  2025 
+## Year:  2026 
+## Year:  2027 
+## Year:  2028 
+## Year:  2029 
+## Year:  2030 
+## Year:  2031 
+## Year:  2032 
+## Year:  2033 
+## Year:  2034 
+## Year:  2035 
+## Year:  2036 
+## Year:  2037 
+## Year:  2038 
+## Year:  2039 
+## Year:  2040 
+## Year:  2041 
+## Year:  2042 
+## Year:  2043 
+## Year:  2044 
+## Year:  2045 
+## Year:  2046 
+## Year:  2047 
+## Year:  2048 
+## Year:  2049 
+## Year:  2050 
+## Year:  2051 
+## Year:  2052 
+## Year:  2053 
+## Year:  2054 
+## Year:  2055 
+## Year:  2056 
+## Year:  2057 
+## Year:  2058 
+## Year:  2059 
+## Year:  2060 
+## Year:  2061 
+## Year:  2062 
+## Year:  2063 
+## Year:  2064 
+## Year:  2065 
+## Simulation has finished.
+## ------------------</code></pre>
+</div>
+<div id="processing-the-output" class="section level1">
+<h1>Processing the output</h1>
+<p>After the standard workflow required to run MicSim, the data can be
+processed in different ways depending on what one is interested in.</p>
+<p>In this example, we first convert the output to long format, where
+each row represents a specific episode that an individual experienced.
+We additionally create variables that indicate the age at the start and
+end of each episode, as well as a variable indicating whether the data
+is from the observed or counterfactual simulation. For convenience, the
+output from both simulations is merged into one data frame, which is
+then used for further analysis.</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a>simpop_long <span class="ot">&lt;-</span> simpop <span class="sc">%&gt;%</span></span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a>  <span class="fu">convertToLongFormat</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a>    <span class="at">agestart =</span> <span class="fu">getAgeInDays</span>(Tstart, birthDate) <span class="sc">/</span> <span class="fl">365.25</span>,</span>
+<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a>    <span class="at">agestart =</span> <span class="fu">case_when</span>(</span>
+<span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a>      agestart <span class="sc">&lt;</span> minage <span class="sc">~</span> minage,</span>
+<span id="cb14-7"><a href="#cb14-7" tabindex="-1"></a>      agestart <span class="sc">&gt;</span> maxage <span class="sc">~</span> maxage,</span>
+<span id="cb14-8"><a href="#cb14-8" tabindex="-1"></a>      <span class="cn">TRUE</span> <span class="sc">~</span> agestart</span>
+<span id="cb14-9"><a href="#cb14-9" tabindex="-1"></a>    ),</span>
+<span id="cb14-10"><a href="#cb14-10" tabindex="-1"></a>    <span class="at">agestop =</span> <span class="fu">getAgeInDays</span>(Tstop, birthDate) <span class="sc">/</span> <span class="fl">365.25</span>,</span>
+<span id="cb14-11"><a href="#cb14-11" tabindex="-1"></a>    <span class="at">agestop =</span> <span class="fu">case_when</span>(</span>
+<span id="cb14-12"><a href="#cb14-12" tabindex="-1"></a>      agestop <span class="sc">&lt;</span> minage <span class="sc">~</span> minage,</span>
+<span id="cb14-13"><a href="#cb14-13" tabindex="-1"></a>      agestop <span class="sc">&gt;</span> maxage <span class="sc">~</span> maxage,</span>
+<span id="cb14-14"><a href="#cb14-14" tabindex="-1"></a>      <span class="cn">TRUE</span> <span class="sc">~</span> agestop</span>
+<span id="cb14-15"><a href="#cb14-15" tabindex="-1"></a>    ),</span>
+<span id="cb14-16"><a href="#cb14-16" tabindex="-1"></a>    <span class="at">sim =</span> <span class="st">&quot;Observed&quot;</span></span>
+<span id="cb14-17"><a href="#cb14-17" tabindex="-1"></a>  )</span>
+<span id="cb14-18"><a href="#cb14-18" tabindex="-1"></a></span>
+<span id="cb14-19"><a href="#cb14-19" tabindex="-1"></a>cf_simpop_long <span class="ot">&lt;-</span> cf_simpop <span class="sc">%&gt;%</span></span>
+<span id="cb14-20"><a href="#cb14-20" tabindex="-1"></a>  <span class="fu">convertToLongFormat</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb14-21"><a href="#cb14-21" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb14-22"><a href="#cb14-22" tabindex="-1"></a>    <span class="at">agestart =</span> <span class="fu">getAgeInDays</span>(Tstart, birthDate) <span class="sc">/</span> <span class="fl">365.25</span>,</span>
+<span id="cb14-23"><a href="#cb14-23" tabindex="-1"></a>    <span class="at">agestart =</span> <span class="fu">case_when</span>(</span>
+<span id="cb14-24"><a href="#cb14-24" tabindex="-1"></a>      agestart <span class="sc">&lt;</span> minage <span class="sc">~</span> minage,</span>
+<span id="cb14-25"><a href="#cb14-25" tabindex="-1"></a>      agestart <span class="sc">&gt;</span> maxage <span class="sc">~</span> maxage,</span>
+<span id="cb14-26"><a href="#cb14-26" tabindex="-1"></a>      <span class="cn">TRUE</span> <span class="sc">~</span> agestart</span>
+<span id="cb14-27"><a href="#cb14-27" tabindex="-1"></a>    ),</span>
+<span id="cb14-28"><a href="#cb14-28" tabindex="-1"></a>    <span class="at">agestop =</span> <span class="fu">getAgeInDays</span>(Tstop, birthDate) <span class="sc">/</span> <span class="fl">365.25</span>,</span>
+<span id="cb14-29"><a href="#cb14-29" tabindex="-1"></a>    <span class="at">agestop =</span> <span class="fu">case_when</span>(</span>
+<span id="cb14-30"><a href="#cb14-30" tabindex="-1"></a>      agestop <span class="sc">&lt;</span> minage <span class="sc">~</span> minage,</span>
+<span id="cb14-31"><a href="#cb14-31" tabindex="-1"></a>      agestop <span class="sc">&gt;</span> maxage <span class="sc">~</span> maxage,</span>
+<span id="cb14-32"><a href="#cb14-32" tabindex="-1"></a>      <span class="cn">TRUE</span> <span class="sc">~</span> agestop</span>
+<span id="cb14-33"><a href="#cb14-33" tabindex="-1"></a>    ),</span>
+<span id="cb14-34"><a href="#cb14-34" tabindex="-1"></a>    <span class="at">sim =</span> <span class="st">&quot;Counterfactual&quot;</span></span>
+<span id="cb14-35"><a href="#cb14-35" tabindex="-1"></a>  )</span>
+<span id="cb14-36"><a href="#cb14-36" tabindex="-1"></a></span>
+<span id="cb14-37"><a href="#cb14-37" tabindex="-1"></a>mydata <span class="ot">&lt;-</span> simpop_long <span class="sc">%&gt;%</span></span>
+<span id="cb14-38"><a href="#cb14-38" tabindex="-1"></a>  <span class="fu">bind_rows</span>(cf_simpop_long) <span class="sc">%&gt;%</span></span>
+<span id="cb14-39"><a href="#cb14-39" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb14-40"><a href="#cb14-40" tabindex="-1"></a>    <span class="at">sim =</span> <span class="fu">factor</span>(sim, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">&quot;Observed&quot;</span>, <span class="st">&quot;Counterfactual&quot;</span>)),</span>
+<span id="cb14-41"><a href="#cb14-41" tabindex="-1"></a>    <span class="at">table_order =</span> <span class="fu">case_when</span>(</span>
+<span id="cb14-42"><a href="#cb14-42" tabindex="-1"></a>      sim <span class="sc">==</span> <span class="st">&quot;Observed&quot;</span> <span class="sc">&amp;</span> education <span class="sc">==</span> <span class="st">&quot;High&quot;</span> <span class="sc">~</span> <span class="dv">0</span>,</span>
+<span id="cb14-43"><a href="#cb14-43" tabindex="-1"></a>      sim <span class="sc">==</span> <span class="st">&quot;Observed&quot;</span> <span class="sc">&amp;</span> education <span class="sc">==</span> <span class="st">&quot;Low&quot;</span> <span class="sc">~</span> <span class="dv">1</span>,</span>
+<span id="cb14-44"><a href="#cb14-44" tabindex="-1"></a>      sim <span class="sc">==</span> <span class="st">&quot;Counterfactual&quot;</span> <span class="sc">&amp;</span> education <span class="sc">==</span> <span class="st">&quot;Low&quot;</span> <span class="sc">~</span> <span class="dv">2</span></span>
+<span id="cb14-45"><a href="#cb14-45" tabindex="-1"></a>    )</span>
+<span id="cb14-46"><a href="#cb14-46" tabindex="-1"></a>  )</span></code></pre></div>
+</div>
+<div id="analyzing-output" class="section level1">
+<h1>Analyzing output</h1>
+<p>In this study, we aimed to simulate the development of educational
+inequalities in MDD across the life course, and to estimate the
+potential impact of intervening on modifiable factors. In this example,
+we focus on the educational inequalities in both the age-specific
+prevalence of MDD and the life course prevalence of MDD. It should be
+noted that we are not limited to only assessing the prevalence of MDD.
+For example, in the publication by <span class="citation">Lepe et al.
+(2024)</span> we also look at the age of onset of MDD and the duration
+of MDD episodes.</p>
+<div id="age-specific-prevalence" class="section level2">
+<h2>Age-specific prevalence</h2>
+<p>We calculate the age-specific prevalence by dividing the number of
+people with MDD in each one-year age band by the total size of that
+subgroup (N = 250). These values are then plotted for easier
+interpretation.</p>
+<p>We clearly show that individuals with low education are more likely
+to experience MDD than individuals with high education, which agrees
+with the literature. We would also expect the female curves to lie above
+the male curves throughout, but here the lines cross within each
+education level. This crossover is simply Monte-Carlo noise due to the
+number of synthethic individuals in the simulation (N = 1000). In the
+published study we avoided this problem by simulating 500000
+individuals, but that size is too computationally heavy for this
+example.</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a>prev <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> minage<span class="sc">:</span>maxage){</span>
+<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a>  prev[[i]] <span class="ot">&lt;-</span> simpop_long <span class="sc">%&gt;%</span></span>
+<span id="cb15-4"><a href="#cb15-4" tabindex="-1"></a>    <span class="fu">filter</span>((health <span class="sc">==</span> <span class="st">&quot;MDD&quot;</span> <span class="sc">&amp;</span> agestart <span class="sc">&lt;=</span> i <span class="sc">&amp;</span> agestop <span class="sc">&gt;=</span> i)) <span class="sc">%&gt;%</span></span>
+<span id="cb15-5"><a href="#cb15-5" tabindex="-1"></a>    <span class="fu">group_by</span>(sex, education) <span class="sc">%&gt;%</span></span>
+<span id="cb15-6"><a href="#cb15-6" tabindex="-1"></a>    <span class="fu">summarise</span>(<span class="at">prev =</span> <span class="fu">n</span>()<span class="sc">/</span>(N<span class="sc">*</span>.<span class="dv">25</span>) <span class="sc">*</span> <span class="dv">100</span>, <span class="at">.groups =</span> <span class="st">&quot;keep&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb15-7"><a href="#cb15-7" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">age =</span> i) <span class="sc">%&gt;%</span></span>
+<span id="cb15-8"><a href="#cb15-8" tabindex="-1"></a>    <span class="fu">ungroup</span>()</span>
+<span id="cb15-9"><a href="#cb15-9" tabindex="-1"></a>}</span>
+<span id="cb15-10"><a href="#cb15-10" tabindex="-1"></a></span>
+<span id="cb15-11"><a href="#cb15-11" tabindex="-1"></a>prev <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(prev)</span>
+<span id="cb15-12"><a href="#cb15-12" tabindex="-1"></a></span>
+<span id="cb15-13"><a href="#cb15-13" tabindex="-1"></a>prev <span class="sc">%&gt;%</span></span>
+<span id="cb15-14"><a href="#cb15-14" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb15-15"><a href="#cb15-15" tabindex="-1"></a>  <span class="fu">geom_line</span>(</span>
+<span id="cb15-16"><a href="#cb15-16" tabindex="-1"></a>    <span class="fu">aes</span>(age, prev, <span class="at">color =</span> sex, <span class="at">linetype =</span> education), </span>
+<span id="cb15-17"><a href="#cb15-17" tabindex="-1"></a>    <span class="at">linewidth =</span> <span class="dv">1</span></span>
+<span id="cb15-18"><a href="#cb15-18" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb15-19"><a href="#cb15-19" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">breaks =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">6</span>)) <span class="sc">+</span></span>
+<span id="cb15-20"><a href="#cb15-20" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb15-21"><a href="#cb15-21" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">&quot;Prevalence of MDD %&quot;</span>,</span>
+<span id="cb15-22"><a href="#cb15-22" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">&quot;Age (years)&quot;</span>,</span>
+<span id="cb15-23"><a href="#cb15-23" tabindex="-1"></a>    <span class="at">colour =</span> <span class="st">&quot;Sex&quot;</span>,</span>
+<span id="cb15-24"><a href="#cb15-24" tabindex="-1"></a>    <span class="at">linetype =</span> <span class="st">&quot;Education&quot;</span></span>
+<span id="cb15-25"><a href="#cb15-25" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb15-26"><a href="#cb15-26" tabindex="-1"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb15-27"><a href="#cb15-27" tabindex="-1"></a>  <span class="fu">theme</span>(</span>
+<span id="cb15-28"><a href="#cb15-28" tabindex="-1"></a>    <span class="at">legend.position =</span> <span class="st">&quot;right&quot;</span>,</span>
+<span id="cb15-29"><a href="#cb15-29" tabindex="-1"></a>    <span class="at">legend.box.margin =</span> <span class="fu">margin</span>(<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>),</span>
+<span id="cb15-30"><a href="#cb15-30" tabindex="-1"></a>    <span class="at">plot.title.position =</span> <span class="st">&quot;plot&quot;</span>,</span>
+<span id="cb15-31"><a href="#cb15-31" tabindex="-1"></a>    <span class="at">plot.caption.position =</span> <span class="st">&quot;plot&quot;</span>,</span>
+<span id="cb15-32"><a href="#cb15-32" tabindex="-1"></a>    <span class="at">plot.margin =</span> <span class="fu">margin</span>(<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>)</span>
+<span id="cb15-33"><a href="#cb15-33" tabindex="-1"></a>  )</span></code></pre></div>
+<p><img role="img" src="data:image/png;base64,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" /><!-- --></p>
+</div>
+<div id="life-course-prevalence" class="section level2">
+<h2>Life course prevalence</h2>
+<p>Lastly, we calculate life-course prevalence, which is the proportion
+of people who experience MDD at any point in their life, using both the
+observed rates and the counterfactual rates. The code here filters by
+Episode &lt;= 2 to avoid duplicate individuals. This works as people can
+only transition between the two states, so anyone with depression will
+have had it in either their first or second episode.</p>
+<p>Consistent with earlier findings, those with low education are more
+likely than those with high education to experience MDD at least once.
+In the counterfactual scenario, life-course prevalence falls for the
+low-education group, but it still remains well above the level observed
+for the high-education group.</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a>lc_prev <span class="ot">&lt;-</span> mydata <span class="sc">%&gt;%</span></span>
+<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a>  <span class="fu">filter</span>(Episode <span class="sc">&lt;=</span> <span class="dv">2</span>, health <span class="sc">==</span> <span class="st">&quot;MDD&quot;</span>, <span class="sc">!</span><span class="fu">is.na</span>(table_order)) <span class="sc">%&gt;%</span></span>
+<span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a>  <span class="fu">group_by</span>(sim, education, sex) <span class="sc">%&gt;%</span></span>
+<span id="cb16-4"><a href="#cb16-4" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">proportion_MDD =</span> <span class="fu">round</span>(<span class="fu">n</span>() <span class="sc">/</span> (N <span class="sc">*</span> .<span class="dv">25</span>) <span class="sc">*</span> <span class="dv">100</span>, <span class="dv">1</span>), <span class="at">.groups =</span> <span class="st">&quot;drop&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb16-5"><a href="#cb16-5" tabindex="-1"></a>  <span class="fu">pivot_wider</span>(</span>
+<span id="cb16-6"><a href="#cb16-6" tabindex="-1"></a>    <span class="at">names_from =</span> <span class="fu">c</span>(sex), <span class="at">names_glue =</span> <span class="st">&quot;{sex} (n%)&quot;</span>,</span>
+<span id="cb16-7"><a href="#cb16-7" tabindex="-1"></a>    <span class="at">values_from =</span> proportion_MDD</span>
+<span id="cb16-8"><a href="#cb16-8" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb16-9"><a href="#cb16-9" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">Scenario =</span> sim, <span class="at">Education =</span> education)</span>
+<span id="cb16-10"><a href="#cb16-10" tabindex="-1"></a></span>
+<span id="cb16-11"><a href="#cb16-11" tabindex="-1"></a></span>
+<span id="cb16-12"><a href="#cb16-12" tabindex="-1"></a><span class="fu">kable</span>(lc_prev)</span></code></pre></div>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Scenario</th>
+<th align="left">Education</th>
+<th align="right">Female (n%)</th>
+<th align="right">Male (n%)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Observed</td>
+<td align="left">High</td>
+<td align="right">14.0</td>
+<td align="right">9.6</td>
+</tr>
+<tr class="even">
+<td align="left">Observed</td>
+<td align="left">Low</td>
+<td align="right">38.0</td>
+<td align="right">28.0</td>
+</tr>
+<tr class="odd">
+<td align="left">Counterfactual</td>
+<td align="left">Low</td>
+<td align="right">26.8</td>
+<td align="right">28.0</td>
+</tr>
+</tbody>
+</table>
+<div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
+<div id="ref-lepe2024" class="csl-entry">
+Lepe, Alexander, Liza A Hoveling, Michaël Boissonneault, Joop A A de
+Beer, Sijmen A Reijneveld, Marlou L A de Kroon, and Aart C Liefbroer.
+2024. <span>“Educational Inequalities in Major Depressive Disorder
+Prevalence, Timing and Duration Among Adults over the Life Course: A
+Microsimulation Analysis Based on the Lifelines Cohort Study.”</span>
+<em>European Journal of Public Health</em> 34 (4): 723–29. <a href="https://doi.org/10.1093/eurpub/ckae066">https://doi.org/10.1093/eurpub/ckae066</a>.
+</div>
+<div id="ref-zinn2011" class="csl-entry">
+Zinn, Sabine. 2011. <span>“A <span>Continuous-Time
+Microsimulation</span> and <span>First Steps Towards</span> a
+<span>Multi-Level Approach</span> in <span>Demography</span>.”</span>
+PhD thesis, Universität Rostock. <a href="https://doi.org/10.18453/rosdok_id00000951">https://doi.org/10.18453/rosdok_id00000951</a>.
+</div>
+</div>
+</div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

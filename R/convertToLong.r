@@ -1,14 +1,57 @@
-####################################################################################
-####################################################################################
-## FUNCTION TO CONVERT MICROSIMULATION OUTPUT INTO LONG FORMAT                    ##
-## SZ, June 2022                                                                  ##
-####################################################################################
-####################################################################################
-# Function requires as global variables (from microsimulation definition):  
-# `absTranstions': matrix comprising information on all transitions to absorbent states
-# `allTransitions': matirix comprising information on all transitions possible between values of state variables 
-# `simHorizon': simulation horizon (i.e., start and end date)
-
+#####################################################################################
+#####################################################################################
+### FUNCTION TO CONVERT MICROSIMULATION OUTPUT INTO LONG FORMAT                    ##
+### SZ, June 2022                                                                  ##
+#####################################################################################
+#####################################################################################
+#'
+#' convertToLongFormat
+#'
+#' Reshaping microsimulation output into long format
+#'
+#' @usage convertToLongFormat(pop,migr=FALSE)
+#' @description The function reshapes the output given by \link{micSim} or by \link{micSimParallel} into long format. In long format, the data comprises for each episode which an individual experiences one row.
+#'
+#' @param pop The data frame \code{pop} contains the whole synthetic population considered during simulation including all events generated. For each individual \code{pop} contains as many rows as the individual performed transitions during simulation.
+#' @param migr A logical variable indicating whether the simulation model considers immigration. The default setting is "no immigration considered": \code{migr=FALSE}.
+#'
+#' @details \code{convertToLongFormat} uses information from the definition of the microsimulation model.
+#' In particular, it uses \code{stateSpace}, \code{absTransitions}, \code{allTransitions}, \code{simHorizon}, and optionally \code{immigrPop}.
+#' (For a description of these objects see \link{micSim}.) \code{stateSpace}, \code{absTransitions}, \code{allTransitions},  \code{simHorizon}, and \code{immigrPop} are globally defined,
+#' i.e., they are already part of the workspace. Thus, they do not have to be given to \code{convertToLongFormat} as extra input parameters.
+#'
+#' Function requires as global variables (from microsimulation definition):
+#' 'absTranstions': matrix comprising information on all transitions to absorbent states
+#' 'allTransitions': matrix comprising information on all transitions possible between values of state variables
+#' 'simHorizon': simulation horizon (i.e., start and end date)
+#'
+#' @returns  A data frame comprising the microsimulation output in long format.
+#' \itemize{
+#'  \item \code{ID} is the unique numerical person identifier of an individual.
+#'  \item \code{birthDate} is the birth date of an individual.
+#'  \item The variables \code{Tstart} and \code{Tstop} mark the start and the ending dates of episodes.
+#'  \item \code{statusEntry} specifies whether the entry into an episode has been observed. Value "1" marks an observed entry and "0" marks a left truncated episode.
+#'  \item \code{statusExit} specifies whether a transition between two states or right censoring completed an episode. Value "1" indicates a transition and "0" a censoring event.
+#'  \item \code{OD} names the transition which completed an episode. Here, right censoring is marked by "cens".
+#'  \item \code{ns} gives the number of episodes an individual has passed.
+#'  \item \code{Episode} enumerates the episodes an individual has passed.
+#'  \item The last columns of the data frame contain for each individual and episode the values of the state variables during that episode such as "sex", "education", etc.
+#'  \item Birth and transition times are given as calendar dates in form of chron objects.
+#' }
+#'
+#' @examples
+#'
+#' \dontrun{
+#' # Run microsimulation before, e.g., the complex example
+#' # described on the help page of the function "micSim".
+#'
+#' pop <- micSim(initPop, immigrPop, transitionMatrix, absStates, initStates, initStatesProb,
+#'         maxAge, simHorizon, fertTr)
+#' popLong <- convertToLongFormat(pop,migr=TRUE)
+#' }
+#' @export
+#'
+#'
 convertToLongFormat <- function(pop, migr=FALSE) {
   
   # Take global variables used from global environment
@@ -20,70 +63,72 @@ convertToLongFormat <- function(pop, migr=FALSE) {
     immigrPop <- mget('immigrPop', envir=globalenv(), ifnotfound=list(0))$immigrPop
   
   if(is.vector(absTransitions))
-    absTransitions <- matrix(unlist(absTransitions), ncol=2, nrow=1)  
-  absStates <- absTransitions[,1]  
-  if(is.null(dim(stateSpace))){    
-    stateSpaceTMP <- as.data.frame(matrix(unlist(stateSpace), ncol=1)) 
+    absTransitions <- matrix(unlist(absTransitions), ncol=2, nrow=1)
+  absStates <- absTransitions[,1]
+  if(is.null(dim(stateSpace))){
+    stateSpaceTMP <- as.data.frame(matrix(unlist(stateSpace), ncol=1))
     colnames(stateSpaceTMP) <- attr(stateSpace,'name')
     stateSpace <- stateSpaceTMP
   }
   
   # --------------------------------------------------------------------------------------------------------------------
   # --------------------------------------------------------------------------------------------------------------------
-  # Set of auxiliary function used in transformation process 
+  # Set of auxiliary function used in transformation process
   # --------------------------------------------------------------------------------------------------------------------
   # --------------------------------------------------------------------------------------------------------------------
-  # Extract transition between values of state variables (using information given in `absTranstions' and `allTransitions')
+  # Extract transition between values of state variables (using information given in "absTranstions" and "allTransitions")
+  
   getTransition <- function(oSdS){
-     oS <- oSdS[1]
-     dS <- oSdS[2]
-     tr <- ''
-     if(is.na(oS) | is.na(dS)){
+    oS <- oSdS[1]
+    dS <- oSdS[2]
+    tr <- ''
+    if(is.na(oS) | is.na(dS)){
       tr <- 'cens'
-     } else {
-       oS <- as.character(unlist(oS))
-       dS <- as.character(unlist(dS))
-       if(dS %in% c("dead", "rest", absTransitions[,1])){
-         tr <- dS
-       } else {
+    } else {
+      oS <- as.character(unlist(oS))
+      dS <- as.character(unlist(dS))
+      if(dS %in% c("dead", "rest", absTransitions[,1])){
+        tr <- dS
+      } else {
         oS <- unlist(strsplit(oS,split='/'))
         dS <- unlist(strsplit(dS,split='/'))
         cid <- which(allTransitions[,1] %in% paste(oS,dS, sep='->'))
         if(length(cid)==1){
           tr <- allTransitions[cid,1]
-        } else {   
+        } else {
           cad <- which(oS!=dS)
           tr <- paste(oS[cad],dS[cad],sep='->')
         }
-       }     
-     }
-     return(tr)   
+      }
+    }
+    return(tr)
   }
-  # According to transition given, create state of destination by replacing value of state variable 
+  # According to transition given, create state of destination by replacing value of state variable
+  
   replaceStateValue <- function(vec){
-   tr <- as.character(unlist(vec[length(vec)]))
-   tr <- unlist(strsplit(tr,split='->'))
-   att <- vec[-length(vec)]
-   att[which(att==tr[1])] <- tr[2]
-   return(att)
+    tr <- as.character(unlist(vec[length(vec)]))
+    tr <- unlist(strsplit(tr,split='->'))
+    att <- vec[-length(vec)]
+    att[which(att==tr[1])] <- tr[2]
+    return(att)
   }
   # Create sequence of numbers
   giveSeq <- function(nu){
-     return(1:nu)
+    return(1:nu)
   }
- 
+  
   # --------------------------------------------------------------------------------------------------------------------
   # --------------------------------------------------------------------------------------------------------------------
   # Transform output of microsimulation into data in long format
   # --------------------------------------------------------------------------------------------------------------------
-  # -------------------------------------------------------------------------------------------------------------------- 
+  # --------------------------------------------------------------------------------------------------------------------
   if("motherID" %in% colnames(pop))
     pop <- pop[,!(colnames(pop) %in% "motherID")]
   id <- pop[,'ID', drop=F]
   birthDate <- pop[,'birthDate']
   birthyear <- ifelse(is.na(pop[,'birthDate']), NA, 1970+getInDays(pop[,'birthDate'])/365.25) # exact birth year with digits
-  trYear <- ifelse(is.na(pop[,'transitionTime']), NA, 1970+getInDays(pop[,'transitionTime'])/365.25) # exact transition time (in years) with digits   
-  trDate <- pop[,'transitionTime'] 
+  trYear <- ifelse(is.na(pop[,'transitionTime']), NA, 1970+getInDays(pop[,'transitionTime'])/365.25) # exact transition time (in years) with digits
+  trDate <- pop[,'transitionTime']
   Tstop <- pop[,'transitionTime']
   date <- Tstop
   popLong <- data.frame(id,birthDate,birthyear,trYear,trDate,Tstop,stringsAsFactors=FALSE)
@@ -91,30 +136,30 @@ convertToLongFormat <- function(pop, migr=FALSE) {
   fromState <- do.call(rbind,strsplit(as.character(pop[,'From']), split='/'))
   initState <- do.call(rbind,strsplit(as.character(pop[,'initState']),split='/'))
   idMissVar <- which(is.na(fromState[,1]))
-  fromState[idMissVar,] <- initState[idMissVar,] 
-  # Create for each state variable considered a column in the `newly' constructed data set 
+  fromState[idMissVar,] <- initState[idMissVar,]
+  # Create for each state variable considered a column in the `newly' constructed data set
   for(i in 1:dim(stateSpace)[2]){
-   nam <- names(stateSpace)[i]
-   colNam <- c(colnames(popLong), nam)
-   popLong <- cbind(popLong,fromState[,i])
-   colnames(popLong) <- colNam
+    nam <- names(stateSpace)[i]
+    colNam <- c(colnames(popLong), nam)
+    popLong <- cbind(popLong,fromState[,i])
+    colnames(popLong) <- colNam
   }
-  # Describe observation scheme: 
+  # Describe observation scheme:
   # statusEntry: 0: left trunction, 1: entry observed
-  statusEntry <- rep(1,length(fromState[,1])) 
+  statusEntry <- rep(1,length(fromState[,1]))
   # statusExit: 0: right censoring, 1: (relevant) transition observed
   statusExit <- rep(1,length(fromState[,1]))
   statusExit[idMissVar] <- rep(0, length(idMissVar))
   popLong <- data.frame(popLong, statusEntry, statusExit, stringsAsFactors=FALSE)
-  # There are newborns who only experienced birth during simulation. 
-  # These individuals are (right) censored at simulation end. 
+  # There are newborns who only experienced birth during simulation.
+  # These individuals are (right) censored at simulation end.
   isCensNB <- which(is.na(popLong[,'Tstop']))
   if(length(isCensNB)>0)
-    popLong[isCensNB,'Tstop'] <- simHorizon[2]  
+    popLong[isCensNB,'Tstop'] <- simHorizon[2]
   # Identify from information given in the combined states the transitions between values of the state variables.
   OD <- apply(pop[,c('From','To')],1,getTransition)
   popLong <- data.frame(popLong, OD, stringsAsFactors=FALSE)
-  # Beware of transitions into absorbent states and censored transitions. 
+  # Beware of transitions into absorbent states and censored transitions.
   # Furthermore, account for the fact that all individuals who are still alive at simulation end will experience
   # a censoring event then.
   idSet <- popLong[which((popLong[,'OD'] %in% c("dead", "rest", absTransitions[,1])) | (popLong[,'statusExit'] == 0)),'ID']
@@ -123,7 +168,7 @@ convertToLongFormat <- function(pop, migr=FALSE) {
     popLongCensSE <- popLong[popLong[,'ID'] %in% idCensSE,]
     popLongCensSE <- popLongCensSE[which(c(diff(as.numeric(popLongCensSE[,'ID'])),2)!=0),]
     odId <- which(names(popLong)=='OD')
-    ReplMat <- apply(popLongCensSE[,c(7:(6+dim(stateSpace)[2]),odId)],1, replaceStateValue) 
+    ReplMat <- apply(popLongCensSE[,c(7:(6+dim(stateSpace)[2]),odId)],1, replaceStateValue)
     popLongCensSE[,7:(6+dim(stateSpace)[2])] <- t(ReplMat)
     popLongCensSE[,'statusExit'] <- 0
     popLongCensSE[,'OD'] <- 'cens'
@@ -134,11 +179,11 @@ convertToLongFormat <- function(pop, migr=FALSE) {
   # Extract episode starting time and age at episode starting time.
   popLong$Tstart <- c(NA,popLong$Tstop[-length(popLong[,1])])
   suppressWarnings(popLong$Tstart[!duplicated(popLong[,'ID'])] <- NA)
-  # Beware we have not observed the episode start of individuals being part of the starting population (=left truncation). 
-  simStartYear <- 1970 + getInDays(simHorizon[1])/365.25 
+  # Beware we have not observed the episode start of individuals being part of the starting population (=left truncation).
+  simStartYear <- 1970 + getInDays(simHorizon[1])/365.25
   bornInSimId <- which(is.na(popLong$Tstart) & popLong$birthyear >= simStartYear)
   bornOutSimId <- which(is.na(popLong$Tstart)& popLong$birthyear < simStartYear)
-  popLong$Tstart[bornInSimId] <- popLong$birthDate[bornInSimId] 
+  popLong$Tstart[bornInSimId] <- popLong$birthDate[bornInSimId]
   popLong$Tstart[bornOutSimId] <- simHorizon[1]
   popLong$statusEntry[bornOutSimId] <- 0
   # The timing of the first episodes reported for immigrants has to be adjusted to account for the fact that we have not
@@ -163,29 +208,18 @@ convertToLongFormat <- function(pop, migr=FALSE) {
   ns <- ns[order(as.numeric(as.character(ns[,1]))),]
   colnames(ns) <- c('ID','ns')
   popLong <- merge(popLong, ns, by='ID')
-  popLong <- popLong[order(as.numeric(popLong[,c('ID')])),] 
+  popLong <- popLong[order(as.numeric(popLong[,c('ID')])),]
   # For each individual enumerate episodes.
   nsU <- popLong$ns[which(!duplicated(popLong[,'ID']))]
   popLong$Episode <- unlist(sapply(nsU,giveSeq))
   # Select information to return.
   idCovs <- 6:(5+dim(stateSpace)[2])
   idC <- which(colnames(popLong) %in% c('ID','birthDate','Tstart','Tstop','OD','ns','statusEntry','statusExit','Episode'))
-  popLong <- popLong[,c(idC,idCovs)]   
+  popLong <- popLong[,c(idC,idCovs)]
   idCovs <- 10:(9+dim(stateSpace)[2])
   popLong <- popLong[,c(1,2,7,3,4,5,6,8,9,idCovs)]
   return(popLong)
 }
-
-
-
-
-
-
-
-
-
-
-
 
 
 

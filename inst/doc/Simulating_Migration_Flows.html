@@ -49,7 +49,7 @@ overflow: visible;
 </style>
 <style type="text/css" data-origin="pandoc">
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span { line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -60,7 +60,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
 { counter-reset: source-line 0; }
@@ -350,10 +350,7 @@ sample was intentionally kept small. MicSim can also handle larger
 numbers of cases, but to be efficient in terms of run times, this
 requires a bit more computing power with more CPUs.</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="co"># Load library</span></span>
-<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(MicSim)</span>
-<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="co">#&gt; Lade nötiges Paket: snowfall</span></span>
-<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="co">#&gt; Lade nötiges Paket: snow</span></span>
-<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="co">#&gt; Lade nötiges Paket: rlecuyer</span></span></code></pre></div>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(MicSim)</span></code></pre></div>
 <div id="definition-of-basic-simulation-frame" class="section level3">
 <h3>Definition of Basic Simulation Frame</h3>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="co"># Defining simulation horizon</span></span>
@@ -413,151 +410,154 @@ requires a bit more computing power with more CPUs.</p>
 <h3>Rates Definition</h3>
 <p>Beware: Rates have to be given at least for age [0,maxAge) and for
 all years within the simulation horizon. At this the exact value of
-<em>maxAge</em> is excluded, i.e. here 100.00 but not
-e.g. age=99.9999.</p>
+<em>maxAge</em> is excluded, i.e. here 100.00 but not e.g. age=99.9999.
+In this example, transition rates do not depend on the time already
+spent in a state or substate, but only on age and/or calendar time.
+Thus, these constitute input arguments for the rates functions.</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="co"># Load rates from data included in the MicSim package (one column for one transition)</span></span>
 <span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>rates <span class="ot">&lt;-</span> migrExpRates</span>
 <span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a></span>
 <span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="co"># Define function to easily transform rates in function format required by MicSim </span></span>
 <span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="fu">require</span>(glue)</span>
 <span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="co">#&gt; Lade nötiges Paket: glue</span></span>
-<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(<span class="fu">names</span>(rates))) {</span>
-<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a>  script_var <span class="ot">=</span> <span class="fu">names</span>(rates[i])</span>
-<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a>  <span class="fu">eval</span>(<span class="fu">parse</span>(<span class="at">text =</span> <span class="fu">glue</span>(<span class="st">&quot;{script_var} &lt;- unlist(as.numeric(rates[,{i}]))&quot;</span>)))</span>
-<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a>}</span>
-<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a></span>
-<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a><span class="co"># --------------------------------------------------------------------------</span></span>
-<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a><span class="co"># Fertility Rates</span></span>
-<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="co"># --------------------------------------------------------------------------</span></span>
-<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a></span>
-<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a>fertRates_NL_0_1 <span class="ot">&lt;-</span> <span class="cf">function</span>(age,calTime, duration){</span>
-<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a>  rate <span class="ot">&lt;-</span> fert_NL_0_1[<span class="fu">as.integer</span>(age)<span class="sc">+</span><span class="dv">1</span>]</span>
-<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a>  <span class="fu">return</span>(rate)  </span>
-<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a>}</span>
-<span id="cb4-20"><a href="#cb4-20" tabindex="-1"></a></span>
-<span id="cb4-21"><a href="#cb4-21" tabindex="-1"></a>fertRates_NL_1_2 <span class="ot">&lt;-</span> <span class="cf">function</span>(age,calTime, duration){</span>
-<span id="cb4-22"><a href="#cb4-22" tabindex="-1"></a>  rate <span class="ot">&lt;-</span> fert_NL_1_2[<span class="fu">as.integer</span>(age)<span class="sc">+</span><span class="dv">1</span>]</span>
-<span id="cb4-23"><a href="#cb4-23" tabindex="-1"></a>  <span class="fu">return</span>(rate)  </span>
-<span id="cb4-24"><a href="#cb4-24" tabindex="-1"></a>}</span>
-<span id="cb4-25"><a href="#cb4-25" tabindex="-1"></a></span>
-<span id="cb4-26"><a href="#cb4-26" tabindex="-1"></a>fertRates_NL_2_3 <span class="ot">&lt;-</span> <span class="cf">function</span>(age,calTime, duration){</span>
-<span id="cb4-27"><a href="#cb4-27" tabindex="-1"></a>  rate <span class="ot">&lt;-</span> fert_NL_2_3[<span class="fu">as.integer</span>(age)<span class="sc">+</span><span class="dv">1</span>]</span>
-<span id="cb4-28"><a href="#cb4-28" tabindex="-1"></a>  <span class="fu">return</span>(rate)  </span>
-<span id="cb4-29"><a href="#cb4-29" tabindex="-1"></a>}</span>
-<span id="cb4-30"><a href="#cb4-30" tabindex="-1"></a></span>
-<span id="cb4-31"><a href="#cb4-31" tabindex="-1"></a>fertRates_NL_3_4 <span class="ot">&lt;-</span> <span class="cf">function</span>(age,calTime, duration){</span>
-<span id="cb4-32"><a href="#cb4-32" tabindex="-1"></a>  rate <span class="ot">&lt;-</span> fert_NL_3_4[<span class="fu">as.integer</span>(age)<span class="sc">-+</span><span class="dv">1</span>]</span>
-<span id="cb4-33"><a href="#cb4-33" tabindex="-1"></a>  <span class="fu">return</span>(rate)  </span>
-<span id="cb4-34"><a href="#cb4-34" tabindex="-1"></a>}</span>
-<span id="cb4-35"><a href="#cb4-35" tabindex="-1"></a></span>
-<span id="cb4-36"><a href="#cb4-36" tabindex="-1"></a>fertRates_ES_0_1 <span class="ot">&lt;-</span> <span class="cf">function</span>(age,calTime, duration){</span>
-<span id="cb4-37"><a href="#cb4-37" tabindex="-1"></a>  rate <span class="ot">&lt;-</span> fert_ES_0_1[<span class="fu">as.integer</span>(age)<span class="sc">+</span><span class="dv">1</span>]</span>
-<span id="cb4-38"><a href="#cb4-38" tabindex="-1"></a>  <span class="fu">return</span>(rate)  </span>
-<span id="cb4-39"><a href="#cb4-39" tabindex="-1"></a>}</span>
-<span id="cb4-40"><a href="#cb4-40" tabindex="-1"></a></span>
-<span id="cb4-41"><a href="#cb4-41" tabindex="-1"></a>fertRates_ES_1_2 <span class="ot">&lt;-</span> <span class="cf">function</span>(age,calTime, duration){</span>
-<span id="cb4-42"><a href="#cb4-42" tabindex="-1"></a>  rate <span class="ot">&lt;-</span> fert_ES_1_2[<span class="fu">as.integer</span>(age)<span class="sc">+</span><span class="dv">1</span>]</span>
-<span id="cb4-43"><a href="#cb4-43" tabindex="-1"></a>  <span class="fu">return</span>(rate)  </span>
-<span id="cb4-44"><a href="#cb4-44" tabindex="-1"></a>}</span>
-<span id="cb4-45"><a href="#cb4-45" tabindex="-1"></a></span>
-<span id="cb4-46"><a href="#cb4-46" tabindex="-1"></a>fertRates_ES_2_3 <span class="ot">&lt;-</span> <span class="cf">function</span>(age,calTime, duration){</span>
-<span id="cb4-47"><a href="#cb4-47" tabindex="-1"></a>  rate <span class="ot">&lt;-</span> fert_ES_2_3[<span class="fu">as.integer</span>(age)<span class="sc">+</span><span class="dv">1</span>]</span>
-<span id="cb4-48"><a href="#cb4-48" tabindex="-1"></a>  <span class="fu">return</span>(rate)  </span>
-<span id="cb4-49"><a href="#cb4-49" tabindex="-1"></a>}</span>
-<span id="cb4-50"><a href="#cb4-50" tabindex="-1"></a></span>
-<span id="cb4-51"><a href="#cb4-51" tabindex="-1"></a>fertRates_ES_3_4 <span class="ot">&lt;-</span> <span class="cf">function</span>(age,calTime, duration){</span>
-<span id="cb4-52"><a href="#cb4-52" tabindex="-1"></a>  rate <span class="ot">&lt;-</span> fert_ES_3_4[<span class="fu">as.integer</span>(age)<span class="sc">+</span><span class="dv">1</span>]</span>
-<span id="cb4-53"><a href="#cb4-53" tabindex="-1"></a>  <span class="fu">return</span>(rate)  </span>
-<span id="cb4-54"><a href="#cb4-54" tabindex="-1"></a>}</span>
-<span id="cb4-55"><a href="#cb4-55" tabindex="-1"></a></span>
-<span id="cb4-56"><a href="#cb4-56" tabindex="-1"></a>fertRates_SE_0_1 <span class="ot">&lt;-</span> <span class="cf">function</span>(age,calTime, duration){</span>
-<span id="cb4-57"><a href="#cb4-57" tabindex="-1"></a>  rate <span class="ot">&lt;-</span> fert_SE_0_1[<span class="fu">as.integer</span>(age)<span class="sc">+</span><span class="dv">1</span>]</span>
-<span id="cb4-58"><a href="#cb4-58" tabindex="-1"></a>  <span class="fu">return</span>(rate)  </span>
-<span id="cb4-59"><a href="#cb4-59" tabindex="-1"></a>}</span>
-<span id="cb4-60"><a href="#cb4-60" tabindex="-1"></a></span>
-<span id="cb4-61"><a href="#cb4-61" tabindex="-1"></a>fertRates_SE_1_2 <span class="ot">&lt;-</span> <span class="cf">function</span>(age,calTime, duration){</span>
-<span id="cb4-62"><a href="#cb4-62" tabindex="-1"></a>  rate <span class="ot">&lt;-</span> fert_SE_1_2[<span class="fu">as.integer</span>(age)<span class="sc">+</span><span class="dv">1</span>]</span>
-<span id="cb4-63"><a href="#cb4-63" tabindex="-1"></a>  <span class="fu">return</span>(rate)  </span>
-<span id="cb4-64"><a href="#cb4-64" tabindex="-1"></a>}</span>
-<span id="cb4-65"><a href="#cb4-65" tabindex="-1"></a></span>
-<span id="cb4-66"><a href="#cb4-66" tabindex="-1"></a>fertRates_SE_2_3 <span class="ot">&lt;-</span> <span class="cf">function</span>(age,calTime, duration){</span>
-<span id="cb4-67"><a href="#cb4-67" tabindex="-1"></a>  rate <span class="ot">&lt;-</span> fert_SE_2_3[<span class="fu">as.integer</span>(age)<span class="sc">+</span><span class="dv">1</span>]</span>
-<span id="cb4-68"><a href="#cb4-68" tabindex="-1"></a>  <span class="fu">return</span>(rate)  </span>
-<span id="cb4-69"><a href="#cb4-69" tabindex="-1"></a>}</span>
-<span id="cb4-70"><a href="#cb4-70" tabindex="-1"></a></span>
-<span id="cb4-71"><a href="#cb4-71" tabindex="-1"></a>fertRates_SE_3_4 <span class="ot">&lt;-</span> <span class="cf">function</span>(age,calTime, duration){</span>
-<span id="cb4-72"><a href="#cb4-72" tabindex="-1"></a>  rate <span class="ot">&lt;-</span> fert_SE_3_4[<span class="fu">as.integer</span>(age)<span class="sc">+</span><span class="dv">1</span>]</span>
-<span id="cb4-73"><a href="#cb4-73" tabindex="-1"></a>  <span class="fu">return</span>(rate)  </span>
-<span id="cb4-74"><a href="#cb4-74" tabindex="-1"></a>}</span>
-<span id="cb4-75"><a href="#cb4-75" tabindex="-1"></a></span>
-<span id="cb4-76"><a href="#cb4-76" tabindex="-1"></a><span class="co"># --------------------------------------------------------------------------</span></span>
-<span id="cb4-77"><a href="#cb4-77" tabindex="-1"></a><span class="co"># Internal Migration Rates</span></span>
-<span id="cb4-78"><a href="#cb4-78" tabindex="-1"></a><span class="co"># --------------------------------------------------------------------------</span></span>
-<span id="cb4-79"><a href="#cb4-79" tabindex="-1"></a></span>
-<span id="cb4-80"><a href="#cb4-80" tabindex="-1"></a><span class="st">`</span><span class="at">%!in%</span><span class="st">`</span> <span class="ot">&lt;-</span> <span class="fu">Negate</span>(<span class="st">`</span><span class="at">%in%</span><span class="st">`</span>)</span>
-<span id="cb4-81"><a href="#cb4-81" tabindex="-1"></a></span>
-<span id="cb4-82"><a href="#cb4-82" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(country_R)) {</span>
-<span id="cb4-83"><a href="#cb4-83" tabindex="-1"></a>  other_provinces <span class="ot">=</span> country_R[<span class="fu">which</span>(country_R <span class="sc">%!in%</span> country_R[i])]</span>
-<span id="cb4-84"><a href="#cb4-84" tabindex="-1"></a>  <span class="cf">for</span>(k <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(other_provinces)) {</span>
-<span id="cb4-85"><a href="#cb4-85" tabindex="-1"></a>    eq <span class="ot">=</span> <span class="fu">paste</span>(<span class="fu">sprintf</span>(<span class="st">&#39;%s_%s_rates&#39;</span>, <span class="fu">glue</span>(<span class="st">&quot;{country_R[i]}&quot;</span>),  <span class="fu">glue</span>(<span class="st">&quot;{other_provinces[k]}&quot;</span>)), </span>
-<span id="cb4-86"><a href="#cb4-86" tabindex="-1"></a>               <span class="st">&#39;&lt;- function(age,calTime, duration)&#39;</span>, <span class="st">&#39;{&#39;</span>,</span>
-<span id="cb4-87"><a href="#cb4-87" tabindex="-1"></a>               <span class="fu">sprintf</span>(<span class="st">&#39;rate &lt;- rate_%s_%s[as.integer(age)+1]&#39;</span>, <span class="fu">glue</span>(<span class="st">&quot;{country_R[i]}&quot;</span>), </span>
-<span id="cb4-88"><a href="#cb4-88" tabindex="-1"></a>               <span class="fu">glue</span>(<span class="st">&quot;{other_provinces[k]}&quot;</span>)), <span class="st">&quot;</span><span class="sc">\n</span><span class="st"> &quot;</span>, <span class="st">&#39;return(rate)&#39;</span>,<span class="st">&#39;}&#39;</span>)</span>
-<span id="cb4-89"><a href="#cb4-89" tabindex="-1"></a>    <span class="fu">eval</span>(<span class="fu">parse</span>(<span class="at">text =</span> eq))</span>
-<span id="cb4-90"><a href="#cb4-90" tabindex="-1"></a>  }</span>
-<span id="cb4-91"><a href="#cb4-91" tabindex="-1"></a>}</span>
-<span id="cb4-92"><a href="#cb4-92" tabindex="-1"></a></span>
-<span id="cb4-93"><a href="#cb4-93" tabindex="-1"></a><span class="co"># --------------------------------------------------------------------------</span></span>
-<span id="cb4-94"><a href="#cb4-94" tabindex="-1"></a><span class="co"># Mortality Rates</span></span>
-<span id="cb4-95"><a href="#cb4-95" tabindex="-1"></a><span class="co"># --------------------------------------------------------------------------</span></span>
-<span id="cb4-96"><a href="#cb4-96" tabindex="-1"></a></span>
-<span id="cb4-97"><a href="#cb4-97" tabindex="-1"></a><span class="co"># Female mortality</span></span>
-<span id="cb4-98"><a href="#cb4-98" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(country_R)) {</span>
-<span id="cb4-99"><a href="#cb4-99" tabindex="-1"></a>  eq <span class="ot">=</span> <span class="fu">paste</span>(<span class="fu">sprintf</span>(<span class="st">&#39;mortRates_f_%s&#39;</span>, <span class="fu">glue</span>(<span class="st">&quot;{country_R[i]}&quot;</span>)), <span class="st">&#39;&lt;- function(age,calTime, duration)&#39;</span>,</span>
-<span id="cb4-100"><a href="#cb4-100" tabindex="-1"></a>             <span class="st">&#39;{&#39;</span>,</span>
-<span id="cb4-101"><a href="#cb4-101" tabindex="-1"></a>             <span class="fu">sprintf</span>(<span class="st">&#39;rate &lt;- mort_f_%s[as.integer(age)+1]&#39;</span>, <span class="fu">glue</span>(<span class="st">&quot;{country_R[i]}&quot;</span>)),</span>
-<span id="cb4-102"><a href="#cb4-102" tabindex="-1"></a>             <span class="st">&quot;</span><span class="sc">\n</span><span class="st"> &quot;</span>,</span>
-<span id="cb4-103"><a href="#cb4-103" tabindex="-1"></a>             <span class="st">&#39;return(rate)&#39;</span>,</span>
-<span id="cb4-104"><a href="#cb4-104" tabindex="-1"></a>             <span class="st">&#39;}&#39;</span>)</span>
-<span id="cb4-105"><a href="#cb4-105" tabindex="-1"></a>  <span class="fu">eval</span>(<span class="fu">parse</span>(<span class="at">text =</span> eq))</span>
-<span id="cb4-106"><a href="#cb4-106" tabindex="-1"></a>}</span>
-<span id="cb4-107"><a href="#cb4-107" tabindex="-1"></a></span>
-<span id="cb4-108"><a href="#cb4-108" tabindex="-1"></a><span class="co"># Male mortality</span></span>
-<span id="cb4-109"><a href="#cb4-109" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(country_R)) {</span>
-<span id="cb4-110"><a href="#cb4-110" tabindex="-1"></a>  eq <span class="ot">=</span> <span class="fu">paste</span>(<span class="fu">sprintf</span>(<span class="st">&#39;mortRates_m_%s&#39;</span>, <span class="fu">glue</span>(<span class="st">&quot;{country_R[i]}&quot;</span>)), <span class="st">&#39;&lt;- function(age,calTime, duration)&#39;</span>,</span>
-<span id="cb4-111"><a href="#cb4-111" tabindex="-1"></a>             <span class="st">&#39;{&#39;</span>,</span>
-<span id="cb4-112"><a href="#cb4-112" tabindex="-1"></a>             <span class="fu">sprintf</span>(<span class="st">&#39;rate &lt;- mort_m_%s[as.integer(age)+1]&#39;</span>, <span class="fu">glue</span>(<span class="st">&quot;{country_R[i]}&quot;</span>)),</span>
-<span id="cb4-113"><a href="#cb4-113" tabindex="-1"></a>             <span class="st">&quot;</span><span class="sc">\n</span><span class="st"> &quot;</span>,</span>
-<span id="cb4-114"><a href="#cb4-114" tabindex="-1"></a>             <span class="st">&#39;return(rate)&#39;</span>,</span>
-<span id="cb4-115"><a href="#cb4-115" tabindex="-1"></a>             <span class="st">&#39;}&#39;</span>)</span>
-<span id="cb4-116"><a href="#cb4-116" tabindex="-1"></a>  <span class="fu">eval</span>(<span class="fu">parse</span>(<span class="at">text =</span> eq))</span>
-<span id="cb4-117"><a href="#cb4-117" tabindex="-1"></a>}</span>
-<span id="cb4-118"><a href="#cb4-118" tabindex="-1"></a></span>
-<span id="cb4-119"><a href="#cb4-119" tabindex="-1"></a><span class="co"># ---------------------------------------------------------------------------</span></span>
-<span id="cb4-120"><a href="#cb4-120" tabindex="-1"></a><span class="co"># Emigration rates</span></span>
-<span id="cb4-121"><a href="#cb4-121" tabindex="-1"></a><span class="co"># ---------------------------------------------------------------------------</span></span>
-<span id="cb4-122"><a href="#cb4-122" tabindex="-1"></a></span>
-<span id="cb4-123"><a href="#cb4-123" tabindex="-1"></a><span class="co"># Emigration rates for females</span></span>
-<span id="cb4-124"><a href="#cb4-124" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(country_R)) {</span>
-<span id="cb4-125"><a href="#cb4-125" tabindex="-1"></a>  eq <span class="ot">=</span> <span class="fu">paste</span>(<span class="fu">sprintf</span>(<span class="st">&#39;emigrRates_f_%s&#39;</span>, <span class="fu">glue</span>(<span class="st">&quot;{country_R[i]}&quot;</span>)), <span class="st">&#39;&lt;- function(age,calTime, duration)&#39;</span>,</span>
-<span id="cb4-126"><a href="#cb4-126" tabindex="-1"></a>             <span class="st">&#39;{&#39;</span>,</span>
-<span id="cb4-127"><a href="#cb4-127" tabindex="-1"></a>             <span class="fu">sprintf</span>(<span class="st">&#39;rate &lt;- emig_f_%s[as.integer(age)+1]&#39;</span>, <span class="fu">glue</span>(<span class="st">&quot;{country_R[i]}&quot;</span>)),</span>
-<span id="cb4-128"><a href="#cb4-128" tabindex="-1"></a>             <span class="st">&quot;</span><span class="sc">\n</span><span class="st"> &quot;</span>,</span>
-<span id="cb4-129"><a href="#cb4-129" tabindex="-1"></a>             <span class="st">&#39;return(rate)&#39;</span>,</span>
-<span id="cb4-130"><a href="#cb4-130" tabindex="-1"></a>             <span class="st">&#39;}&#39;</span>)</span>
-<span id="cb4-131"><a href="#cb4-131" tabindex="-1"></a>  <span class="fu">eval</span>(<span class="fu">parse</span>(<span class="at">text =</span> eq))</span>
-<span id="cb4-132"><a href="#cb4-132" tabindex="-1"></a>}</span>
-<span id="cb4-133"><a href="#cb4-133" tabindex="-1"></a></span>
-<span id="cb4-134"><a href="#cb4-134" tabindex="-1"></a><span class="co"># Emigration rates for males</span></span>
-<span id="cb4-135"><a href="#cb4-135" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(country_R)) {</span>
-<span id="cb4-136"><a href="#cb4-136" tabindex="-1"></a>  eq <span class="ot">=</span> <span class="fu">paste</span>(<span class="fu">sprintf</span>(<span class="st">&#39;emigrRates_m_%s&#39;</span>, <span class="fu">glue</span>(<span class="st">&quot;{country_R[i]}&quot;</span>)), <span class="st">&#39;&lt;- function(age,calTime, duration)&#39;</span>,</span>
-<span id="cb4-137"><a href="#cb4-137" tabindex="-1"></a>             <span class="st">&#39;{&#39;</span>,</span>
-<span id="cb4-138"><a href="#cb4-138" tabindex="-1"></a>             <span class="fu">sprintf</span>(<span class="st">&#39;rate &lt;- emig_m_%s[as.integer(age)+1]&#39;</span>, <span class="fu">glue</span>(<span class="st">&quot;{country_R[i]}&quot;</span>)),</span>
-<span id="cb4-139"><a href="#cb4-139" tabindex="-1"></a>             <span class="st">&quot;</span><span class="sc">\n</span><span class="st"> &quot;</span>,</span>
-<span id="cb4-140"><a href="#cb4-140" tabindex="-1"></a>             <span class="st">&#39;return(rate)&#39;</span>,</span>
-<span id="cb4-141"><a href="#cb4-141" tabindex="-1"></a>             <span class="st">&#39;}&#39;</span>)</span>
-<span id="cb4-142"><a href="#cb4-142" tabindex="-1"></a>  <span class="fu">eval</span>(<span class="fu">parse</span>(<span class="at">text =</span> eq))</span>
-<span id="cb4-143"><a href="#cb4-143" tabindex="-1"></a>}</span></code></pre></div>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="co">#&gt; Warning: Paket &#39;glue&#39; wurde unter R Version 4.3.3 erstellt</span></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(<span class="fu">names</span>(rates))) {</span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a>  script_var <span class="ot">=</span> <span class="fu">names</span>(rates[i])</span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a>  <span class="fu">eval</span>(<span class="fu">parse</span>(<span class="at">text =</span> <span class="fu">glue</span>(<span class="st">&quot;{script_var} &lt;- unlist(as.numeric(rates[,{i}]))&quot;</span>)))</span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a>}</span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a></span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a><span class="co"># --------------------------------------------------------------------------</span></span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="co"># Fertility Rates</span></span>
+<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a><span class="co"># --------------------------------------------------------------------------</span></span>
+<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a></span>
+<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a>fertRates_NL_0_1 <span class="ot">&lt;-</span> <span class="cf">function</span>(age,calTime){</span>
+<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a>  rate <span class="ot">&lt;-</span> fert_NL_0_1[<span class="fu">as.integer</span>(age)<span class="sc">+</span><span class="dv">1</span>]</span>
+<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a>  <span class="fu">return</span>(rate)  </span>
+<span id="cb4-20"><a href="#cb4-20" tabindex="-1"></a>}</span>
+<span id="cb4-21"><a href="#cb4-21" tabindex="-1"></a></span>
+<span id="cb4-22"><a href="#cb4-22" tabindex="-1"></a>fertRates_NL_1_2 <span class="ot">&lt;-</span> <span class="cf">function</span>(age,calTime){</span>
+<span id="cb4-23"><a href="#cb4-23" tabindex="-1"></a>  rate <span class="ot">&lt;-</span> fert_NL_1_2[<span class="fu">as.integer</span>(age)<span class="sc">+</span><span class="dv">1</span>]</span>
+<span id="cb4-24"><a href="#cb4-24" tabindex="-1"></a>  <span class="fu">return</span>(rate)  </span>
+<span id="cb4-25"><a href="#cb4-25" tabindex="-1"></a>}</span>
+<span id="cb4-26"><a href="#cb4-26" tabindex="-1"></a></span>
+<span id="cb4-27"><a href="#cb4-27" tabindex="-1"></a>fertRates_NL_2_3 <span class="ot">&lt;-</span> <span class="cf">function</span>(age,calTime){</span>
+<span id="cb4-28"><a href="#cb4-28" tabindex="-1"></a>  rate <span class="ot">&lt;-</span> fert_NL_2_3[<span class="fu">as.integer</span>(age)<span class="sc">+</span><span class="dv">1</span>]</span>
+<span id="cb4-29"><a href="#cb4-29" tabindex="-1"></a>  <span class="fu">return</span>(rate)  </span>
+<span id="cb4-30"><a href="#cb4-30" tabindex="-1"></a>}</span>
+<span id="cb4-31"><a href="#cb4-31" tabindex="-1"></a></span>
+<span id="cb4-32"><a href="#cb4-32" tabindex="-1"></a>fertRates_NL_3_4 <span class="ot">&lt;-</span> <span class="cf">function</span>(age,calTime){</span>
+<span id="cb4-33"><a href="#cb4-33" tabindex="-1"></a>  rate <span class="ot">&lt;-</span> fert_NL_3_4[<span class="fu">as.integer</span>(age)<span class="sc">-+</span><span class="dv">1</span>]</span>
+<span id="cb4-34"><a href="#cb4-34" tabindex="-1"></a>  <span class="fu">return</span>(rate)  </span>
+<span id="cb4-35"><a href="#cb4-35" tabindex="-1"></a>}</span>
+<span id="cb4-36"><a href="#cb4-36" tabindex="-1"></a></span>
+<span id="cb4-37"><a href="#cb4-37" tabindex="-1"></a>fertRates_ES_0_1 <span class="ot">&lt;-</span> <span class="cf">function</span>(age,calTime){</span>
+<span id="cb4-38"><a href="#cb4-38" tabindex="-1"></a>  rate <span class="ot">&lt;-</span> fert_ES_0_1[<span class="fu">as.integer</span>(age)<span class="sc">+</span><span class="dv">1</span>]</span>
+<span id="cb4-39"><a href="#cb4-39" tabindex="-1"></a>  <span class="fu">return</span>(rate)  </span>
+<span id="cb4-40"><a href="#cb4-40" tabindex="-1"></a>}</span>
+<span id="cb4-41"><a href="#cb4-41" tabindex="-1"></a></span>
+<span id="cb4-42"><a href="#cb4-42" tabindex="-1"></a>fertRates_ES_1_2 <span class="ot">&lt;-</span> <span class="cf">function</span>(age,calTime){</span>
+<span id="cb4-43"><a href="#cb4-43" tabindex="-1"></a>  rate <span class="ot">&lt;-</span> fert_ES_1_2[<span class="fu">as.integer</span>(age)<span class="sc">+</span><span class="dv">1</span>]</span>
+<span id="cb4-44"><a href="#cb4-44" tabindex="-1"></a>  <span class="fu">return</span>(rate)  </span>
+<span id="cb4-45"><a href="#cb4-45" tabindex="-1"></a>}</span>
+<span id="cb4-46"><a href="#cb4-46" tabindex="-1"></a></span>
+<span id="cb4-47"><a href="#cb4-47" tabindex="-1"></a>fertRates_ES_2_3 <span class="ot">&lt;-</span> <span class="cf">function</span>(age,calTime){</span>
+<span id="cb4-48"><a href="#cb4-48" tabindex="-1"></a>  rate <span class="ot">&lt;-</span> fert_ES_2_3[<span class="fu">as.integer</span>(age)<span class="sc">+</span><span class="dv">1</span>]</span>
+<span id="cb4-49"><a href="#cb4-49" tabindex="-1"></a>  <span class="fu">return</span>(rate)  </span>
+<span id="cb4-50"><a href="#cb4-50" tabindex="-1"></a>}</span>
+<span id="cb4-51"><a href="#cb4-51" tabindex="-1"></a></span>
+<span id="cb4-52"><a href="#cb4-52" tabindex="-1"></a>fertRates_ES_3_4 <span class="ot">&lt;-</span> <span class="cf">function</span>(age,calTime){</span>
+<span id="cb4-53"><a href="#cb4-53" tabindex="-1"></a>  rate <span class="ot">&lt;-</span> fert_ES_3_4[<span class="fu">as.integer</span>(age)<span class="sc">+</span><span class="dv">1</span>]</span>
+<span id="cb4-54"><a href="#cb4-54" tabindex="-1"></a>  <span class="fu">return</span>(rate)  </span>
+<span id="cb4-55"><a href="#cb4-55" tabindex="-1"></a>}</span>
+<span id="cb4-56"><a href="#cb4-56" tabindex="-1"></a></span>
+<span id="cb4-57"><a href="#cb4-57" tabindex="-1"></a>fertRates_SE_0_1 <span class="ot">&lt;-</span> <span class="cf">function</span>(age,calTime){</span>
+<span id="cb4-58"><a href="#cb4-58" tabindex="-1"></a>  rate <span class="ot">&lt;-</span> fert_SE_0_1[<span class="fu">as.integer</span>(age)<span class="sc">+</span><span class="dv">1</span>]</span>
+<span id="cb4-59"><a href="#cb4-59" tabindex="-1"></a>  <span class="fu">return</span>(rate)  </span>
+<span id="cb4-60"><a href="#cb4-60" tabindex="-1"></a>}</span>
+<span id="cb4-61"><a href="#cb4-61" tabindex="-1"></a></span>
+<span id="cb4-62"><a href="#cb4-62" tabindex="-1"></a>fertRates_SE_1_2 <span class="ot">&lt;-</span> <span class="cf">function</span>(age,calTime){</span>
+<span id="cb4-63"><a href="#cb4-63" tabindex="-1"></a>  rate <span class="ot">&lt;-</span> fert_SE_1_2[<span class="fu">as.integer</span>(age)<span class="sc">+</span><span class="dv">1</span>]</span>
+<span id="cb4-64"><a href="#cb4-64" tabindex="-1"></a>  <span class="fu">return</span>(rate)  </span>
+<span id="cb4-65"><a href="#cb4-65" tabindex="-1"></a>}</span>
+<span id="cb4-66"><a href="#cb4-66" tabindex="-1"></a></span>
+<span id="cb4-67"><a href="#cb4-67" tabindex="-1"></a>fertRates_SE_2_3 <span class="ot">&lt;-</span> <span class="cf">function</span>(age,calTime){</span>
+<span id="cb4-68"><a href="#cb4-68" tabindex="-1"></a>  rate <span class="ot">&lt;-</span> fert_SE_2_3[<span class="fu">as.integer</span>(age)<span class="sc">+</span><span class="dv">1</span>]</span>
+<span id="cb4-69"><a href="#cb4-69" tabindex="-1"></a>  <span class="fu">return</span>(rate)  </span>
+<span id="cb4-70"><a href="#cb4-70" tabindex="-1"></a>}</span>
+<span id="cb4-71"><a href="#cb4-71" tabindex="-1"></a></span>
+<span id="cb4-72"><a href="#cb4-72" tabindex="-1"></a>fertRates_SE_3_4 <span class="ot">&lt;-</span> <span class="cf">function</span>(age,calTime){</span>
+<span id="cb4-73"><a href="#cb4-73" tabindex="-1"></a>  rate <span class="ot">&lt;-</span> fert_SE_3_4[<span class="fu">as.integer</span>(age)<span class="sc">+</span><span class="dv">1</span>]</span>
+<span id="cb4-74"><a href="#cb4-74" tabindex="-1"></a>  <span class="fu">return</span>(rate)  </span>
+<span id="cb4-75"><a href="#cb4-75" tabindex="-1"></a>}</span>
+<span id="cb4-76"><a href="#cb4-76" tabindex="-1"></a></span>
+<span id="cb4-77"><a href="#cb4-77" tabindex="-1"></a><span class="co"># --------------------------------------------------------------------------</span></span>
+<span id="cb4-78"><a href="#cb4-78" tabindex="-1"></a><span class="co"># Internal Migration Rates</span></span>
+<span id="cb4-79"><a href="#cb4-79" tabindex="-1"></a><span class="co"># --------------------------------------------------------------------------</span></span>
+<span id="cb4-80"><a href="#cb4-80" tabindex="-1"></a></span>
+<span id="cb4-81"><a href="#cb4-81" tabindex="-1"></a><span class="st">`</span><span class="at">%!in%</span><span class="st">`</span> <span class="ot">&lt;-</span> <span class="fu">Negate</span>(<span class="st">`</span><span class="at">%in%</span><span class="st">`</span>)</span>
+<span id="cb4-82"><a href="#cb4-82" tabindex="-1"></a></span>
+<span id="cb4-83"><a href="#cb4-83" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(country_R)) {</span>
+<span id="cb4-84"><a href="#cb4-84" tabindex="-1"></a>  other_provinces <span class="ot">=</span> country_R[<span class="fu">which</span>(country_R <span class="sc">%!in%</span> country_R[i])]</span>
+<span id="cb4-85"><a href="#cb4-85" tabindex="-1"></a>  <span class="cf">for</span>(k <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(other_provinces)) {</span>
+<span id="cb4-86"><a href="#cb4-86" tabindex="-1"></a>    eq <span class="ot">=</span> <span class="fu">paste</span>(<span class="fu">sprintf</span>(<span class="st">&#39;%s_%s_rates&#39;</span>, <span class="fu">glue</span>(<span class="st">&quot;{country_R[i]}&quot;</span>),  <span class="fu">glue</span>(<span class="st">&quot;{other_provinces[k]}&quot;</span>)), </span>
+<span id="cb4-87"><a href="#cb4-87" tabindex="-1"></a>               <span class="st">&#39;&lt;- function(age,calTime)&#39;</span>, <span class="st">&#39;{&#39;</span>,</span>
+<span id="cb4-88"><a href="#cb4-88" tabindex="-1"></a>               <span class="fu">sprintf</span>(<span class="st">&#39;rate &lt;- rate_%s_%s[as.integer(age)+1]&#39;</span>, <span class="fu">glue</span>(<span class="st">&quot;{country_R[i]}&quot;</span>), </span>
+<span id="cb4-89"><a href="#cb4-89" tabindex="-1"></a>               <span class="fu">glue</span>(<span class="st">&quot;{other_provinces[k]}&quot;</span>)), <span class="st">&quot;</span><span class="sc">\n</span><span class="st"> &quot;</span>, <span class="st">&#39;return(rate)&#39;</span>,<span class="st">&#39;}&#39;</span>)</span>
+<span id="cb4-90"><a href="#cb4-90" tabindex="-1"></a>    <span class="fu">eval</span>(<span class="fu">parse</span>(<span class="at">text =</span> eq))</span>
+<span id="cb4-91"><a href="#cb4-91" tabindex="-1"></a>  }</span>
+<span id="cb4-92"><a href="#cb4-92" tabindex="-1"></a>}</span>
+<span id="cb4-93"><a href="#cb4-93" tabindex="-1"></a></span>
+<span id="cb4-94"><a href="#cb4-94" tabindex="-1"></a><span class="co"># --------------------------------------------------------------------------</span></span>
+<span id="cb4-95"><a href="#cb4-95" tabindex="-1"></a><span class="co"># Mortality Rates</span></span>
+<span id="cb4-96"><a href="#cb4-96" tabindex="-1"></a><span class="co"># --------------------------------------------------------------------------</span></span>
+<span id="cb4-97"><a href="#cb4-97" tabindex="-1"></a></span>
+<span id="cb4-98"><a href="#cb4-98" tabindex="-1"></a><span class="co"># Female mortality</span></span>
+<span id="cb4-99"><a href="#cb4-99" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(country_R)) {</span>
+<span id="cb4-100"><a href="#cb4-100" tabindex="-1"></a>  eq <span class="ot">=</span> <span class="fu">paste</span>(<span class="fu">sprintf</span>(<span class="st">&#39;mortRates_f_%s&#39;</span>, <span class="fu">glue</span>(<span class="st">&quot;{country_R[i]}&quot;</span>)), <span class="st">&#39;&lt;- function(age,calTime)&#39;</span>,</span>
+<span id="cb4-101"><a href="#cb4-101" tabindex="-1"></a>             <span class="st">&#39;{&#39;</span>,</span>
+<span id="cb4-102"><a href="#cb4-102" tabindex="-1"></a>             <span class="fu">sprintf</span>(<span class="st">&#39;rate &lt;- mort_f_%s[as.integer(age)+1]&#39;</span>, <span class="fu">glue</span>(<span class="st">&quot;{country_R[i]}&quot;</span>)),</span>
+<span id="cb4-103"><a href="#cb4-103" tabindex="-1"></a>             <span class="st">&quot;</span><span class="sc">\n</span><span class="st"> &quot;</span>,</span>
+<span id="cb4-104"><a href="#cb4-104" tabindex="-1"></a>             <span class="st">&#39;return(rate)&#39;</span>,</span>
+<span id="cb4-105"><a href="#cb4-105" tabindex="-1"></a>             <span class="st">&#39;}&#39;</span>)</span>
+<span id="cb4-106"><a href="#cb4-106" tabindex="-1"></a>  <span class="fu">eval</span>(<span class="fu">parse</span>(<span class="at">text =</span> eq))</span>
+<span id="cb4-107"><a href="#cb4-107" tabindex="-1"></a>}</span>
+<span id="cb4-108"><a href="#cb4-108" tabindex="-1"></a></span>
+<span id="cb4-109"><a href="#cb4-109" tabindex="-1"></a><span class="co"># Male mortality</span></span>
+<span id="cb4-110"><a href="#cb4-110" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(country_R)) {</span>
+<span id="cb4-111"><a href="#cb4-111" tabindex="-1"></a>  eq <span class="ot">=</span> <span class="fu">paste</span>(<span class="fu">sprintf</span>(<span class="st">&#39;mortRates_m_%s&#39;</span>, <span class="fu">glue</span>(<span class="st">&quot;{country_R[i]}&quot;</span>)), <span class="st">&#39;&lt;- function(age,calTime)&#39;</span>,</span>
+<span id="cb4-112"><a href="#cb4-112" tabindex="-1"></a>             <span class="st">&#39;{&#39;</span>,</span>
+<span id="cb4-113"><a href="#cb4-113" tabindex="-1"></a>             <span class="fu">sprintf</span>(<span class="st">&#39;rate &lt;- mort_m_%s[as.integer(age)+1]&#39;</span>, <span class="fu">glue</span>(<span class="st">&quot;{country_R[i]}&quot;</span>)),</span>
+<span id="cb4-114"><a href="#cb4-114" tabindex="-1"></a>             <span class="st">&quot;</span><span class="sc">\n</span><span class="st"> &quot;</span>,</span>
+<span id="cb4-115"><a href="#cb4-115" tabindex="-1"></a>             <span class="st">&#39;return(rate)&#39;</span>,</span>
+<span id="cb4-116"><a href="#cb4-116" tabindex="-1"></a>             <span class="st">&#39;}&#39;</span>)</span>
+<span id="cb4-117"><a href="#cb4-117" tabindex="-1"></a>  <span class="fu">eval</span>(<span class="fu">parse</span>(<span class="at">text =</span> eq))</span>
+<span id="cb4-118"><a href="#cb4-118" tabindex="-1"></a>}</span>
+<span id="cb4-119"><a href="#cb4-119" tabindex="-1"></a></span>
+<span id="cb4-120"><a href="#cb4-120" tabindex="-1"></a><span class="co"># ---------------------------------------------------------------------------</span></span>
+<span id="cb4-121"><a href="#cb4-121" tabindex="-1"></a><span class="co"># Emigration rates</span></span>
+<span id="cb4-122"><a href="#cb4-122" tabindex="-1"></a><span class="co"># ---------------------------------------------------------------------------</span></span>
+<span id="cb4-123"><a href="#cb4-123" tabindex="-1"></a></span>
+<span id="cb4-124"><a href="#cb4-124" tabindex="-1"></a><span class="co"># Emigration rates for females</span></span>
+<span id="cb4-125"><a href="#cb4-125" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(country_R)) {</span>
+<span id="cb4-126"><a href="#cb4-126" tabindex="-1"></a>  eq <span class="ot">=</span> <span class="fu">paste</span>(<span class="fu">sprintf</span>(<span class="st">&#39;emigrRates_f_%s&#39;</span>, <span class="fu">glue</span>(<span class="st">&quot;{country_R[i]}&quot;</span>)), <span class="st">&#39;&lt;- function(age,calTime)&#39;</span>,</span>
+<span id="cb4-127"><a href="#cb4-127" tabindex="-1"></a>             <span class="st">&#39;{&#39;</span>,</span>
+<span id="cb4-128"><a href="#cb4-128" tabindex="-1"></a>             <span class="fu">sprintf</span>(<span class="st">&#39;rate &lt;- emig_f_%s[as.integer(age)+1]&#39;</span>, <span class="fu">glue</span>(<span class="st">&quot;{country_R[i]}&quot;</span>)),</span>
+<span id="cb4-129"><a href="#cb4-129" tabindex="-1"></a>             <span class="st">&quot;</span><span class="sc">\n</span><span class="st"> &quot;</span>,</span>
+<span id="cb4-130"><a href="#cb4-130" tabindex="-1"></a>             <span class="st">&#39;return(rate)&#39;</span>,</span>
+<span id="cb4-131"><a href="#cb4-131" tabindex="-1"></a>             <span class="st">&#39;}&#39;</span>)</span>
+<span id="cb4-132"><a href="#cb4-132" tabindex="-1"></a>  <span class="fu">eval</span>(<span class="fu">parse</span>(<span class="at">text =</span> eq))</span>
+<span id="cb4-133"><a href="#cb4-133" tabindex="-1"></a>}</span>
+<span id="cb4-134"><a href="#cb4-134" tabindex="-1"></a></span>
+<span id="cb4-135"><a href="#cb4-135" tabindex="-1"></a><span class="co"># Emigration rates for males</span></span>
+<span id="cb4-136"><a href="#cb4-136" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(country_R)) {</span>
+<span id="cb4-137"><a href="#cb4-137" tabindex="-1"></a>  eq <span class="ot">=</span> <span class="fu">paste</span>(<span class="fu">sprintf</span>(<span class="st">&#39;emigrRates_m_%s&#39;</span>, <span class="fu">glue</span>(<span class="st">&quot;{country_R[i]}&quot;</span>)), <span class="st">&#39;&lt;- function(age,calTime)&#39;</span>,</span>
+<span id="cb4-138"><a href="#cb4-138" tabindex="-1"></a>             <span class="st">&#39;{&#39;</span>,</span>
+<span id="cb4-139"><a href="#cb4-139" tabindex="-1"></a>             <span class="fu">sprintf</span>(<span class="st">&#39;rate &lt;- emig_m_%s[as.integer(age)+1]&#39;</span>, <span class="fu">glue</span>(<span class="st">&quot;{country_R[i]}&quot;</span>)),</span>
+<span id="cb4-140"><a href="#cb4-140" tabindex="-1"></a>             <span class="st">&quot;</span><span class="sc">\n</span><span class="st"> &quot;</span>,</span>
+<span id="cb4-141"><a href="#cb4-141" tabindex="-1"></a>             <span class="st">&#39;return(rate)&#39;</span>,</span>
+<span id="cb4-142"><a href="#cb4-142" tabindex="-1"></a>             <span class="st">&#39;}&#39;</span>)</span>
+<span id="cb4-143"><a href="#cb4-143" tabindex="-1"></a>  <span class="fu">eval</span>(<span class="fu">parse</span>(<span class="at">text =</span> eq))</span>
+<span id="cb4-144"><a href="#cb4-144" tabindex="-1"></a>}</span></code></pre></div>
 </div>
 <div id="transition-pattern-and-assignment-of-functions-specifying-transition-rates" class="section level3">
 <h3>Transition pattern and assignment of functions specifying transition
@@ -661,8 +661,8 @@ run the whole sample, i.e.  using <em>initPop</em> instead of
 <span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>              <span class="at">fixInitStates=</span>fixInitStates,</span>
 <span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>              <span class="at">maxAge=</span>maxAge, <span class="at">simHorizon=</span>simHorizon,<span class="at">fertTr=</span>fertTr)</span>
 <span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="co">#&gt; Initialization ... </span></span>
-<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Starting at:  2024-01-23 14:07:50.88455&quot;</span></span>
-<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Ending at:  2024-01-23 14:07:51.858173&quot;</span></span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Starting at:  2025-08-29 10:07:35.311615&quot;</span></span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Ending at:  2025-08-29 10:07:36.344485&quot;</span></span>
 <span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a><span class="co">#&gt; Simulation is running ... </span></span>
 <span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a><span class="co">#&gt; Year:  2014 </span></span>
 <span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a><span class="co">#&gt; Year:  2015 </span></span>
@@ -673,12 +673,12 @@ run the whole sample, i.e.  using <em>initPop</em> instead of
 <span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a><span class="co">#&gt; ------------------</span></span>
 <span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a><span class="fu">head</span>(pop)</span>
 <span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a><span class="co">#&gt;     ID birthDate initState     From   To transitionTime transitionAge motherID</span></span>
-<span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a><span class="co">#&gt; 1    1  19411206  m/NL/999     &lt;NA&gt; &lt;NA&gt;           &lt;NA&gt;            NA     &lt;NA&gt;</span></span>
-<span id="cb6-20"><a href="#cb6-20" tabindex="-1"></a><span class="co">#&gt; 112  2  20070608  m/SE/999     &lt;NA&gt; &lt;NA&gt;           &lt;NA&gt;            NA     &lt;NA&gt;</span></span>
-<span id="cb6-21"><a href="#cb6-21" tabindex="-1"></a><span class="co">#&gt; 225  3  19750709    m/ES/0     &lt;NA&gt; &lt;NA&gt;           &lt;NA&gt;            NA     &lt;NA&gt;</span></span>
-<span id="cb6-22"><a href="#cb6-22" tabindex="-1"></a><span class="co">#&gt; 337  4  19220312  f/NL/999 f/NL/999 dead       20150626         93.29     &lt;NA&gt;</span></span>
-<span id="cb6-23"><a href="#cb6-23" tabindex="-1"></a><span class="co">#&gt; 449  5  19740425    f/ES/0     &lt;NA&gt; &lt;NA&gt;           &lt;NA&gt;            NA     &lt;NA&gt;</span></span>
-<span id="cb6-24"><a href="#cb6-24" tabindex="-1"></a><span class="co">#&gt; 461  6  20110828  m/ES/999     &lt;NA&gt; &lt;NA&gt;           &lt;NA&gt;            NA     &lt;NA&gt;</span></span></code></pre></div>
+<span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a><span class="co">#&gt; 1    1  19411206  m/NL/999     &lt;NA&gt; &lt;NA&gt;           &lt;NA&gt;            NA       NA</span></span>
+<span id="cb6-20"><a href="#cb6-20" tabindex="-1"></a><span class="co">#&gt; 112  2  20070608  m/SE/999     &lt;NA&gt; &lt;NA&gt;           &lt;NA&gt;            NA       NA</span></span>
+<span id="cb6-21"><a href="#cb6-21" tabindex="-1"></a><span class="co">#&gt; 225  3  19750709    m/ES/0     &lt;NA&gt; &lt;NA&gt;           &lt;NA&gt;            NA       NA</span></span>
+<span id="cb6-22"><a href="#cb6-22" tabindex="-1"></a><span class="co">#&gt; 337  4  19220312  f/NL/999 f/NL/999 dead       20150626         93.29       NA</span></span>
+<span id="cb6-23"><a href="#cb6-23" tabindex="-1"></a><span class="co">#&gt; 449  5  19740425    f/ES/0     &lt;NA&gt; &lt;NA&gt;           &lt;NA&gt;            NA       NA</span></span>
+<span id="cb6-24"><a href="#cb6-24" tabindex="-1"></a><span class="co">#&gt; 461  6  20110828  m/ES/999     &lt;NA&gt; &lt;NA&gt;           &lt;NA&gt;            NA       NA</span></span></code></pre></div>
 </div>
 <div id="convert-to-long-format" class="section level3">
 <h3>Convert to long format</h3>
@@ -731,31 +731,31 @@ your results.</p>
 <span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>                      <span class="at">transitionMatrix=</span>transitionMatrix, <span class="at">absStates=</span>absStates,</span>
 <span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a>                      <span class="at">varInitStates=</span>varInitStates, <span class="at">initStatesProb=</span>initStatesProb,</span>
 <span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a>                      <span class="at">fixInitStates=</span>fixInitStates,</span>
-<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a>                      <span class="at">maxAge=</span>maxAge, <span class="at">simHorizon=</span>simHorizon,<span class="at">fertTr=</span>fertTr,</span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a>                      <span class="at">maxAge=</span>maxAge, <span class="at">simHorizon=</span>simHorizon,<span class="at">fertTr=</span>fertTr, </span>
 <span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a>                      <span class="at">cores=</span>cores, <span class="at">seeds=</span>seeds)</span>
-<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a><span class="co">#&gt; Starting at [1] &quot;2024-01-23 14:07:52 CET&quot;</span></span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a><span class="co">#&gt; Starting at [1] &quot;2025-08-29 10:07:36 CEST&quot;</span></span>
 <span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a><span class="co">#&gt; Warning in searchCommandline(parallel, cpus = cpus, type = type, socketHosts =</span></span>
 <span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a><span class="co">#&gt; socketHosts, : Unknown option on commandline: tools::buildVignettes(dir</span></span>
 <span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a><span class="co">#&gt; R Version:  R version 4.3.2 (2023-10-31 ucrt)</span></span>
 <span id="cb9-14"><a href="#cb9-14" tabindex="-1"></a><span class="co">#&gt; snowfall 1.84-6.3 initialized (using snow 0.4-4): parallel execution on 3 CPUs.</span></span>
 <span id="cb9-15"><a href="#cb9-15" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb9-16"><a href="#cb9-16" tabindex="-1"></a><span class="co">#&gt; Stopping cluster</span></span>
-<span id="cb9-17"><a href="#cb9-17" tabindex="-1"></a><span class="co">#&gt; Stopped at [1] &quot;2024-01-23 14:09:42 CET&quot;</span></span>
+<span id="cb9-17"><a href="#cb9-17" tabindex="-1"></a><span class="co">#&gt; Stopped at [1] &quot;2025-08-29 10:08:46 CEST&quot;</span></span>
 <span id="cb9-18"><a href="#cb9-18" tabindex="-1"></a><span class="fu">head</span>(pop)</span>
 <span id="cb9-19"><a href="#cb9-19" tabindex="-1"></a><span class="co">#&gt;       ID birthDate initState     From   To transitionTime transitionAge</span></span>
 <span id="cb9-20"><a href="#cb9-20" tabindex="-1"></a><span class="co">#&gt; 1      1  19411206  m/NL/999     &lt;NA&gt; &lt;NA&gt;           &lt;NA&gt;            NA</span></span>
-<span id="cb9-21"><a href="#cb9-21" tabindex="-1"></a><span class="co">#&gt; 11220  2  20070608  m/SE/999     &lt;NA&gt; &lt;NA&gt;           &lt;NA&gt;            NA</span></span>
-<span id="cb9-22"><a href="#cb9-22" tabindex="-1"></a><span class="co">#&gt; 16690  3  19750709    m/ES/0     &lt;NA&gt; &lt;NA&gt;           &lt;NA&gt;            NA</span></span>
-<span id="cb9-23"><a href="#cb9-23" tabindex="-1"></a><span class="co">#&gt; 17812  4  19220312  f/NL/999 f/NL/999 dead       20160929         94.55</span></span>
-<span id="cb9-24"><a href="#cb9-24" tabindex="-1"></a><span class="co">#&gt; 18937  5  19740425    f/ES/0     &lt;NA&gt; &lt;NA&gt;           &lt;NA&gt;            NA</span></span>
-<span id="cb9-25"><a href="#cb9-25" tabindex="-1"></a><span class="co">#&gt; 20057  6  20110828  m/ES/999 m/ES/999 rest       20180917          7.05</span></span>
+<span id="cb9-21"><a href="#cb9-21" tabindex="-1"></a><span class="co">#&gt; 11210  2  20070608  m/SE/999     &lt;NA&gt; &lt;NA&gt;           &lt;NA&gt;            NA</span></span>
+<span id="cb9-22"><a href="#cb9-22" tabindex="-1"></a><span class="co">#&gt; 16683  3  19750709    m/ES/0     &lt;NA&gt; &lt;NA&gt;           &lt;NA&gt;            NA</span></span>
+<span id="cb9-23"><a href="#cb9-23" tabindex="-1"></a><span class="co">#&gt; 17800  4  19220312  f/NL/999 f/NL/999 dead       20160929         94.55</span></span>
+<span id="cb9-24"><a href="#cb9-24" tabindex="-1"></a><span class="co">#&gt; 18926  5  19740425    f/ES/0     &lt;NA&gt; &lt;NA&gt;           &lt;NA&gt;            NA</span></span>
+<span id="cb9-25"><a href="#cb9-25" tabindex="-1"></a><span class="co">#&gt; 20046  6  20110828  m/ES/999 m/ES/999 rest       20180917          7.05</span></span>
 <span id="cb9-26"><a href="#cb9-26" tabindex="-1"></a><span class="co">#&gt;       motherID</span></span>
-<span id="cb9-27"><a href="#cb9-27" tabindex="-1"></a><span class="co">#&gt; 1         &lt;NA&gt;</span></span>
-<span id="cb9-28"><a href="#cb9-28" tabindex="-1"></a><span class="co">#&gt; 11220     &lt;NA&gt;</span></span>
-<span id="cb9-29"><a href="#cb9-29" tabindex="-1"></a><span class="co">#&gt; 16690     &lt;NA&gt;</span></span>
-<span id="cb9-30"><a href="#cb9-30" tabindex="-1"></a><span class="co">#&gt; 17812     &lt;NA&gt;</span></span>
-<span id="cb9-31"><a href="#cb9-31" tabindex="-1"></a><span class="co">#&gt; 18937     &lt;NA&gt;</span></span>
-<span id="cb9-32"><a href="#cb9-32" tabindex="-1"></a><span class="co">#&gt; 20057     &lt;NA&gt;</span></span></code></pre></div>
+<span id="cb9-27"><a href="#cb9-27" tabindex="-1"></a><span class="co">#&gt; 1           NA</span></span>
+<span id="cb9-28"><a href="#cb9-28" tabindex="-1"></a><span class="co">#&gt; 11210       NA</span></span>
+<span id="cb9-29"><a href="#cb9-29" tabindex="-1"></a><span class="co">#&gt; 16683       NA</span></span>
+<span id="cb9-30"><a href="#cb9-30" tabindex="-1"></a><span class="co">#&gt; 17800       NA</span></span>
+<span id="cb9-31"><a href="#cb9-31" tabindex="-1"></a><span class="co">#&gt; 18926       NA</span></span>
+<span id="cb9-32"><a href="#cb9-32" tabindex="-1"></a><span class="co">#&gt; 20046       NA</span></span></code></pre></div>
 </div>
 
 

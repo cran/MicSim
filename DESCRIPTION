@@ -1,26 +1,31 @@
 Package: MicSim
 Type: Package
 Title: Performing Continuous-Time Microsimulation
-Version: 2.0.1
-Date: 2024-01-23
-Authors@R: c(person("Sabine", "Zinn", role = c("aut","cre"),
-    email = "szinn@diw.de"),
-    person("Claudio","Bosco", role = "ctb",
-    email = "Claudio.BOSCO@ec.europa.eu"),
-    person("Maurizio","Teobaldell", role = "ctb",
-    email = "Maurizio.TEOBALDELLI@ext.ec.europa.eu"))
-Maintainer: Sabine Zinn <szinn@diw.de>
+Version: 3.0.0
+Date: 2025-08-29
+Authors@R: c(person("Sabine", "Zinn", role = c("aut","cre"), email = "szinn@diw.de"),
+   	person("Felix", "von Heusinger", role = "ctb", email = "fvonheusinger@diw.de", ),
+	person("Camila", "Weber", role = "ctb", email = "cweber@diw.de"),
+	person("Claudio","Bosco", role = "ctb", email = "Claudio.BOSCO@ec.europa.eu"),
+  person("Maurizio","Teobaldell", role = "ctb", email = "Maurizio.TEOBALDELLI@ext.ec.europa.eu"))
 Description: This toolkit allows performing continuous-time microsimulation for a wide range of life science (demography, social sciences, epidemiology) applications. Individual life-courses are specified by a continuous-time multi-state model as described in Zinn (2014) <doi:10.34196/IJM.00105>. 
-LazyData: true
-Depends: R (>= 4.2.0), snowfall, rlecuyer
-License: GPL-2
-Suggests: rmarkdown, knitr, glue
-VignetteBuilder: knitr
+License: GPL (>= 2)
 Encoding: UTF-8
+RoxygenNote: 7.3.2
+Imports: rlecuyer, snowfall
+Suggests: glue, knitr, rmarkdown, dplyr, tidyr, ggplot2, testthat (>=
+        3.0.0)
+Config/testthat/edition: 3
+VignetteBuilder: knitr
+Depends: R (>= 3.5)
+LazyData: true
 NeedsCompilation: no
-Packaged: 2024-01-23 13:09:43 UTC; Freddie
+Packaged: 2025-08-29 08:09:02 UTC; Freddie
 Author: Sabine Zinn [aut, cre],
+  Felix von Heusinger [ctb],
+  Camila Weber [ctb],
   Claudio Bosco [ctb],
   Maurizio Teobaldell [ctb]
+Maintainer: Sabine Zinn <szinn@diw.de>
 Repository: CRAN
-Date/Publication: 2024-01-23 17:02:50 UTC
+Date/Publication: 2025-08-29 08:30:02 UTC

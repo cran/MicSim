@@ -1,27 +1,14 @@
----
-title: "Examples on Simulating Migration Flows for the MicSim Package"
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{Examples on Simulating Migration Flows for the MicSim Package}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
----
-
-```{r, include = FALSE}
+## ----include = FALSE----------------------------------------------------------
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
-```
 
-The sample data on migration between Spain, Sweden and the Netherlands were prepared by Claudio Bosco (European Commission), Daniela Ghio (European Commission), Maurizio Teobaldelli (European Commission) and Sabine Zinn (German Socio-Economic Panel, Humboldt University Berlin). EUROSTAT data were used as the data source. The sample was intentionally kept small. MicSim can also handle larger numbers of cases, but to be efficient in terms of run times, this requires a bit more computing power with more CPUs. 
-```{r}
+## -----------------------------------------------------------------------------
 # Load library
 library(MicSim)
-```
 
-### Definition of Basic Simulation Frame 
-```{r}
+## -----------------------------------------------------------------------------
 # Defining simulation horizon
 startDate <- 20140101 # yyyymmdd
 endDate   <- 20181231 # yyyymmdd
@@ -41,10 +28,8 @@ stateSpace <- expand.grid(sex=sex,country_R=country_R,fert=fert)
 
 # Definition of nonabsorbing and absorbing states
 absStates <- c("dead","rest")   
-```
 
-### Definition of initial population and newborn characteristics
-```{r setup}
+## ----setup--------------------------------------------------------------------
 # initial population included in the MicSim package
 initPop <- initPopMigrExp
 head(initPop)
@@ -61,12 +46,8 @@ varInitStates <- rbind(c("m","ES","0"), c("f","ES","0"), # to have possibility t
 initStatesProb <- c(0.5151,0.4849, # probabilities for female / male newborns for each nationality separately
                     0.5124,0.4876,
                     0.5146,0.4854)
-```
 
-### Rates Definition
-Beware: Rates have to be given at least for age [0,maxAge) and for all years within the simulation horizon.
-At this the exact value of *maxAge* is excluded, i.e. here 100.00 but not e.g. age=99.9999. 
-```{r}
+## -----------------------------------------------------------------------------
 # Load rates from data included in the MicSim package (one column for one transition)
 rates <- migrExpRates
 
@@ -81,62 +62,62 @@ for (i in 1:length(names(rates))) {
 # Fertility Rates
 # --------------------------------------------------------------------------
 
-fertRates_NL_0_1 <- function(age,calTime, duration){
+fertRates_NL_0_1 <- function(age,calTime){
   rate <- fert_NL_0_1[as.integer(age)+1]
   return(rate)  
 }
 
-fertRates_NL_1_2 <- function(age,calTime, duration){
+fertRates_NL_1_2 <- function(age,calTime){
   rate <- fert_NL_1_2[as.integer(age)+1]
   return(rate)  
 }
 
-fertRates_NL_2_3 <- function(age,calTime, duration){
+fertRates_NL_2_3 <- function(age,calTime){
   rate <- fert_NL_2_3[as.integer(age)+1]
   return(rate)  
 }
 
-fertRates_NL_3_4 <- function(age,calTime, duration){
+fertRates_NL_3_4 <- function(age,calTime){
   rate <- fert_NL_3_4[as.integer(age)-+1]
   return(rate)  
 }
 
-fertRates_ES_0_1 <- function(age,calTime, duration){
+fertRates_ES_0_1 <- function(age,calTime){
   rate <- fert_ES_0_1[as.integer(age)+1]
   return(rate)  
 }
 
-fertRates_ES_1_2 <- function(age,calTime, duration){
+fertRates_ES_1_2 <- function(age,calTime){
   rate <- fert_ES_1_2[as.integer(age)+1]
   return(rate)  
 }
 
-fertRates_ES_2_3 <- function(age,calTime, duration){
+fertRates_ES_2_3 <- function(age,calTime){
   rate <- fert_ES_2_3[as.integer(age)+1]
   return(rate)  
 }
 
-fertRates_ES_3_4 <- function(age,calTime, duration){
+fertRates_ES_3_4 <- function(age,calTime){
   rate <- fert_ES_3_4[as.integer(age)+1]
   return(rate)  
 }
 
-fertRates_SE_0_1 <- function(age,calTime, duration){
+fertRates_SE_0_1 <- function(age,calTime){
   rate <- fert_SE_0_1[as.integer(age)+1]
   return(rate)  
 }
 
-fertRates_SE_1_2 <- function(age,calTime, duration){
+fertRates_SE_1_2 <- function(age,calTime){
   rate <- fert_SE_1_2[as.integer(age)+1]
   return(rate)  
 }
 
-fertRates_SE_2_3 <- function(age,calTime, duration){
+fertRates_SE_2_3 <- function(age,calTime){
   rate <- fert_SE_2_3[as.integer(age)+1]
   return(rate)  
 }
 
-fertRates_SE_3_4 <- function(age,calTime, duration){
+fertRates_SE_3_4 <- function(age,calTime){
   rate <- fert_SE_3_4[as.integer(age)+1]
   return(rate)  
 }
@@ -151,7 +132,7 @@ for(i in 1:length(country_R)) {
   other_provinces = country_R[which(country_R %!in% country_R[i])]
   for(k in 1:length(other_provinces)) {
     eq = paste(sprintf('%s_%s_rates', glue("{country_R[i]}"),  glue("{other_provinces[k]}")), 
-               '<- function(age,calTime, duration)', '{',
+               '<- function(age,calTime)', '{',
                sprintf('rate <- rate_%s_%s[as.integer(age)+1]', glue("{country_R[i]}"), 
                glue("{other_provinces[k]}")), "\n ", 'return(rate)','}')
     eval(parse(text = eq))
@@ -164,7 +145,7 @@ for(i in 1:length(country_R)) {
 
 # Female mortality
 for(i in 1:length(country_R)) {
-  eq = paste(sprintf('mortRates_f_%s', glue("{country_R[i]}")), '<- function(age,calTime, duration)',
+  eq = paste(sprintf('mortRates_f_%s', glue("{country_R[i]}")), '<- function(age,calTime)',
              '{',
              sprintf('rate <- mort_f_%s[as.integer(age)+1]', glue("{country_R[i]}")),
              "\n ",
@@ -175,7 +156,7 @@ for(i in 1:length(country_R)) {
 
 # Male mortality
 for(i in 1:length(country_R)) {
-  eq = paste(sprintf('mortRates_m_%s', glue("{country_R[i]}")), '<- function(age,calTime, duration)',
+  eq = paste(sprintf('mortRates_m_%s', glue("{country_R[i]}")), '<- function(age,calTime)',
              '{',
              sprintf('rate <- mort_m_%s[as.integer(age)+1]', glue("{country_R[i]}")),
              "\n ",
@@ -190,7 +171,7 @@ for(i in 1:length(country_R)) {
 
 # Emigration rates for females
 for(i in 1:length(country_R)) {
-  eq = paste(sprintf('emigrRates_f_%s', glue("{country_R[i]}")), '<- function(age,calTime, duration)',
+  eq = paste(sprintf('emigrRates_f_%s', glue("{country_R[i]}")), '<- function(age,calTime)',
              '{',
              sprintf('rate <- emig_f_%s[as.integer(age)+1]', glue("{country_R[i]}")),
              "\n ",
@@ -201,7 +182,7 @@ for(i in 1:length(country_R)) {
 
 # Emigration rates for males
 for(i in 1:length(country_R)) {
-  eq = paste(sprintf('emigrRates_m_%s', glue("{country_R[i]}")), '<- function(age,calTime, duration)',
+  eq = paste(sprintf('emigrRates_m_%s', glue("{country_R[i]}")), '<- function(age,calTime)',
              '{',
              sprintf('rate <- emig_m_%s[as.integer(age)+1]', glue("{country_R[i]}")),
              "\n ",
@@ -210,10 +191,8 @@ for(i in 1:length(country_R)) {
   eval(parse(text = eq))
 }
 
-```
 
-### Transition pattern and assignment of functions specifying transition rates
-```{r}
+## -----------------------------------------------------------------------------
 # ---------------------------------------------------------------------------
 # Transition matrix for fertility
 # ---------------------------------------------------------------------------
@@ -299,14 +278,8 @@ transitionMatrix <- buildTransitionMatrix(allTransitions=allTransitions,
 # ---------------------------------------------------------------------------
 
 fertTr <- fertTrMatrix[,1]
-```
 
-### Run Simulation (using one core)
-For illustration purpose, the subsequent run is limited to the first 500 people and to 100 migrants.
-However, just remove the restriction to run the whole sample, i.e. 
-using *initPop* instead of *initPop[1:500,]* and *immigrPop* instead of *immigrPop[1:100,]*.
-
-```{r}
+## -----------------------------------------------------------------------------
 pop <- micSim(initPop=initPop[1:500,], immigrPop=immigrPop[1:100,],
               transitionMatrix=transitionMatrix, absStates=absStates,
               varInitStates=varInitStates, initStatesProb=initStatesProb,
@@ -314,27 +287,17 @@ pop <- micSim(initPop=initPop[1:500,], immigrPop=immigrPop[1:100,],
               maxAge=maxAge, simHorizon=simHorizon,fertTr=fertTr)
 head(pop)
 
-```
 
-### Convert to long format
-
-```{r}
+## -----------------------------------------------------------------------------
 popLong <- convertToLongFormat(pop, migr=TRUE)
 head(popLong)
 
-```
 
-### Convert to wide format
-
-```{r}
+## -----------------------------------------------------------------------------
 popWide <- convertToWideFormat(pop)
 head(popWide)
-```
 
-### Run Simulation with parallel computing on several cores
-Try this to speed up your simulation run. The more cores you can use the faster the simulation will be executed.
-This example uses three cores. Give as many seeds as you use cores. That way you can replicate your results.
-```{r}
+## -----------------------------------------------------------------------------
 
 cores <- 3
 seeds <- c(34,145,97)
@@ -342,11 +305,7 @@ pop <- micSimParallel(initPop=initPop, immigrPop=immigrPop,
                       transitionMatrix=transitionMatrix, absStates=absStates,
                       varInitStates=varInitStates, initStatesProb=initStatesProb,
                       fixInitStates=fixInitStates,
-                      maxAge=maxAge, simHorizon=simHorizon,fertTr=fertTr,
+                      maxAge=maxAge, simHorizon=simHorizon,fertTr=fertTr, 
                       cores=cores, seeds=seeds)
 head(pop)
-```
-
-
-
 

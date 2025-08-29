@@ -66,6 +66,9 @@ initStatesProb <- c(0.5151,0.4849, # probabilities for female / male newborns fo
 ### Rates Definition
 Beware: Rates have to be given at least for age [0,maxAge) and for all years within the simulation horizon.
 At this the exact value of *maxAge* is excluded, i.e. here 100.00 but not e.g. age=99.9999. 
+In this example, transition rates do not depend on the time already spent in a state or substate, but only on age and/or calendar time.
+Thus, these constitute input arguments for the rates functions. 
+
 ```{r}
 # Load rates from data included in the MicSim package (one column for one transition)
 rates <- migrExpRates
@@ -81,62 +84,62 @@ for (i in 1:length(names(rates))) {
 # Fertility Rates
 # --------------------------------------------------------------------------
 
-fertRates_NL_0_1 <- function(age,calTime, duration){
+fertRates_NL_0_1 <- function(age,calTime){
   rate <- fert_NL_0_1[as.integer(age)+1]
   return(rate)  
 }
 
-fertRates_NL_1_2 <- function(age,calTime, duration){
+fertRates_NL_1_2 <- function(age,calTime){
   rate <- fert_NL_1_2[as.integer(age)+1]
   return(rate)  
 }
 
-fertRates_NL_2_3 <- function(age,calTime, duration){
+fertRates_NL_2_3 <- function(age,calTime){
   rate <- fert_NL_2_3[as.integer(age)+1]
   return(rate)  
 }
 
-fertRates_NL_3_4 <- function(age,calTime, duration){
+fertRates_NL_3_4 <- function(age,calTime){
   rate <- fert_NL_3_4[as.integer(age)-+1]
   return(rate)  
 }
 
-fertRates_ES_0_1 <- function(age,calTime, duration){
+fertRates_ES_0_1 <- function(age,calTime){
   rate <- fert_ES_0_1[as.integer(age)+1]
   return(rate)  
 }
 
-fertRates_ES_1_2 <- function(age,calTime, duration){
+fertRates_ES_1_2 <- function(age,calTime){
   rate <- fert_ES_1_2[as.integer(age)+1]
   return(rate)  
 }
 
-fertRates_ES_2_3 <- function(age,calTime, duration){
+fertRates_ES_2_3 <- function(age,calTime){
   rate <- fert_ES_2_3[as.integer(age)+1]
   return(rate)  
 }
 
-fertRates_ES_3_4 <- function(age,calTime, duration){
+fertRates_ES_3_4 <- function(age,calTime){
   rate <- fert_ES_3_4[as.integer(age)+1]
   return(rate)  
 }
 
-fertRates_SE_0_1 <- function(age,calTime, duration){
+fertRates_SE_0_1 <- function(age,calTime){
   rate <- fert_SE_0_1[as.integer(age)+1]
   return(rate)  
 }
 
-fertRates_SE_1_2 <- function(age,calTime, duration){
+fertRates_SE_1_2 <- function(age,calTime){
   rate <- fert_SE_1_2[as.integer(age)+1]
   return(rate)  
 }
 
-fertRates_SE_2_3 <- function(age,calTime, duration){
+fertRates_SE_2_3 <- function(age,calTime){
   rate <- fert_SE_2_3[as.integer(age)+1]
   return(rate)  
 }
 
-fertRates_SE_3_4 <- function(age,calTime, duration){
+fertRates_SE_3_4 <- function(age,calTime){
   rate <- fert_SE_3_4[as.integer(age)+1]
   return(rate)  
 }
@@ -151,7 +154,7 @@ for(i in 1:length(country_R)) {
   other_provinces = country_R[which(country_R %!in% country_R[i])]
   for(k in 1:length(other_provinces)) {
     eq = paste(sprintf('%s_%s_rates', glue("{country_R[i]}"),  glue("{other_provinces[k]}")), 
-               '<- function(age,calTime, duration)', '{',
+               '<- function(age,calTime)', '{',
                sprintf('rate <- rate_%s_%s[as.integer(age)+1]', glue("{country_R[i]}"), 
                glue("{other_provinces[k]}")), "\n ", 'return(rate)','}')
     eval(parse(text = eq))
@@ -164,7 +167,7 @@ for(i in 1:length(country_R)) {
 
 # Female mortality
 for(i in 1:length(country_R)) {
-  eq = paste(sprintf('mortRates_f_%s', glue("{country_R[i]}")), '<- function(age,calTime, duration)',
+  eq = paste(sprintf('mortRates_f_%s', glue("{country_R[i]}")), '<- function(age,calTime)',
              '{',
              sprintf('rate <- mort_f_%s[as.integer(age)+1]', glue("{country_R[i]}")),
              "\n ",
@@ -175,7 +178,7 @@ for(i in 1:length(country_R)) {
 
 # Male mortality
 for(i in 1:length(country_R)) {
-  eq = paste(sprintf('mortRates_m_%s', glue("{country_R[i]}")), '<- function(age,calTime, duration)',
+  eq = paste(sprintf('mortRates_m_%s', glue("{country_R[i]}")), '<- function(age,calTime)',
              '{',
              sprintf('rate <- mort_m_%s[as.integer(age)+1]', glue("{country_R[i]}")),
              "\n ",
@@ -190,7 +193,7 @@ for(i in 1:length(country_R)) {
 
 # Emigration rates for females
 for(i in 1:length(country_R)) {
-  eq = paste(sprintf('emigrRates_f_%s', glue("{country_R[i]}")), '<- function(age,calTime, duration)',
+  eq = paste(sprintf('emigrRates_f_%s', glue("{country_R[i]}")), '<- function(age,calTime)',
              '{',
              sprintf('rate <- emig_f_%s[as.integer(age)+1]', glue("{country_R[i]}")),
              "\n ",
@@ -201,7 +204,7 @@ for(i in 1:length(country_R)) {
 
 # Emigration rates for males
 for(i in 1:length(country_R)) {
-  eq = paste(sprintf('emigrRates_m_%s', glue("{country_R[i]}")), '<- function(age,calTime, duration)',
+  eq = paste(sprintf('emigrRates_m_%s', glue("{country_R[i]}")), '<- function(age,calTime)',
              '{',
              sprintf('rate <- emig_m_%s[as.integer(age)+1]', glue("{country_R[i]}")),
              "\n ",
@@ -306,6 +309,7 @@ For illustration purpose, the subsequent run is limited to the first 500 people 
 However, just remove the restriction to run the whole sample, i.e. 
 using *initPop* instead of *initPop[1:500,]* and *immigrPop* instead of *immigrPop[1:100,]*.
 
+
 ```{r}
 pop <- micSim(initPop=initPop[1:500,], immigrPop=immigrPop[1:100,],
               transitionMatrix=transitionMatrix, absStates=absStates,
@@ -342,11 +346,9 @@ pop <- micSimParallel(initPop=initPop, immigrPop=immigrPop,
                       transitionMatrix=transitionMatrix, absStates=absStates,
                       varInitStates=varInitStates, initStatesProb=initStatesProb,
                       fixInitStates=fixInitStates,
-                      maxAge=maxAge, simHorizon=simHorizon,fertTr=fertTr,
+                      maxAge=maxAge, simHorizon=simHorizon,fertTr=fertTr, 
                       cores=cores, seeds=seeds)
 head(pop)
 ```
-
-
 
 
